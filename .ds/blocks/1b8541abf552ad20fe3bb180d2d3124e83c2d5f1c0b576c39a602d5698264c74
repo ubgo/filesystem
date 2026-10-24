@@ -1,0 +1,16 @@
+func mapErr(err error) error {
+	code := filesystem.CodeUnknown
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, ErrNoSuchKey):
+		code = filesystem.CodeNotFound
+	case errors.Is(err, ErrConflict):
+		code = filesystem.CodeExists
+	case errors.Is(err, ErrThrottled):
+		code = filesystem.CodeUnavailable // the one code layer.Retry retries
+	case errors.Is(err, ErrForbidden):
+		code = filesystem.CodePermission
+	}
+	return filesystem.NewError(code, err)
+}

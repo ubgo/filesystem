@@ -1,0 +1,19 @@
+func newZonedStore(ctx context.Context, db *sql.DB, now func() time.Time, plugins ...records.Plugin) (*records.Store, *egress.Plugin, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	eg := egress.New(egress.WithBucket(tenantDay))
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithClock(now), records.WithPlugins(append([]records.Plugin{eg}, plugins...)...))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, eg, nil
+}

@@ -1,0 +1,3 @@
+func migrateOnStart(ctx context.Context, s *records.Store) ([]string, error) {
+	return s.Migrate(ctx)
+}

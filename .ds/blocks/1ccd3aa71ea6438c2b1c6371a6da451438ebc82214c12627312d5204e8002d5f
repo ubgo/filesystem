@@ -1,0 +1,17 @@
+func newConsumer(q sqs.API, c *Confirmer, out io.Writer) (*sqs.Consumer, error) {
+	return sqs.New(q, sqs.Options{
+		QueueURL: queueURL,
+		Buckets:  notify.Buckets{bucketName},
+		Handler:  c.Handle,
+		OnRejected: func(e notify.Event) {
+			fmt.Fprintf(out, "rejected an event from bucket %q\n", e.Bucket)
+		},
+		OnError: func(err error) {
+			if errors.Is(err, notify.ErrMalformed) {
+				fmt.Fprintln(out, "dropped a message that is not an S3 event")
+				return
+			}
+			fmt.Fprintf(out, "left for redelivery: %v\n", err)
+		},
+	})
+}

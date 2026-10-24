@@ -1,0 +1,7 @@
+func (a *Avatars) Save(ctx context.Context, userID string, body io.Reader) (string, error) {
+	res, err := upload.Receive(ctx, a.disk, body, "avatar", avatarPolicy(userID))
+	if err != nil {
+		return "", err
+	}
+	return res.Key, nil
+}

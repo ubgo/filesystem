@@ -1,0 +1,15 @@
+func runJobs(ctx context.Context, app *App) <-chan struct{} {
+	sched := jobs.NewScheduler(jobs.SchedulerOptions{OnRun: func(r jobs.Report) {
+		if r.Err != nil || r.Result.Count > 0 {
+			fmt.Printf("job %s: %d imported, err=%v\n", r.Job, r.Result.Count, r.Err)
+		}
+	}})
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		if err := sched.Run(ctx, jobs.Schedule{Job: app.ImportJob(), Every: importEvery, Jitter: importJitter, RunAtStart: true}); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}()
+	return done
+}

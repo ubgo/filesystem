@@ -1,0 +1,33 @@
+func everyKind(ctx context.Context, s *records.Store) (records.File, error) {
+	post := records.Owner{Type: ownerPost, ID: "post_1"}
+	f, err := s.Upload(ctx, tenant, diskName, strings.NewReader("hello"), "a.txt", textPolicy)
+	if err != nil {
+		return f, err
+	}
+	a, err := s.Attach(ctx, tenant, f.ID, post, roleGallery)
+	if err != nil {
+		return f, err
+	}
+	steps := []func() error{
+		func() error { return s.Reorder(ctx, tenant, post, roleGallery, []string{a.ID}) },
+		func() error { return s.Trash(ctx, tenant, f.ID) },
+		func() error { return s.Restore(ctx, tenant, f.ID) },
+		func() error {
+			_, err := s.Replace(ctx, tenant, f.ID, strings.NewReader("hello again"), "", textPolicy)
+			return err
+		},
+		func() error { return s.SetVisibility(ctx, tenant, f.ID, filesystem.VisibilityPublic) },
+		func() error {
+			_, err := s.SetStatus(ctx, tenant, f.ID, records.StatusFailed, "thumbnail failed")
+			return err
+		},
+		func() error { return s.Detach(ctx, tenant, a.ID) },
+		func() error { return s.Purge(ctx, tenant, f.ID) },
+	}
+	for _, step := range steps {
+		if err := step(); err != nil {
+			return f, err
+		}
+	}
+	return f, nil
+}

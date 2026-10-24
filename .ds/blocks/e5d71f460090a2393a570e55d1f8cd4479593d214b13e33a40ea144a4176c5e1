@@ -1,0 +1,12 @@
+func tenantPolicy() upload.Policy {
+	p := policy
+	p.Key = nil // Key or KeyContext, not both
+	p.KeyContext = func(ctx context.Context, info upload.Info) (string, error) {
+		tenant, ok := tenantFrom(ctx)
+		if !ok {
+			return "", filesystem.Errorf(filesystem.CodePermission, "no tenant")
+		}
+		return upload.RandomKey("tenants/" + tenant)(info)
+	}
+	return p
+}

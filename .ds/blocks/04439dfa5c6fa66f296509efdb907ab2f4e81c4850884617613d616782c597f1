@@ -1,0 +1,14 @@
+func oneShotStream(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", &flaky{Driver: memory.New()}, filesystem.WithInterceptors(
+		layer.Observe(report(out)),
+		layer.Retry(layer.RetryOptions{Sleep: noWait}),
+	))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "one-shot stream:")
+	stream := io.MultiReader(strings.NewReader("streamed once"))
+	_, err = disk.Write(ctx, "b.txt", stream, filesystem.WriteOptions{})
+	fmt.Fprintf(out, "  write: %s\n", filesystem.CodeOf(err))
+	return nil
+}

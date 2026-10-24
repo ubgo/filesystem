@@ -1,0 +1,4 @@
+type stuck struct {
+	*memory.Driver
+	reads atomic.Int32
+}

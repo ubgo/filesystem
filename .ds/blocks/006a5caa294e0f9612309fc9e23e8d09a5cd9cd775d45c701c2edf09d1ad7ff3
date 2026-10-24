@@ -1,0 +1,6 @@
+func newHandler(disk *filesystem.Disk) http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("POST /photos", upload.Handler(disk, photoPolicy, upload.HandlerOptions{MaxFiles: maxPhotosPerRequest}))
+	mux.Handle(publicPrefix+"/", http.StripPrefix(publicPrefix, fshttp.Public(disk)))
+	return mux
+}

@@ -1,0 +1,20 @@
+func deleteMany(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	keys := []string{"tmp/a.txt", "tmp/b.txt", "tmp/nested/c.txt"}
+	for _, k := range keys {
+		if _, err := disk.WriteBytes(ctx, k, []byte("x"), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	if err := disk.DeleteKeys(ctx, keys[:2]); err != nil {
+		return err
+	}
+	if err := disk.DeletePrefix(ctx, "tmp"); err != nil {
+		return err
+	}
+	page, err := disk.ListPage(ctx, "tmp", filesystem.ListOptions{Recursive: true})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after deletes: %d keys under tmp/\n", len(page.Entries))
+	return nil
+}

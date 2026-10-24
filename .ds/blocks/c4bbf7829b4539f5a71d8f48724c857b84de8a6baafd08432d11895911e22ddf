@@ -1,0 +1,3 @@
+func ProblemOf(err error) Problem {
+	return Problem{Error: fshttp.ClientMessage(err), Code: filesystem.CodeOf(err)}
+}

@@ -1,0 +1,10 @@
+func openDisk(ctx context.Context, addr string) (*filesystem.Disk, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(ftp.Scheme, ftp.Opener); err != nil {
+		return nil, err
+	}
+	if err := mux.Register(ftp.SchemeSecure, ftp.Opener); err != nil {
+		return nil, err
+	}
+	return mux.Open(ctx, "partner", "ftp://"+ftpUser+"@"+addr+"/exchange?password_env="+passwordEnv+"&max_conns=3")
+}

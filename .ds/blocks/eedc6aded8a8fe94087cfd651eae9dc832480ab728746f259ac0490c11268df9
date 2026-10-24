@@ -1,0 +1,8 @@
+func newVariants() (*variants.Plugin, error) {
+	logFailure := func(_ context.Context, f records.File, name string, err error) {
+		fmt.Fprintf(os.Stderr, "variant %s of %s: %v\n", name, f.ID, err)
+	}
+	return variants.New(widths, imaging.Options{},
+		variants.WithDensities("cover", 2, 3),
+		variants.WithEager(logFailure, widthNames...))
+}

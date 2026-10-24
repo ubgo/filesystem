@@ -1,0 +1,10 @@
+func newMux() (*filesystem.Mux, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(local.Scheme, local.Opener); err != nil {
+		return nil, err
+	}
+	if err := mux.Register(memory.Scheme, memory.Opener); err != nil {
+		return nil, err
+	}
+	return mux, nil
+}

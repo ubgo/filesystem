@@ -1,0 +1,18 @@
+func headRequests(ctx context.Context, a *app, out io.Writer) error {
+	link, err := a.private.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	resp, body, err := fetch(http.MethodHead, link.URL, nil, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "HEAD signed %d length=%s type=%s body=%d bytes\n",
+		resp.StatusCode, resp.Header.Get("Content-Length"), resp.Header.Get("Content-Type"), len(body))
+	resp, _, err = fetch(http.MethodHead, a.srv.URL+publicPrefix+"/missing.png", nil, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "HEAD public missing %d\n", resp.StatusCode)
+	return nil
+}

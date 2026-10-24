@@ -1,0 +1,11 @@
+func writeInvoice(ctx context.Context, disk *filesystem.Disk, pdf []byte) (context.Context, error) {
+	ctx, err := gcs.WithRequestOptions(ctx, disk, invoiceKey, gcs.RequestOptions{
+		KMSKeyName:   tenantKMSKey, // overrides KMSKeyFor and KMSKeyName for this key only
+		StorageClass: gcs.ClassNearline,
+	})
+	if err != nil {
+		return ctx, err
+	}
+	_, err = disk.WriteBytes(ctx, invoiceKey, pdf, filesystem.WriteOptions{ContentType: "application/pdf"})
+	return ctx, err
+}

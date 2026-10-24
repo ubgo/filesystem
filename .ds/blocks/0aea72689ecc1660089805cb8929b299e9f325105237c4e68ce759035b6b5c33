@@ -1,0 +1,24 @@
+func runStep(ctx context.Context, out io.Writer, bin, work string, s step) error {
+	if s.title != "" {
+		fmt.Fprintf(out, "# %s\n", s.title)
+	}
+	fmt.Fprintf(out, "$ fs %s\n", quoteArgs(s.args))
+	cmd := exec.CommandContext(ctx, bin, s.args...)
+	cmd.Dir = work
+	cmd.Env = append(os.Environ(), s.env...)
+	if s.stdin != "" {
+		cmd.Stdin = strings.NewReader(s.stdin)
+	}
+	var buf bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &buf, &buf
+	err := cmd.Run()
+	_, _ = out.Write(buf.Bytes())
+	var exit *exec.ExitError
+	switch {
+	case errors.As(err, &exit):
+		fmt.Fprintf(out, "(exit %d)\n", exit.ExitCode())
+	case err != nil:
+		return err
+	}
+	return nil
+}

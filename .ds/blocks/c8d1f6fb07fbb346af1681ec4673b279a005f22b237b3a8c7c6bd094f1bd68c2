@@ -1,0 +1,8 @@
+func refusedMoves(ctx context.Context, s *records.Store, fp *folders.Plugin, t tree) (intoSelf, clash filesystem.Code, err error) {
+	intoSelf = filesystem.CodeOf(fp.Move(ctx, s, tenant, t.website.ID, t.assets.ID))
+	if _, err = fp.Create(ctx, s, tenant, folders.RootID, "Website"); err != nil {
+		return "", "", err
+	}
+	clash = filesystem.CodeOf(fp.Move(ctx, s, tenant, t.website.ID, folders.RootID))
+	return intoSelf, clash, nil
+}

@@ -1,0 +1,14 @@
+func newPlanStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager, now func() time.Time) (*records.Store, *versions.Plugin, error) {
+	v, err := versions.New(versions.WithKeepFunc(planKeep), versions.WithRestoreKey(versions.RestoreBesideFile))
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithVisibilityDisks(publicDisk, privateDisk), records.WithClock(now), records.WithPlugins(v))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, v, nil
+}

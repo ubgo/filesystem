@@ -1,0 +1,19 @@
+func (a *App) Export(ctx context.Context, userID string) (string, bool, error) {
+	if !userIDPattern.MatchString(userID) {
+		return "", false, filesystem.Errorf(filesystem.CodeInvalidArgument, "invalid user id")
+	}
+	key := exportKey(userID, a.Now())
+	// The cheap check skips rebuilding an export that exists; IfNotExists
+	// in store settles the race between two requests that both missed it.
+	if ok, err := a.Disk.Exists(ctx, key); err != nil || ok {
+		return key, false, err
+	}
+	err := a.store(ctx, key, userID)
+	switch filesystem.CodeOf(err) {
+	case "":
+		return key, true, nil
+	case filesystem.CodeExists:
+		return key, false, nil
+	}
+	return "", false, err
+}

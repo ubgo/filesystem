@@ -1,0 +1,17 @@
+func listSorted(ctx context.Context, s *records.Store, scope string, order records.FileOrder) ([]string, error) {
+	var names []string
+	q := records.FileQuery{Scope: scope, Limit: 2, Order: order}
+	for {
+		page, err := s.Files(ctx, q)
+		if err != nil {
+			return nil, err
+		}
+		for _, f := range page.Files {
+			names = append(names, fmt.Sprintf("%s(%d)", f.Filename, f.Size))
+		}
+		if page.NextCursor == "" {
+			return names, nil
+		}
+		q.Cursor = page.NextCursor
+	}
+}

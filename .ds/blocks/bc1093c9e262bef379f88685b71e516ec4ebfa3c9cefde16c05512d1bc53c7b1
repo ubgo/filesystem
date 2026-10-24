@@ -1,0 +1,19 @@
+func newHandlers(disks Disks, store *records.Store, signer *signedurl.Signer, tusDir string) (Handlers, error) {
+	tusHandler, err := tus.New(tus.Config{Disk: disks.Media, Policy: policy, TempDir: tusDir, BasePath: pathTus})
+	if err != nil {
+		return Handlers{}, err
+	}
+	recordsHandler, err := newRecordsHandler(store)
+	if err != nil {
+		return Handlers{}, err
+	}
+	return Handlers{
+		Upload:  upload.Handler(disks.Media, policy, upload.HandlerOptions{MaxFiles: maxFormFiles}),
+		Ticket:  upload.PresignHandler(disks.Bucket, policy, ticketLifetime),
+		Uppy:    upload.Uppy(disks.Bucket, policy, upload.UppyOptions{Authorize: allowUppy}),
+		Tus:     tusHandler,
+		Files:   fshttp.Signed(disks.Manager, signer),
+		Public:  fshttp.Public(disks.Public),
+		Records: withUser(recordsHandler),
+	}, nil
+}

@@ -1,0 +1,21 @@
+func (a *App) download(w http.ResponseWriter, r *http.Request) {
+	tenant, err := tenantOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	f, err := a.Store.File(r.Context(), tenant, r.PathValue("id"))
+	if err == nil && f.DeletedAt != nil {
+		err = filesystem.Errorf(filesystem.CodeNotFound, "file is in the trash")
+	}
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	link, err := a.Store.URL(r.Context(), f, linkLifetime)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	http.Redirect(w, r, link, http.StatusFound)
+}

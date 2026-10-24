@@ -1,0 +1,13 @@
+func (a *App) newTus(disk *filesystem.Disk) (http.Handler, error) {
+	return tus.New(tus.Config{
+		Disk:     disk,
+		Policy:   policy,
+		TempDir:  a.TempDir,
+		BasePath: tusPath,
+		Authorize: func(ctx context.Context, _ http.Header) error {
+			_, err := userFrom(ctx)
+			return err
+		},
+		OnStored: a.record,
+	})
+}

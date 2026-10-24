@@ -1,0 +1,11 @@
+func policyFor(r *http.Request) (upload.Policy, error) {
+	region, err := parseCrop(r.URL.Query().Get("crop"))
+	if err != nil {
+		return upload.Policy{}, err
+	}
+	p := avatarPolicy
+	if region != (image.Rectangle{}) {
+		p.Process = cropTo(region)
+	}
+	return p, nil
+}

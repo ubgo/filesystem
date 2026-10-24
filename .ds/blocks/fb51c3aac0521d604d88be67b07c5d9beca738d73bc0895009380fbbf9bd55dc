@@ -1,0 +1,20 @@
+func openTarget(ctx context.Context) (*filesystem.Disk, func(), error) {
+	if dsn, ok := os.LookupEnv(envMirrorDSN); ok {
+		mux := filesystem.NewMux()
+		if err := mux.Register(s3.Scheme, s3.Opener); err != nil {
+			return nil, nil, err
+		}
+		d, err := mux.Open(ctx, newDisk, dsn)
+		return d, func() {}, err
+	}
+	drv, stop, err := fakeS3(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	d, err := filesystem.NewDisk(newDisk, drv)
+	if err != nil {
+		stop()
+		return nil, nil, err
+	}
+	return d, stop, nil
+}

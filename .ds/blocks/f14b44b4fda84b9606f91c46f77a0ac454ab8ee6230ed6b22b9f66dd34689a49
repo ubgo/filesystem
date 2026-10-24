@@ -1,0 +1,3 @@
+func exportKey(userID string, now time.Time) string {
+	return exportDir + "/" + userID + "/" + now.UTC().Format(dayLayout) + ".zip"
+}

@@ -1,0 +1,8 @@
+func describe(out io.Writer, err error) {
+	var fe *filesystem.Error
+	if !errors.As(err, &fe) {
+		return
+	}
+	fmt.Fprintf(out, "code=%s op=%s disk=%s key=%s\n", fe.Code, fe.Op, fe.Disk, fe.Key)
+	fmt.Fprintf(out, "message: %v\n", err)
+}

@@ -1,0 +1,7 @@
+func openDisk(dataDir, publicBase string) (*filesystem.Disk, error) {
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk(diskName, drv, filesystem.WithPublicURL(publicBase+publicPrefix))
+}

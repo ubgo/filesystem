@@ -1,0 +1,7 @@
+var coverPolicy = upload.Policy{
+	MaxSize:    maxCoverBytes,
+	Allowed:    []string{"image/jpeg", "image/png", "image/webp"},
+	Key:        upload.RandomKey("covers"),
+	Visibility: filesystem.VisibilityPublic,
+	Process:    imaging.Sanitize(imaging.Options{MaxBytes: maxCoverBytes}),
+}

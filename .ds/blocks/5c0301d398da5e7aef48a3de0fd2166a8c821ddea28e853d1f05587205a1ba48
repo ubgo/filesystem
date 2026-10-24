@@ -1,0 +1,21 @@
+func newStore(ctx context.Context, p *Plugin) (*records.Store, []string, error) {
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		return nil, nil, err
+	}
+	db.SetMaxOpenConns(1)
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(p))
+	if err != nil {
+		return nil, nil, err
+	}
+	applied, err := store.Migrate(ctx)
+	return store, applied, err
+}

@@ -1,0 +1,16 @@
+func hedge(ctx context.Context, out io.Writer) error {
+	drv := &stuck{Driver: memory.New()}
+	disk, err := filesystem.NewDisk("media", drv, filesystem.WithInterceptors(layer.Hedge(hedgeAfter)))
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "a.txt", []byte("answered"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	b, err := disk.ReadAll(ctx, "a.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "hedge: read %q after %d driver reads\n", b, drv.reads.Load())
+	return nil
+}

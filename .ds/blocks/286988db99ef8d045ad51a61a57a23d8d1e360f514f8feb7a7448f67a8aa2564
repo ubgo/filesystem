@@ -1,0 +1,14 @@
+func runMaintenance(ctx context.Context, a *App) {
+	t := time.NewTicker(sweepEvery)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case now := <-t.C:
+			if err := a.maintain(ctx, now); err != nil {
+				fmt.Fprintln(os.Stderr, "maintenance:", err)
+			}
+		}
+	}
+}

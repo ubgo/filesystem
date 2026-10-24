@@ -1,0 +1,3 @@
+func verify(ctx context.Context, s *records.Store, au *audit.Plugin, scope string) (int64, error) {
+	return au.Verify(ctx, s, scope)
+}

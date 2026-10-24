@@ -1,0 +1,14 @@
+func TestGallery(t *testing.T) {
+	disk := filesystemtest.NewFake(t, mediaDisk)
+	gallery := NewGallery(newStore(t, disk.Disk))
+	for _, name := range []string{"a.gif", "b.gif"} {
+		if _, err := gallery.Add(t.Context(), "u1", strings.NewReader(gif), name); err != nil {
+			t.Fatal(err)
+		}
+	}
+	photos, err := gallery.Photos(t.Context(), "u1")
+	if err != nil || len(photos) != 2 || photos[0].File.Filename != "a.gif" {
+		t.Fatalf("photos = %+v, %v", photos, err)
+	}
+	disk.AssertCount(rolePhotos, 2)
+}

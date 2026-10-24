@@ -1,0 +1,8 @@
+func migrationSQL(store *records.Store, out io.Writer) error {
+	script, err := store.MigrationSQL()
+	if err != nil {
+		return err
+	}
+	_, err = io.WriteString(out, script)
+	return err
+}

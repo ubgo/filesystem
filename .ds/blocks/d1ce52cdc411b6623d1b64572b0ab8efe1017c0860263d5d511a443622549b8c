@@ -1,0 +1,16 @@
+func follow(ctx context.Context, s *records.Store, au *audit.Plugin, scope, cursor string) ([]string, string, error) {
+	var kinds []string
+	for {
+		page, err := au.Changes(ctx, s, audit.ChangeQuery{Scope: scope, Cursor: cursor, Limit: 2})
+		if err != nil {
+			return nil, cursor, err
+		}
+		for _, e := range page.Entries {
+			kinds = append(kinds, fmt.Sprintf("%d:%s", e.Seq, e.Kind))
+		}
+		if len(page.Entries) == 0 {
+			return kinds, page.NextCursor, nil
+		}
+		cursor = page.NextCursor
+	}
+}

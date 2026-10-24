@@ -1,0 +1,24 @@
+func run(ctx context.Context, dsn string, out io.Writer) error {
+	mux, err := newMux()
+	if err != nil {
+		return err
+	}
+	disk, err := mux.Open(ctx, diskName, dsn)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	if err := disk.Check(ctx); err != nil {
+		return err
+	}
+	e, err := disk.Write(ctx, helloKey, strings.NewReader(helloText), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	got, err := disk.ReadAll(ctx, helloKey)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(out, "wrote %s: %d bytes, %s\nread back %q\ncapabilities: %s\n", e.Key, e.Size, e.ContentType, got, disk.Capabilities())
+	return err
+}

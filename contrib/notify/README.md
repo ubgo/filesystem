@@ -1,0 +1,24 @@
+# notify
+
+`github.com/ubgo/filesystem/contrib/notify` turns a storage backend's own object notifications into one `notify.Event` and calls the application's `notify.Handler`: confirm a direct upload the moment its object lands, or react to objects deleted outside the application. The core module imports only the standard library; each cloud's consumer is a module of its own, so an application downloads only the SDK it uses. The guide is [Maintenance](../../docs/maintenance/README.md#bucket-notifications).
+
+| Module | Consumes | Authentication | Redelivery on a Handler error |
+|---|---|---|---|
+| `contrib/notify` | (the seam) `Event` (with `Name`, the provider's event type, and `VersionID`), `Kind` (`KindCreated`, `KindDeleted`, `KindOther`), `Handler`, `Buckets`, `EventID`, `ErrMalformed`, `ProviderS3`, `ProviderGCS`, `ProviderAzure` | | |
+| `contrib/notify/sqs` | S3 or S3-compatible events in an SQS queue, sent directly or through SNS; `s3:TestEvent` acknowledged | the `*sqs.Client` signs every request with IAM credentials (SigV4) | the message stays in the queue until its visibility timeout, then its dead-letter queue |
+| `contrib/notify/pubsub` | GCS `OBJECT_FINALIZE` and `OBJECT_DELETE` notifications, pulled from a subscription; the delete GCS sends for an overwritten object is skipped | the client's Google credentials; pull-only, so no push endpoint exists to forge | nack, so Pub/Sub delivers it again |
+| `contrib/notify/eventgrid` | `Microsoft.Storage.BlobCreated` and `BlobDeleted` in the Event Grid schema, posted to an `http.Handler`; answers the subscription validation handshake | `Options.Authorize`, required: `QuerySecret(param, secret)` or `HeaderSecret(name, secret)`, constant-time, or your own (an Entra token check); the handshake needs it too | answers 500, so Event Grid retries the batch |
+
+Every consumer requires `Buckets`: an event naming any other bucket goes to `OnRejected` and is acknowledged without reaching the Handler. For Event Grid each entry is `<storage account>/<container>`, because container names are unique only inside an account; the account comes from the event's topic and is set in `Event.Account`, and an event whose topic names no account is rejected. `Event.ID` is `EventID(account, bucket, key, provider ID)`, the same derivation in every consumer, because the provider's own ID (an S3 sequencer is ordered only per key) repeats across keys. A message that is not a notification at all is reported to `OnError` wrapping `notify.ErrMalformed` and then removed (SQS: deleted; Pub/Sub: acknowledged) so it is not delivered forever; set `KeepMalformed` to leave it for the queue's dead-letter queue or the subscription's dead-letter topic instead. Deliveries are at least once, so a Handler must be idempotent, and an event is a claim about an object: `Disk.Stat` it before trusting its size. Keys are decoded (S3's URL-encoded keys included), so they are the keys a Disk over the bucket's root uses.
+
+| Name | What it is |
+|---|---|
+| `sqs.New(api, Options{QueueURL, Buckets, Handler, OnRejected, OnError, KeepMalformed, PassOther, WaitSeconds, MaxMessages})` | a consumer; `api` is an `*sqs.Client` or anything with its `ReceiveMessage` and `DeleteMessage` |
+| `(*sqs.Consumer).Run(ctx)`, `Poll(ctx)` | poll until `ctx` ends (a failed receive goes to `OnError` and is retried), or one receive round |
+| `pubsub.New(sub, Options{Buckets, Handler, OnRejected, OnError, KeepMalformed, PassOther})` | a consumer; `sub` is a `*pubsub.Subscriber` (cloud.google.com/go/pubsub/v2) or anything with its `Receive` |
+| `(*pubsub.Consumer).Run(ctx)` | receive until `ctx` ends |
+| `eventgrid.Handler(Options{Authorize, Buckets, Handler, OnRejected, MaxBodyBytes, CloudEvents, PassOther})` | the webhook; refuses non-POST (405), unauthorised (401), oversized (413, default 1 MiB) and malformed (400) requests |
+| `PassOther` (each consumer), `KindOther`, `Event.Name`, `Event.VersionID` | by default other event types (a Glacier restore, a tier or metadata change) are dropped; `PassOther` hands them to the Handler as `KindOther`, their type in `Name`. `VersionID` is the S3 `versionId` or the GCS generation (empty for Azure); on a versioned S3 bucket a delete marker arrives as `KindDeleted` with `Name` `ObjectRemoved:DeleteMarkerCreated` |
+| `eventgrid.Options.CloudEvents` | reads subscriptions in the CloudEvents 1.0 schema (one event or a batch) and answers the `OPTIONS` abuse-protection handshake (`WebHook-Request-Origin`) once `Authorize` accepts it; a validation event in that schema is never echoed |
+
+Tests run each consumer against an in-process fake: a fake queue and a real SQS client talking to an in-process endpoint that refuses requests not signed by the expected key, `pstest` for Pub/Sub, and `httptest` for Event Grid.

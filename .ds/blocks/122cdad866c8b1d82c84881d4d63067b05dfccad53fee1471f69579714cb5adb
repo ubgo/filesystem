@@ -1,0 +1,13 @@
+func avatarOrDefault(ctx context.Context, disk *filesystem.Disk, key string) string {
+	_, err := disk.Stat(ctx, key)
+	switch filesystem.CodeOf(err) {
+	case "":
+		return key
+	case filesystem.CodeNotFound:
+		return "default.png"
+	case filesystem.CodeUnavailable:
+		return "retry later"
+	default:
+		return "error: " + err.Error()
+	}
+}

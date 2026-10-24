@@ -1,0 +1,16 @@
+func downscale(photo []byte, l upload.Limits) ([]byte, error) {
+	info, err := imaging.Probe(bytes.NewReader(photo))
+	if err != nil {
+		return nil, err
+	}
+	if (l.MaxWidth == 0 || info.Width <= l.MaxWidth) && (l.MaxHeight == 0 || info.Height <= l.MaxHeight) {
+		return photo, nil
+	}
+	res, err := imaging.Process(bytes.NewReader(photo), imaging.Transform{
+		Mode: imaging.ModeFit, Width: l.MaxWidth, Height: l.MaxHeight, Format: imaging.FormatJPEG,
+	}, imaging.Options{MaxBytes: l.MaxBytes})
+	if err != nil {
+		return nil, err
+	}
+	return res.Data, nil
+}

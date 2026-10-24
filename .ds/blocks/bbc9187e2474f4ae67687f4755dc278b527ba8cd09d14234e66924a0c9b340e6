@@ -1,0 +1,4 @@
+var smartCard = imaging.Transform{
+	Mode: imaging.ModeFill, Width: box, Height: box, Format: imaging.FormatPNG,
+	Gravity: imaging.GravitySmart,
+}

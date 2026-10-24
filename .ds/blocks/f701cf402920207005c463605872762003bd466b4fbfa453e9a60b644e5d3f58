@@ -1,0 +1,33 @@
+func chunked(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	h, err := upload.Chunked(disk, policy, upload.ChunkedOptions{Staging: staging, Owner: owner})
+	if err != nil {
+		return err
+	}
+	f := upload.DropzoneFields()
+	send := func(index int) (int, string, error) {
+		chunk := photo[index*chunkSize : min((index+1)*chunkSize, len(photo))]
+		rec, err := post(ctx, h, nil,
+			part{field: f.UploadID, value: "4f1c-photo"},
+			part{field: f.Index, value: itoa(index)},
+			part{field: f.Total, value: itoa((len(photo) + chunkSize - 1) / chunkSize)},
+			part{field: f.TotalSize, value: itoa(len(photo))},
+			part{field: f.File, file: "photo.png", value: chunk},
+		)
+		if err != nil {
+			return 0, "", err
+		}
+		return rec.Code, stable(rec.Body.String()), nil
+	}
+	for _, index := range []int{0, 2, 2, 1} {
+		code, body, err := send(index)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "chunk %d: %d %s\n", index, code, body)
+	}
+	return nil
+}

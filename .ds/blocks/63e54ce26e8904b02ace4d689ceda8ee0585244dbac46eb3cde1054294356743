@@ -1,0 +1,3 @@
+func newMemoryDisk() (*filesystem.Disk, error) {
+	return filesystem.NewDisk(diskName, memory.New())
+}

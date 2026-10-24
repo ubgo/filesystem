@@ -1,0 +1,11 @@
+func newBucketHandler(s *records.Store) (http.Handler, error) {
+	return recordshttp.Handler(recordshttp.Config{
+		Store:        s,
+		DiskFor:      diskFor,
+		Policy:       policy,
+		MaxFiles:     maxFilesPerRequest,
+		Scope:        scopeOf,
+		Authorize:    authorizer(),
+		LinkLifetime: linkLifetime,
+	})
+}

@@ -1,0 +1,26 @@
+func (a *App) getAvatar(w http.ResponseWriter, r *http.Request) {
+	size := r.URL.Query().Get("size")
+	if size == "" {
+		size = sizeLarge
+	}
+	if _, ok := sizes["avatar-"+size]; !ok {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "size must be %s or %s", sizeSmall, sizeLarge))
+		return
+	}
+	f, err := a.current(r.Context(), r.PathValue("id"))
+	if filesystem.CodeOf(err) == filesystem.CodeNotFound {
+		q := url.Values{"size": {size}, "v": {placeholder.Version}}
+		http.Redirect(w, r, fallbackPrefix+url.PathEscape(r.PathValue("id"))+".png?"+q.Encode(), http.StatusFound)
+		return
+	}
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	u, err := a.Variants.URL(r.Context(), a.Store, f.Scope, f.ID, "avatar-"+size, time.Hour)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	http.Redirect(w, r, u, http.StatusFound)
+}

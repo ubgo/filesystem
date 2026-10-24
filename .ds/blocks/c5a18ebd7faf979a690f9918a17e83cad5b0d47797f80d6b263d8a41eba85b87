@@ -1,0 +1,9 @@
+func entry(key string, o Object) filesystem.Entry {
+	return filesystem.Entry{
+		Key:         key,
+		Size:        int64(len(o.Data)),
+		ModTime:     o.Modified,
+		ContentType: o.ContentType,
+		Metadata:    maps.Clone(o.Metadata),
+	}
+}

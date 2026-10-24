@@ -1,0 +1,11 @@
+func (a *App) canReadFile(ctx context.Context, scope, user, fileID string) (bool, error) {
+	q := fmt.Sprintf(`SELECT COUNT(*) FROM %s fa
+		JOIN messages m ON m.id = fa.%s
+		JOIN conversation_members cm ON cm.conversation_id = m.conversation_id
+		WHERE fa.%s = ? AND fa.%s = ? AND fa.%s = ? AND cm.user_id = ?`,
+		records.TableNameAttachments, records.ColAttachmentOwnerID,
+		records.ColAttachmentScope, records.ColAttachmentFileID, records.ColAttachmentOwnerType)
+	var n int
+	err := a.DB.QueryRowContext(ctx, q, scope, fileID, ownerMessage, user).Scan(&n)
+	return n > 0, err
+}

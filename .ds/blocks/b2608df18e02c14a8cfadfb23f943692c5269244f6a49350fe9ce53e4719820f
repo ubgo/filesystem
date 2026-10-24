@@ -1,0 +1,25 @@
+func sharedFileDemo(ctx context.Context, w io.Writer, s *records.Store) error {
+	user := records.Owner{Type: ownerUser, ID: "usr_2"}
+	post := records.Owner{Type: ownerPost, ID: "post_2"}
+	shared, err := store(ctx, s, "team.png")
+	if err != nil {
+		return err
+	}
+	if _, err := s.Attach(ctx, tenant, shared.ID, post, roleCover); err != nil {
+		return err
+	}
+	if _, err := s.SetAttachment(ctx, tenant, shared.ID, user, roleAvatar, records.PreviousPurge); err != nil {
+		return err
+	}
+	next, err := store(ctx, s, "solo.png")
+	if err != nil {
+		return err
+	}
+	if _, err := s.SetAttachment(ctx, tenant, next.ID, user, roleAvatar, records.PreviousPurge); err != nil {
+		return err
+	}
+	_, err = s.File(ctx, tenant, shared.ID)
+	cover, _ := s.Attachments(ctx, tenant, post, roleCover)
+	fmt.Fprintf(w, "shared file kept: %t, still the post's cover: %t\n", err == nil, len(cover) == 1)
+	return nil
+}

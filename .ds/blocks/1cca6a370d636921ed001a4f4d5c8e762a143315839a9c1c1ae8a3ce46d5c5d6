@@ -1,0 +1,36 @@
+func exifAuthorship(ctx context.Context, w io.Writer) error {
+	photo, err := photoWithEXIF(cameraEXIF(photoArtist, photoCopyright))
+	if err != nil {
+		return err
+	}
+	stripped, err := optimised(ctx, imaging.Optimize(imaging.Options{}, imaging.OptimizeOptions{Quality: 80}), photo)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "exif by default: kept %t\n", exifTags(stripped) != nil)
+
+	kept, err := optimised(ctx, keepAuthorship(), photo)
+	if err != nil {
+		return err
+	}
+	tags := exifTags(kept)
+	fmt.Fprintf(w, "exif with MetadataEXIFCopyright: %d fields, Artist %q, Copyright %q\n", len(tags), tags[tagArtist], tags[tagCopyright])
+	_, gpsIFD := tags[tagGPSIFD]
+	fmt.Fprintf(w, "exif GPS kept: %t, position anywhere in the file: %t, camera make kept: %t\n",
+		gpsIFD, bytes.Contains(kept, []byte(gpsPosition)), bytes.Contains(kept, []byte(cameraMake)))
+
+	bare, err := photoWithEXIF(cameraEXIF("", ""))
+	if err != nil {
+		return err
+	}
+	out, err := optimised(ctx, keepAuthorship(), bare)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "exif of a photo with neither field: kept %t\n", exifTags(out) != nil)
+
+	unknown := imaging.Optimize(imaging.Options{}, imaging.OptimizeOptions{KeepMetadata: []imaging.Metadata{"xmp"}})
+	_, err = optimised(ctx, unknown, photo)
+	fmt.Fprintf(w, "keeping an unknown kind: %s\n", filesystem.CodeOf(err))
+	return nil
+}

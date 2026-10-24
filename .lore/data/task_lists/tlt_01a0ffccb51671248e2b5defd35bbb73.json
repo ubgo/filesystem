@@ -1,0 +1,11 @@
+{
+  "_table": "task_lists",
+  "_v": 1,
+  "body": "Build phase started 2026-10-03. Owner request verbatim: i want you start building the project for now i will read the featuers, spec later bu tyou just start building all and do not stop. make sure everythign is extendible, pluggable, full unit test coverage, proper top to down approach no AI SLOP at all. just keep working an ddo no tostop",
+  "created_at": "2026-10-03T03:26:40.918064000Z",
+  "id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "status_str": "active",
+  "title": "Build v0",
+  "updated_at": "2026-10-03T03:26:40.918064000Z"
+}

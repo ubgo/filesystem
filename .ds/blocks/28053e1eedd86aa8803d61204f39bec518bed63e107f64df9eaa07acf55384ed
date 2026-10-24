@@ -1,0 +1,8 @@
+func Exercise(t *testing.T, base string, a *app.App) {
+	t.Run("form upload", func(t *testing.T) { formUpload(t, base) })
+	t.Run("records", func(t *testing.T) { recordsFlow(t, base) })
+	t.Run("public", func(t *testing.T) { publicFile(t, a, base) })
+	t.Run("ticket", func(t *testing.T) { ticket(t, base) })
+	t.Run("uppy", func(t *testing.T) { uppy(t, base) })
+	t.Run("tus", func(t *testing.T) { tusUpload(t, a, base) })
+}

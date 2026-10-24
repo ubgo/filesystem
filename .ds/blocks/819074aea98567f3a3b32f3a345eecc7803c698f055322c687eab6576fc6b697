@@ -1,0 +1,11 @@
+func entGallery(ctx context.Context, client *ent.Client, scope, owner string) ([]*ent.Attachment, error) {
+	return client.Attachment.Query().
+		Where(
+			attachment.Scope(scope),
+			attachment.OwnerType(ownerPost), attachment.OwnerID(owner), attachment.Role(roleGallery),
+			attachment.HasFileWith(file.DeletedAtIsNil()),
+		).
+		Order(ent.Asc(attachment.FieldPosition), ent.Asc(attachment.FieldID)).
+		WithFile().
+		All(ctx)
+}

@@ -1,0 +1,5 @@
+func Handler(h http.Handler) fiber.Handler {
+	return func(c fiber.Ctx) error {
+		return adaptor.HTTPHandler(detach(c.Context(), h))(c)
+	}
+}

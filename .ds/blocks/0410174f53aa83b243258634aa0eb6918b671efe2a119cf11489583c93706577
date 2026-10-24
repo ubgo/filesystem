@@ -1,0 +1,16 @@
+type File struct{ ent.Schema }
+
+// Mixin implements ent.Interface.
+func (File) Mixin() []ent.Mixin { return []ent.Mixin{fsent.FileMixin{}} }
+
+// Edges implements ent.Interface.
+func (File) Edges() []ent.Edge { return []ent.Edge{fsent.FileAttachments(Attachment.Type)} }
+
+// Attachment reads fs_attachments.
+type Attachment struct{ ent.Schema }
+
+// Mixin implements ent.Interface.
+func (Attachment) Mixin() []ent.Mixin { return []ent.Mixin{fsent.AttachmentMixin{}} }
+
+// Edges implements ent.Interface.
+func (Attachment) Edges() []ent.Edge { return []ent.Edge{fsent.AttachmentFile(File.Type)} }

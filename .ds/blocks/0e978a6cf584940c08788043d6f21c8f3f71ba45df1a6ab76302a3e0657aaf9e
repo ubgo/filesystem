@@ -1,0 +1,4 @@
+func currentUser(r *http.Request) string {
+	user, _ := r.Context().Value(userKey{}).(string) // set by requireUser for every route that calls this
+	return user
+}

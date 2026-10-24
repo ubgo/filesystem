@@ -1,0 +1,23 @@
+func authorizer(s *records.Store) func(*http.Request, recordshttp.Action, recordshttp.Target) error {
+	return func(r *http.Request, action recordshttp.Action, t recordshttp.Target) error {
+		user := r.Header.Get(headerUser)
+		if user == "" {
+			return errNotYours
+		}
+		if t.Owner.Type != "" {
+			if t.Owner.Type != ownerUser || t.Owner.ID != user {
+				return errNotYours
+			}
+			return nil
+		}
+		f, err := s.File(r.Context(), t.Scope, t.FileID)
+		if err != nil {
+			// Unknown files are refused too, so a probe learns nothing.
+			return errNotYours
+		}
+		if f.UploadedBy != actorPrefix+user {
+			return errNotYours
+		}
+		return nil
+	}
+}

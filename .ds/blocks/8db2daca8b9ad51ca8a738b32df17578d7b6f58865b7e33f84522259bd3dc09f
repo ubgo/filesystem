@@ -1,0 +1,30 @@
+func demoQueries(ctx context.Context, w io.Writer, s *records.Store, tp *tags.Plugin, files []records.File) error {
+	both, err := filesTagged(ctx, s, tp, "Invoice", "paid")
+	if err != nil {
+		return err
+	}
+	small, err := smallInvoices(ctx, s, tp)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "invoice+paid: %v; invoices under %d bytes: %v\n", both, smallFile, small)
+	if err := s.Trash(ctx, tenant, files[2].ID); err != nil {
+		return err
+	}
+	c, err := cloud(ctx, s, tp)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(w, "cloud with shop.txt trashed:", c)
+	if err := tp.Rename(ctx, s, tenant, "paid", "invoice"); err != nil {
+		return err
+	}
+	if err := tp.Delete(ctx, s, tenant, "2026"); err != nil {
+		return err
+	}
+	if c, err = cloud(ctx, s, tp); err != nil {
+		return err
+	}
+	fmt.Fprintln(w, "cloud after renaming paid to invoice and deleting 2026:", c)
+	return nil
+}

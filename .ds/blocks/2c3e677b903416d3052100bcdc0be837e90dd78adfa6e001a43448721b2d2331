@@ -1,0 +1,20 @@
+func fsView(ctx context.Context, a *app, out io.Writer) error {
+	fsys := a.private.FS(ctx)
+	var files []string
+	err := fs.WalkDir(fsys, "invoices", func(path string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() {
+			files = append(files, path)
+		}
+		return err
+	})
+	if err != nil {
+		return err
+	}
+	b, err := fs.ReadFile(fsys, "invoices/41.pdf")
+	if err != nil {
+		return err
+	}
+	_, statErr := fs.Stat(fsys, "invoices/missing.pdf")
+	fmt.Fprintf(out, "fs walk %s | read %q | missing is fs.ErrNotExist: %v\n", strings.Join(files, ","), b, errors.Is(statErr, fs.ErrNotExist))
+	return nil
+}

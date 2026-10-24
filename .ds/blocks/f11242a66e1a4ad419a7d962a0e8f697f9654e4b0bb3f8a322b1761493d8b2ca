@@ -1,0 +1,6 @@
+func missingVariable(ctx context.Context, mux *filesystem.Mux, out io.Writer) {
+	env := map[string]string{"STORAGE_DISKS": "media,backups", "STORAGE_MEDIA_DSN": "mem://"}
+	lookup := func(k string) (string, bool) { v, ok := env[k]; return v, ok }
+	_, err := mux.OpenManager(ctx, envPrefix, lookup)
+	fmt.Fprintf(out, "missing: %v\n", err)
+}

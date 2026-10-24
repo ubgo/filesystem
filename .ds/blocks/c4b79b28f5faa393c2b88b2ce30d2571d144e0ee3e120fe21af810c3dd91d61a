@@ -1,0 +1,34 @@
+func directories(ctx context.Context, out io.Writer, dir string) error {
+	root := filepath.Join(dir, "dirs")
+	if err := os.Mkdir(root, 0o700); err != nil {
+		return err
+	}
+	drv, err := local.New(root)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("uploads", drv)
+	if err != nil {
+		_ = drv.Close()
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	if err := disk.MakeDir(ctx, "inbox/2026"); err != nil {
+		return err
+	}
+	ok, err := disk.DirExists(ctx, "inbox")
+	if err != nil {
+		return err
+	}
+	page, err := disk.ListPage(ctx, "", filesystem.ListOptions{Recursive: true})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "dirs capability: %t, inbox exists: %t, keys listed: %d\n",
+		disk.Capabilities().Dirs, ok, len(page.Entries))
+	if _, err := disk.WriteBytes(ctx, "notes.txt", []byte("n"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "MakeDir over a file: %s\n", filesystem.CodeOf(disk.MakeDir(ctx, "notes.txt")))
+	return nil
+}

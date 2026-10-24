@@ -1,0 +1,43 @@
+func throughProxy(ctx context.Context, out io.Writer) error {
+	var agent string
+	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		agent = r.Header.Get("User-Agent")
+		_, _ = io.WriteString(w, pdfFile)
+	}))
+	defer remote.Close()
+	pp := &connectProxy{}
+	proxySrv := httptest.NewServer(pp)
+	defer proxySrv.Close()
+	proxy, err := url.Parse(proxySrv.URL)
+	if err != nil {
+		return err
+	}
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	_, port, err := net.SplitHostPort(strings.TrimPrefix(remote.URL, "http://"))
+	if err != nil {
+		return err
+	}
+	link := "http://localhost:" + port + "/files/q3.pdf" // a name, not an address
+	res, err := upload.FromURL(ctx, disk, link, policy, upload.FetchOptions{
+		Header:    http.Header{"User-Agent": {importerAgent}},
+		Proxy:     proxy,
+		AllowAddr: func(a netip.Addr) bool { return a.IsLoopback() }, // the demo's server is local
+	})
+	if err != nil {
+		return err
+	}
+	targets := pp.asked()
+	addresses := len(targets) > 0
+	for _, t := range targets { // one per address tried: ::1, then 127.0.0.1
+		host, _, err := net.SplitHostPort(t)
+		addresses = addresses && err == nil && net.ParseIP(host) != nil
+	}
+	fmt.Fprintf(out, "through the proxy: %q %s; proxy asked for addresses, never the name: %t; User-Agent sent: %t\n",
+		res.Filename, res.ContentType, addresses, agent == importerAgent)
+	_, err = upload.FromURL(ctx, disk, "http://169.254.169.254/latest/meta-data/", policy, upload.FetchOptions{Proxy: proxy})
+	fmt.Fprintf(out, "metadata address through the proxy: %s, proxy asked: %t\n", filesystem.CodeOf(err), len(pp.asked()) > len(targets))
+	return nil
+}

@@ -1,0 +1,4 @@
+func portalPolicy(_ *http.Request, _ share.Share, base upload.Policy) (upload.Policy, error) {
+	base.MaxSize = portalMaxUpload
+	return base, nil
+}

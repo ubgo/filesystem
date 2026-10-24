@@ -1,0 +1,20 @@
+func sasLinks(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	put, err := disk.SignedURL(ctx, "inbox/scan.txt", filesystem.PresignOptions{Method: filesystem.MethodPut, Expires: linkLifetime, ContentType: "text/plain"})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "signed PUT requires %s: %s\n", headerBlobType, put.Header.Get(headerBlobType))
+	if _, err := send(ctx, http.MethodPut, put.URL, strings.NewReader("scanned"), put.Header); err != nil {
+		return err
+	}
+	get, err := disk.SignedURL(ctx, "inbox/scan.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	body, err := send(ctx, http.MethodGet, get.URL, nil, get.Header)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "signed GET: %q\n", body)
+	return nil
+}

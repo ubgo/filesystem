@@ -1,0 +1,22 @@
+func (a *App) removeImage(w http.ResponseWriter, r *http.Request) {
+	if !isMerchant(r) {
+		writeError(w, filesystem.Errorf(filesystem.CodePermission, "merchants only"))
+		return
+	}
+	product := records.Owner{Type: ownerProduct, ID: r.PathValue("id")}
+	list, err := a.Store.Attachments(r.Context(), "", product, roleGallery)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	fileID := r.PathValue("fileID")
+	if !slices.ContainsFunc(list, func(af records.AttachedFile) bool { return af.File.ID == fileID }) {
+		writeError(w, filesystem.Errorf(filesystem.CodeNotFound, "product %s has no image %s", product.ID, fileID))
+		return
+	}
+	if err := a.Store.Purge(r.Context(), "", fileID); err != nil {
+		writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

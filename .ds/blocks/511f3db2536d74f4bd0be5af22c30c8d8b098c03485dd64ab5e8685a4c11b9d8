@@ -1,0 +1,8 @@
+func newPolicy(s scan.Scanner) upload.Policy {
+	return upload.Policy{
+		MaxSize: maxUploadBytes,
+		Allowed: []string{"image/png", "image/jpeg", "application/pdf", "text/plain", "application/zip"},
+		Key:     upload.RandomKey("uploads"),
+		Inspect: upload.Inspectors(scan.Inspect(s), imageHeader),
+	}
+}

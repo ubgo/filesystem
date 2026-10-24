@@ -1,0 +1,9 @@
+func avatarPolicy() upload.Policy {
+	return upload.Policy{
+		MaxSize:  avatarMaxSize,
+		MinSize:  1,
+		Allowed:  []string{avatarType},
+		Key:      upload.RandomKey("avatars"),
+		PostForm: true,
+	}
+}

@@ -1,0 +1,11 @@
+func ensureContainer(ctx context.Context, disk *filesystem.Disk, container string) error {
+	client, ok := filesystem.As[*azblob.Client](disk)
+	if !ok {
+		return fmt.Errorf("disk %s is not an Azure disk", disk.Name())
+	}
+	_, err := client.CreateContainer(ctx, container, nil)
+	if bloberror.HasCode(err, bloberror.ContainerAlreadyExists) {
+		return nil
+	}
+	return err
+}

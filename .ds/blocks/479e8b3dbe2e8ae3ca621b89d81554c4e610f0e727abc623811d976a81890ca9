@@ -1,0 +1,18 @@
+func backup(ctx context.Context, w io.Writer, app *filesystem.Disk, d Disks) error {
+	first := time.Time{}
+	n, err := backupSince(ctx, app, d.Backup, first)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "backup: full run copied %d\n", n)
+	second := time.Now()
+	time.Sleep(time.Second) // S3 reports modification times in whole seconds
+	if _, err := app.WriteBytes(ctx, "invoices/2026/001.txt", []byte("invoice 1, corrected\n"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	if n, err = backupSince(ctx, app, d.Backup, second); err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "backup: incremental run copied %d\n", n)
+	return nil
+}

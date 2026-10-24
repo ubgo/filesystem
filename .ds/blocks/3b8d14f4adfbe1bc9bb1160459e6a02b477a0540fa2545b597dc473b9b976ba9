@@ -1,0 +1,3 @@
+func forget(ctx context.Context, s *records.Store, v *versions.Plugin, versionID string) error {
+	return v.Delete(ctx, s, tenant, versionID)
+}

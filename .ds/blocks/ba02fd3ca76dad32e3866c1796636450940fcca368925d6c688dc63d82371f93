@@ -1,0 +1,20 @@
+func delegatePrefix(ctx context.Context, out io.Writer, _ fixture) error {
+	sts := &fakeSTS{}
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: sts}) // only for the stand-in STS
+	root := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "root-token", Expiry: time.Now().Add(time.Hour)})
+	tok, err := gcs.DelegatePrefix(ctx, root, gcs.DelegateOptions{Bucket: bucketName, Prefix: "users/42", Access: gcs.DelegateCreate})
+	if err != nil {
+		return err
+	}
+	var sent struct {
+		AccessBoundary struct {
+			AccessBoundaryRules []struct{ AvailablePermissions []string }
+		}
+	}
+	if err := json.Unmarshal([]byte(sts.boundary), &sent); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "delegated %s/%s with %s\n", tok.Bucket, tok.Prefix, strings.Join(sent.AccessBoundary.AccessBoundaryRules[0].AvailablePermissions, ","))
+	fmt.Fprintf(out, "token prints as: %s\n", redactExpiry(tok.String()))
+	return nil
+}

@@ -1,0 +1,12 @@
+func (throttled) RoundTrip(r *http.Request) (*http.Response, error) {
+	if r.Body != nil {
+		_ = r.Body.Close()
+	}
+	return &http.Response{
+		StatusCode: http.StatusTooManyRequests,
+		Status:     "429 Too Many Requests",
+		Header:     http.Header{"Retry-After": {fmt.Sprint(rateLimitWait)}},
+		Body:       io.NopCloser(strings.NewReader("{}")),
+		Request:    r,
+	}, nil
+}

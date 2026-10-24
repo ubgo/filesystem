@@ -1,0 +1,3 @@
+func save(ctx context.Context, s *records.Store, loaded records.File, text string) (records.File, error) {
+	return s.Replace(ctx, tenant, loaded.ID, strings.NewReader(text), "", textPolicy, records.IfUnchanged(loaded.SHA256))
+}

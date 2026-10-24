@@ -1,0 +1,14 @@
+func TestConformance(t *testing.T) {
+	filesystemtest.Run(t, func(t *testing.T) *filesystem.Disk {
+		drv, err := local.New(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		disk, err := filesystem.NewDisk("conformance", drv)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = disk.Close() })
+		return disk
+	})
+}

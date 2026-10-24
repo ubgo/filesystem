@@ -1,0 +1,20 @@
+func kmsKey(ctx context.Context, out io.Writer, f fixture) error {
+	_, disk, err := newBucketDisk(f, "cmek", false, gcs.Config{KMSKeyName: kmsKeyName, Signing: f.signing})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "a.txt", []byte("x"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	put, err := disk.SignedURL(ctx, "direct.bin", filesystem.PresignOptions{Method: filesystem.MethodPut, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	u, err := url.Parse(put.URL)
+	if err != nil {
+		return err
+	}
+	signed := strings.Contains(u.Query().Get("X-Goog-SignedHeaders"), "x-goog-encryption-kms-key-name")
+	fmt.Fprintf(out, "kms: presigned PUT signs the key: %t, client sends %s\n", signed, put.Header.Get("X-Goog-Encryption-Kms-Key-Name"))
+	return nil
+}

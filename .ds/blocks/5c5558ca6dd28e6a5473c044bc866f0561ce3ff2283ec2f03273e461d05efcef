@@ -1,0 +1,4 @@
+type countingProcessor struct {
+	next imaging.Processor
+	n    atomic.Int64
+}

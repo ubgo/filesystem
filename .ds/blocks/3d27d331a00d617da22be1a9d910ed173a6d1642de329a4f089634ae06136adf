@@ -1,0 +1,19 @@
+func run(ctx context.Context, out io.Writer) error {
+	d, used, err := newDisk(func(s SlowOp) { fmt.Fprintf(out, "slow: %+v\n", s) })
+	if err != nil {
+		return err
+	}
+	_, err = d.WriteBytes(ctx, "legal/contract.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "write legal/contract.pdf: %v\n", err)
+	_, err = d.WriteBytes(ctx, "drafts/contract.txt", []byte("draft"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "write drafts/contract.txt: %v\n", err)
+	_, err = d.Move(ctx, "drafts/contract.txt", "legal/contract.txt")
+	fmt.Fprintf(out, "move into legal/: %v\n", err)
+	for i := 0; ; i++ {
+		if _, err = d.WriteBytes(ctx, fmt.Sprintf("bulk/%d.txt", i), []byte("0123456789abcdef"), filesystem.WriteOptions{}); err != nil {
+			break
+		}
+	}
+	fmt.Fprintf(out, "after %d bytes: %v\n", used.Load(), err)
+	return nil
+}

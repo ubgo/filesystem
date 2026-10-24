@@ -1,0 +1,5 @@
+func save(ctx context.Context, s *records.Store, fileID, user, body string) error {
+	ctx = records.WithActor(ctx, user)
+	_, err := s.Replace(ctx, tenant, fileID, strings.NewReader(body), "", docs)
+	return err
+}

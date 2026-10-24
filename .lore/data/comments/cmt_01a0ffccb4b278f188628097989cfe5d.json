@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Decided 2026-10-03 under the owner go-ahead to start building; recorded in the internal notes (ADR-0004, ADR-0005). Revisit on owner review.",
+  "created_at": "2026-10-03T03:26:40.818572000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a0fd462689706d807f7a16e56e0b16",
+  "entity_table": "tasks",
+  "id": "cmt_01a0ffccb4b278f188628097989cfe5d",
+  "updated_at": "2026-10-03T03:26:40.818573000Z"
+}

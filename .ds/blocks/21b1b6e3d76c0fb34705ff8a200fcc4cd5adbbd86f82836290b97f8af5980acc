@@ -1,0 +1,21 @@
+func etags(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	first, err := disk.WriteBytes(ctx, "a.txt", []byte("same"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	again, err := disk.WriteBytes(ctx, "a.txt", []byte("same"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	changed, err := disk.WriteBytes(ctx, "a.txt", []byte("different"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	now, err := disk.Stat(ctx, "a.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "etag: same bytes keep it (memory): %t, new bytes change it: %t, stat reports the latest: %t\n",
+		first.ETag == again.ETag, changed.ETag != again.ETag, now.ETag == changed.ETag)
+	return nil
+}

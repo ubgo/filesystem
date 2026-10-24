@@ -1,0 +1,3 @@
+func variantJob(ctx context.Context, s *records.Store, vp *variants.Plugin, scope, fileID string) error {
+	return vp.Generate(ctx, s, scope, fileID)
+}

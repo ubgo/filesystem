@@ -1,0 +1,8 @@
+func postAvatar(t *testing.T, a *Avatars, user string, file filesystemtest.UploadFile) *httptest.ResponseRecorder {
+	t.Helper()
+	req := filesystemtest.NewUploadRequest(t, "/avatar", nil, file)
+	req.Header.Set(headerUser, user)
+	rec := httptest.NewRecorder()
+	a.ServeHTTP(rec, req)
+	return rec
+}

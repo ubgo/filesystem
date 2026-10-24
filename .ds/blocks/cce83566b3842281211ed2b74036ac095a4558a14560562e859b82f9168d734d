@@ -1,0 +1,25 @@
+func bucketLifecycle(ctx context.Context, out io.Writer, _ fixture) error {
+	client, stop, err := bucketConfigClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer stop()
+	err = gcs.SetLifecycle(ctx, client, bucketName,
+		gcs.LifecycleRule{Action: gcs.LifecycleDelete, AgeDays: 1, Prefixes: []string{"tmp/"}},
+		gcs.LifecycleRule{Action: gcs.LifecycleSetStorageClass, StorageClass: "ARCHIVE", AgeDays: 90, Prefixes: []string{"logs/"}},
+		gcs.LifecycleRule{Action: gcs.LifecycleAbortUploads, AgeDays: 7},
+	)
+	if err != nil {
+		return err
+	}
+	rules, err := gcs.Lifecycle(ctx, client, bucketName)
+	if err != nil {
+		return err
+	}
+	actions := make([]string, len(rules))
+	for i, r := range rules {
+		actions[i] = r.Action
+	}
+	fmt.Fprintf(out, "lifecycle: %s; logs/ move to %s after %d days\n", strings.Join(actions, ","), rules[1].StorageClass, rules[1].AgeDays)
+	return nil
+}

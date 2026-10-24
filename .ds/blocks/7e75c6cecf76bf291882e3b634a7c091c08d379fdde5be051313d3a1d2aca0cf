@@ -1,0 +1,16 @@
+func sweepByPlan(ctx context.Context, s *records.Store, tenants []tenantPlan, now time.Time) (map[string]records.RetentionReport, error) {
+	out := map[string]records.RetentionReport{}
+	for _, t := range tenants {
+		keep := freeKeep
+		if t.Pro {
+			keep = proKeep
+		}
+		rules := []records.Retention{{OwnerType: ownerChat, MaxAge: keep}}
+		rep, err := s.SweepRetentionIn(ctx, t.Scope, rules, now, false)
+		if err != nil {
+			return out, fmt.Errorf("retention of %s: %w", t.Scope, err)
+		}
+		out[t.Scope] = rep
+	}
+	return out, nil
+}

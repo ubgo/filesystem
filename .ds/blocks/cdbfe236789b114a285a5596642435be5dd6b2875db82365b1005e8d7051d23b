@@ -1,0 +1,31 @@
+func govCloudDelegation(ctx context.Context, out io.Writer, _ *s3.Client, _ *fakeS3) error {
+	stsClient := &fakeSTS{} // sts.NewFromConfig(cfg) in production
+	_, err := fss3.DelegatePrefix(ctx, stsClient, fss3.DelegateOptions{
+		Role:        govRole, // Partition becomes aws-us-gov
+		SessionName: "user-42",
+		Bucket:      bucketName,
+		Prefix:      "users/42",
+		Write:       true,
+		Duration:    time.Hour,
+		KMSKeyARNs:  []string{govKMSKey},
+	})
+	if err != nil {
+		return err
+	}
+	var policy struct {
+		Statement []struct {
+			Action   any
+			Resource []string
+		}
+	}
+	if err := json.Unmarshal([]byte(aws.ToString(stsClient.last.Policy)), &policy); err != nil {
+		return err
+	}
+	last := policy.Statement[len(policy.Statement)-1]
+	fmt.Fprintf(out, "govcloud: objects %s; kms %v on %s\n", policy.Statement[0].Resource[0], last.Action, last.Resource[0])
+	_, err = fss3.SessionPolicy(fss3.DelegateOptions{Role: govRole, Bucket: bucketName, Prefix: "users/42", Partition: fss3.PartitionChina})
+	fmt.Fprintf(out, "china partition for a govcloud role: %s\n", filesystem.CodeOf(err))
+	_, err = fss3.SessionPolicy(fss3.DelegateOptions{Role: govRole, Bucket: bucketName, Prefix: "users/42", KMSKeyARNs: []string{"arn:aws-us-gov:kms:us-gov-west-1:111122223333:alias/media"}})
+	fmt.Fprintf(out, "kms alias instead of a key: %s\n", filesystem.CodeOf(err))
+	return nil
+}

@@ -1,0 +1,23 @@
+func (a *App) importOne(ctx context.Context, f records.File) error {
+	rows, refused, err := a.parse(ctx, f)
+	if errors.Is(err, errBadFile) {
+		_, err = a.Store.SetStatus(ctx, f.Scope, f.ID, records.StatusFailed, strings.TrimPrefix(err.Error(), errBadFile.Error()+": "))
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	if err := a.writeReport(ctx, f.ID, refused); err != nil {
+		return err
+	}
+	return a.Store.Tx(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		for _, c := range rows {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO contacts (scope, email, name, import_id) VALUES (?, ?, ?, ?)
+				ON CONFLICT (scope, email) DO UPDATE SET name = excluded.name, import_id = excluded.import_id`, f.Scope, c[1], c[0], f.ID); err != nil {
+				return err
+			}
+		}
+		_, err := a.Store.SetStatus(ctx, f.Scope, f.ID, records.StatusReady, fmt.Sprintf("imported %d, refused %d", len(rows), len(refused)))
+		return err
+	})
+}

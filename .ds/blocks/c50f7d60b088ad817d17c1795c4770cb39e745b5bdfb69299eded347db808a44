@@ -1,0 +1,12 @@
+func (a *App) deleteAvatar(w http.ResponseWriter, r *http.Request) {
+	f, err := a.current(r.Context(), r.PathValue("id"))
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	if err := a.Store.Purge(r.Context(), "", f.ID); err != nil {
+		writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

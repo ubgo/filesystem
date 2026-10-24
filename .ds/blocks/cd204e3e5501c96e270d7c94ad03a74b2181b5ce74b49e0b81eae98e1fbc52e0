@@ -1,0 +1,18 @@
+func (a *App) importURL(w http.ResponseWriter, r *http.Request) {
+	user := r.Header.Get(headerUser)
+	if user == "" {
+		writeError(w, filesystem.Errorf(filesystem.CodePermission, "sign in first"))
+		return
+	}
+	var req importRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxJSONBytes)).Decode(&req); err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "invalid JSON body"))
+		return
+	}
+	f, err := a.importFrom(r.Context(), user, req.URL)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, fileResponse{FileID: f.ID, Filename: f.Filename, ContentType: f.ContentType, Size: f.Size})
+}

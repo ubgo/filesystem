@@ -1,0 +1,8 @@
+func writeError(w http.ResponseWriter, err error) {
+	status := fshttp.StatusOf(err)
+	msg := http.StatusText(status)
+	if status < http.StatusInternalServerError || status == http.StatusInsufficientStorage {
+		msg = err.Error()
+	}
+	writeJSON(w, status, errorResponse{Error: msg, Code: filesystem.CodeOf(err)})
+}

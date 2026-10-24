@@ -1,0 +1,22 @@
+func newStore(ctx context.Context, db *sql.DB, fp *folders.Plugin) (*records.Store, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithOwnerTypes(ownerPost),
+		records.WithRoleLimit(roleGallery, galleryMax),
+		records.WithPlugins(fp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	return s, nil
+}

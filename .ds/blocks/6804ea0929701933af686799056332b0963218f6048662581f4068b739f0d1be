@@ -1,0 +1,8 @@
+func demoEnv(dataDir string) filesystem.LookupFunc {
+	env := map[string]string{
+		envPrefix + filesystem.EnvDisks:                         sharedDisk + "," + dedicatedPrefix + "globex",
+		filesystem.EnvName(envPrefix, sharedDisk):               "file:" + filepath.Join(dataDir, "shared"),
+		filesystem.EnvName(envPrefix, dedicatedPrefix+"globex"): "file:" + filepath.Join(dataDir, "globex"),
+	}
+	return func(k string) (string, bool) { v, ok := env[k]; return v, ok }
+}

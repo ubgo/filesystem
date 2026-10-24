@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Done. s3: lifecycle.go, replication.go, acl.go, delegate.go (STS session policy limited to the prefix, ScopedCredentials redacted). gcs: the same four (turbo replication, ACL entities, downscoped token with a CEL boundary). azure: delegate.go (directory/container SAS); lifecycle and replication are management-plane, documented as out of scope. UR-13: core PresignOptions.AllowedIP/PresignIP/IPRestricter (patch applied by the lead), signedurl ip claim, fshttp.Signed check with TrustedProxies, Azure sip. Every test is break-verified. SeaweedFS: lifecycle passes, STS skipped (unsupported). Azurite ignores sip. go.mod tidy needed for sts/oauth2.",
+  "created_at": "2026-10-07T11:46:17.102446000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a1151fb88b74d2916fac3ea6c0db57",
+  "entity_table": "tasks",
+  "id": "cmt_01a1162f8b8e773b8a29d06b4b1cf08d",
+  "updated_at": "2026-10-07T11:46:17.102454000Z"
+}

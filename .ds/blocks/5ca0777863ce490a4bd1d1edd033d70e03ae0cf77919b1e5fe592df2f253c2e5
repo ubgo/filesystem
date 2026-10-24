@@ -1,0 +1,14 @@
+func photoPolicy() (upload.Policy, error) {
+	check, err := imaging.CheckDimensions(imaging.DimensionLimits{MinWidth: minSide, MinHeight: minSide, MaxPixels: 40_000_000})
+	if err != nil {
+		return upload.Policy{}, err
+	}
+	return upload.Policy{
+		MaxSize:    maxUpload,
+		Allowed:    []string{"image/jpeg", "image/png"},
+		Key:        upload.RandomKey("photos"),
+		Visibility: filesystem.VisibilityPublic,
+		Process:    imaging.Optimize(imaging.Options{}, imaging.OptimizeOptions{Quality: 80}),
+		Inspect:    check,
+	}, nil
+}

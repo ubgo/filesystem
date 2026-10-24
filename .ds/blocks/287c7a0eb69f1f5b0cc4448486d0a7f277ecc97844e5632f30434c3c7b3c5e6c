@@ -1,0 +1,4 @@
+type HTTPScanner struct {
+	URL    string
+	Client *http.Client
+}

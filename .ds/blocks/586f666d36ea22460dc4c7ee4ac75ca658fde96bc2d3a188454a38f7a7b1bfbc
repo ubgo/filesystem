@@ -1,0 +1,7 @@
+func openDisks(ctx context.Context) (Disks, error) {
+	cdnDSN, vaultDSN := os.Getenv(envCDNDSN), os.Getenv(envVaultDSN)
+	if cdnDSN == "" || vaultDSN == "" {
+		return memoryDisks(baseURL, bytes.Repeat([]byte("change-me"), 4))
+	}
+	return bucketDisks(ctx, cdnDSN, vaultDSN, os.Getenv(envCDNBase))
+}

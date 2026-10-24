@@ -1,0 +1,23 @@
+func basics(ctx context.Context, out io.Writer, name string, disk *filesystem.Disk) error {
+	_, err := disk.WriteBytes(ctx, "notes/todo.txt", []byte("buy milk\n"), filesystem.WriteOptions{ContentType: "text/plain"})
+	if err != nil {
+		return err
+	}
+	got, err := disk.ReadAll(ctx, "notes/todo.txt")
+	if err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "notes/todo.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "%s: read %q, stat size=%d etag set=%t type=%q\n", name, got, e.Size, e.ETag != "", e.ContentType)
+	_, err = disk.Stat(ctx, "NOTES/TODO.TXT")
+	fmt.Fprintf(out, "%s: stat NOTES/TODO.TXT: %s\n", name, outcome(err))
+	listed, err := keys(ctx, disk, "notes")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "%s: list notes: %v\n", name, listed)
+	return nil
+}

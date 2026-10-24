@@ -1,0 +1,24 @@
+func attachFile(ctx context.Context, mw *multipart.Writer, disk *filesystem.Disk, a attachment) error {
+	part, err := mw.CreatePart(textproto.MIMEHeader{
+		"Content-Type":              {a.ContentType},
+		"Content-Disposition":       {mime.FormatMediaType("attachment", map[string]string{"filename": a.Filename})},
+		"Content-Transfer-Encoding": {"base64"},
+	})
+	if err != nil {
+		return err
+	}
+	rc, err := disk.Read(ctx, a.Key)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	enc := base64.NewEncoder(base64.StdEncoding, &lineBreaker{w: part})
+	if _, err := io.Copy(enc, rc); err != nil {
+		return err
+	}
+	if err := enc.Close(); err != nil {
+		return err
+	}
+	_, err = io.WriteString(part, "\r\n")
+	return err
+}

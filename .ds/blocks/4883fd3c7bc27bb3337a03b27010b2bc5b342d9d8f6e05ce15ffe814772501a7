@@ -1,0 +1,15 @@
+func main() {
+	cfg := config{BaseURL: baseURL, DataDir: dataDir, StorageDSN: os.Getenv(envStorageDSN), Secret: []byte(os.Getenv(envSecret))}
+	if len(cfg.Secret) == 0 {
+		cfg.Secret = []byte(rand.Text() + rand.Text())
+		log.Printf("%s is not set: using a random secret, so links stop working when the server restarts", envSecret)
+	}
+	a, err := newApp(context.Background(), cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer a.Close()
+	log.Printf("listening on %s; files and database in %s", cfg.BaseURL, cfg.DataDir)
+	srv := &http.Server{Addr: addr, Handler: a.Handler(), ReadHeaderTimeout: readHeaderTimeout}
+	log.Fatal(srv.ListenAndServe())
+}

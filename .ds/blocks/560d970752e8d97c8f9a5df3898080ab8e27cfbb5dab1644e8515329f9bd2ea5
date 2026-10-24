@@ -1,0 +1,6 @@
+func statuses(out io.Writer) {
+	for _, c := range filesystem.CodeValues {
+		s := fshttp.StatusOf(filesystem.Errorf(c, "example"))
+		fmt.Fprintf(out, "%s -> %d %s\n", c, s, http.StatusText(s))
+	}
+}

@@ -1,0 +1,8 @@
+func newCache(disk *filesystem.Disk, allow func(netip.Addr) bool) (*remote.Cache, error) {
+	return remote.New(disk, remote.Options{
+		Dir:        "remote",
+		Policy:     upload.Policy{MaxSize: 5 << 20, Allowed: []string{"image/*"}},
+		Fetch:      upload.FetchOptions{Timeout: 10 * time.Second, AllowAddr: allow},
+		PreviewTTL: 24 * time.Hour,
+	})
+}

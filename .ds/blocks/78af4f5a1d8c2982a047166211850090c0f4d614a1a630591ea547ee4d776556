@@ -1,0 +1,26 @@
+func signedLinks(ctx context.Context, out io.Writer, db *sql.DB, plain *filesystem.Disk) error {
+	_, err := plain.SignedURL(ctx, "users/42.png", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Minute})
+	fmt.Fprintf(out, "signed URL without a signer: %s\n", filesystem.CodeOf(err))
+
+	srv := httptest.NewServer(nil)
+	defer srv.Close()
+	signer, err := signedurl.New(srv.URL+"/files", []signedurl.Key{{ID: "k1", Secret: bytes.Repeat([]byte("s"), signedurl.MinKeyBytes)}})
+	if err != nil {
+		return err
+	}
+	disk, err := openDisk(ctx, db, filesystem.WithURLSigner(signer))
+	if err != nil {
+		return err
+	}
+	mgr, err := filesystem.NewManager(disk)
+	if err != nil {
+		return err
+	}
+	srv.Config.Handler = http.StripPrefix("/files", fshttp.Signed(mgr, signer))
+
+	link, err := disk.SignedURL(ctx, "users/42.png", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Minute})
+	if err != nil {
+		return err
+	}
+	return fetch(out, link.URL)
+}

@@ -1,0 +1,15 @@
+func batch(ctx context.Context, disk *filesystem.Disk, out io.Writer) {
+	for _, k := range []string{"tmp/a", "tmp/b"} {
+		_, _ = disk.WriteBytes(ctx, k, []byte(k), filesystem.WriteOptions{})
+	}
+	err := disk.DeleteKeys(ctx, []string{"tmp/a", "../escape", "tmp/b"})
+	var be *filesystem.BatchError
+	if errors.As(err, &be) {
+		for _, f := range be.Failures {
+			fmt.Fprintf(out, "batch failure: %q %s\n", f.Key, filesystem.CodeOf(f.Err))
+		}
+	}
+	fmt.Fprintf(out, "batch errors.Is ErrInvalidKey: %t\n", errors.Is(err, filesystem.ErrInvalidKey))
+	left, _ := disk.Exists(ctx, "tmp/a")
+	fmt.Fprintf(out, "tmp/a still there: %t\n", left)
+}

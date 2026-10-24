@@ -1,0 +1,5 @@
+func opaqueID(prefix string) string {
+	b := make([]byte, opaqueIDBytes)
+	_, _ = rand.Read(b) // crypto/rand.Read never fails on supported platforms
+	return prefix + hex.EncodeToString(b)
+}

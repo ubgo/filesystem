@@ -1,0 +1,8 @@
+func fetchOptions(allow func(netip.Addr) bool) upload.FetchOptions {
+	return upload.FetchOptions{
+		Timeout:      fetchTimeout,
+		MaxRedirects: maxRedirects,
+		MaxSize:      importPolicy.MaxSize,
+		AllowAddr:    allow,
+	}
+}

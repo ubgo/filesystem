@@ -1,0 +1,15 @@
+func (a *app) purgePhoto(w http.ResponseWriter, r *http.Request) {
+	user, id := currentUser(r), r.PathValue("id")
+	f, err := a.store.File(r.Context(), user, id)
+	if err == nil && f.DeletedAt == nil {
+		err = filesystem.Errorf(filesystem.CodeInvalidArgument, "move the photo to the trash first")
+	}
+	if err == nil {
+		err = a.store.Purge(r.Context(), user, id)
+	}
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

@@ -1,0 +1,7 @@
+func grantUntil(ctx context.Context, s *records.Store, ap *acl.Plugin, project string, until time.Time) error {
+	if _, err := ap.Grant(ctx, s, tenant, acl.Grant{Subject: carol, Kind: onProject, Resource: project, Level: comment, ExpiresAt: &until}); err != nil {
+		return err
+	}
+	_, err := ap.Grant(ctx, s, tenant, acl.Grant{Subject: dave, Kind: onProject, Resource: project, Level: dropbox})
+	return err
+}

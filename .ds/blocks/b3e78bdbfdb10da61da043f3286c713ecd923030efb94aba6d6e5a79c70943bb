@@ -1,0 +1,14 @@
+func newFullStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, error) {
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithIDs(opaqueID),
+		records.WithOwnerTypes(ownerPost),
+		records.WithSourceIP(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	return s, nil
+}

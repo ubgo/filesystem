@@ -1,0 +1,39 @@
+func overlay(ctx context.Context, out io.Writer) error {
+	production, err := mem("production")
+	if err != nil {
+		return err
+	}
+	for _, k := range []string{"a.txt", "b.txt"} {
+		if _, err := production.WriteBytes(ctx, k, []byte("prod "+k), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	sandbox, err := mem("sandbox")
+	if err != nil {
+		return err
+	}
+	preview, err := filesystem.Overlay("preview", sandbox, production)
+	if err != nil {
+		return err
+	}
+	if _, err := preview.WriteBytes(ctx, "a.txt", []byte("edited in preview"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	if err := preview.Delete(ctx, "b.txt"); err != nil {
+		return err
+	}
+	a, err := preview.ReadAll(ctx, "a.txt")
+	if err != nil {
+		return err
+	}
+	seen, err := keys(ctx, preview)
+	if err != nil {
+		return err
+	}
+	untouched, err := keys(ctx, production)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "overlay: preview reads %q, lists %q; production still lists %q\n", a, seen, untouched)
+	return nil
+}

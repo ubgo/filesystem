@@ -1,0 +1,12 @@
+func newDisks() (*filesystem.Manager, error) {
+	drv := memory.New()
+	media, err := filesystem.NewDisk(diskName, drv)
+	if err != nil {
+		return nil, err
+	}
+	archive, err := filesystem.NewDisk(archiveName, drv, filesystem.WithInterceptors(filesystem.ReadOnly()))
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewManager(media, archive)
+}

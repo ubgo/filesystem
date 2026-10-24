@@ -1,0 +1,3 @@
+func protect(ctx context.Context, s *records.Store, p *share.Plugin, fileID string) (share.Share, error) {
+	return p.Create(ctx, s, tenant, fileID, share.Options{TTL: linkTTL, Password: linkPassword})
+}

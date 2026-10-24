@@ -1,0 +1,19 @@
+func vercelErrors(ctx context.Context, out io.Writer, fake *fakes.Vercel) error {
+	wrong, err := openVercel("vercel_blob_rw_StoreAbc123_wrongsecret", vercelblob.AccessPublic, fake)
+	if err != nil {
+		return err
+	}
+	_, err = wrong.Stat(ctx, "avatars/u1.png")
+	fmt.Fprintf(out, "wrong token: %s\n", outcome(err))
+	disk, err := openVercel(vercelToken, vercelblob.AccessPublic, fake)
+	if err != nil {
+		return err
+	}
+	fake.FailNext(fakes.Failure{Status: http.StatusTooManyRequests, Code: "rate_limited", RetryAfter: int(retryHint.Seconds())})
+	_, err = disk.Stat(ctx, "avatars/u1.png")
+	fmt.Fprintf(out, "rate limited: %s\n", outcome(err))
+	fake.MaxBytes = vercelUploadLimit
+	_, err = disk.WriteBytes(ctx, "big.bin", make([]byte, vercelUploadLimit+1), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "over the size limit: %s\n", outcome(err))
+	return nil
+}

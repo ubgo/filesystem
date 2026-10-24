@@ -1,0 +1,4 @@
+type Source interface {
+	Profile(ctx context.Context, userID string) (Profile, error)
+	Orders(ctx context.Context, userID string) ([]Order, error)
+}

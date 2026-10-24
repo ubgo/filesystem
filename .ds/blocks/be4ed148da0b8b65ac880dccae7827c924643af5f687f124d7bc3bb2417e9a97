@@ -1,0 +1,24 @@
+func fileModes(ctx context.Context, out io.Writer, dir string) error {
+	drv, err := local.New(dir)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("uploads", drv)
+	if err != nil {
+		_ = drv.Close()
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	for _, v := range filesystem.VisibilityValues {
+		key := string(v) + ".txt"
+		if _, err := disk.WriteBytes(ctx, key, []byte(key), filesystem.WriteOptions{Visibility: v}); err != nil {
+			return err
+		}
+		info, err := os.Stat(filepath.Join(dir, key))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "local %s: %v\n", v, info.Mode().Perm())
+	}
+	return nil
+}

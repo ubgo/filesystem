@@ -1,0 +1,24 @@
+func bringYourOwnBucket(ctx context.Context, out io.Writer, _ *s3.Client, fake *fakeS3) error {
+	stsClient := &fakeSTS{} // the application's own STS client in production
+	creds, err := fss3.RoleCredentials(stsClient, fss3.RoleOptions{
+		RoleARN:     customerRole,
+		ExternalID:  tenantExternal, // generated per tenant by the application
+		SessionName: "tenant-acme",
+	})
+	if err != nil {
+		return err
+	}
+	client := s3.New(s3.Options{Region: fakeRegion, BaseEndpoint: aws.String(fake.endpoint), UsePathStyle: true, Credentials: creds})
+	disk, err := newBucketDisk(ctx, client, "acme-files", fss3.Config{})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "report.txt", []byte("q3"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	put := fake.lastSent(http.MethodPut, "/acme-files/report.txt", "PutObject")
+	fmt.Fprintf(out, "byo bucket: STS saw external ID %s; PUT signed by %s with a session token: %t\n",
+		aws.ToString(stsClient.last.ExternalId), signingKey(put), put.Get("X-Amz-Security-Token") != "")
+	fmt.Fprintf(out, "role provider prints as: %v\n", creds)
+	return nil
+}

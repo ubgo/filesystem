@@ -1,0 +1,15 @@
+func storageClass(ctx context.Context, out io.Writer, f fixture) error {
+	_, disk, err := newBucketDisk(f, "cold-store", false, gcs.Config{StorageClass: gcs.ClassNearline})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "logs/2026-09.log", []byte("september"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "logs/2026-09.log")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "storage class: %s\n", e.StorageClass)
+	return nil
+}

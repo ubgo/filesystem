@@ -1,0 +1,25 @@
+func readWithGorm(out io.Writer, db *sql.DB) error {
+	g, err := openGorm(db)
+	if err != nil {
+		return err
+	}
+	gallery, err := gormGallery(g, tenant, postID)
+	if err != nil {
+		return err
+	}
+	for _, a := range gallery {
+		fmt.Fprintf(out, "gorm gallery: %d %s %d bytes\n", a.Position, a.File.Filename, a.File.Size)
+	}
+	files, err := gormLiveFiles(g, tenant)
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		rec, err := f.Record()
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "gorm live file: %s, %d attachment(s), records.File status %s\n", rec.Filename, len(f.Attachments), rec.Status)
+	}
+	return nil
+}

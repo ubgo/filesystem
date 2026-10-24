@@ -1,0 +1,11 @@
+func purgeIfUnused(ctx context.Context, s *records.Store, f records.File) error {
+	used, err := s.UsagesOf(ctx, records.UsageQuery{Scope: f.Scope, FileID: f.ID, Limit: 1})
+	if err != nil {
+		return err
+	}
+	if len(used.Usages) > 0 {
+		a := used.Usages[0]
+		return fmt.Errorf("%w: %s %s as %s", errInUse, a.Owner.Type, a.Owner.ID, a.Role)
+	}
+	return s.Purge(ctx, f.Scope, f.ID)
+}

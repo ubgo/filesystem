@@ -1,0 +1,6 @@
+var photoPolicy = upload.Policy{
+	MaxSize: maxPhotoBytes,
+	Allowed: []string{"image/jpeg", "image/png", "image/webp"},
+	Key:     upload.RandomKey("photos"),
+	Process: imaging.Sanitize(imaging.Options{MaxBytes: maxPhotoBytes}),
+}

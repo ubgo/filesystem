@@ -1,0 +1,22 @@
+func (a *App) describe(ctx context.Context, tenant string) (branding, error) {
+	out := branding{}
+	for name, s := range slots {
+		list, err := a.Store.Attachments(ctx, tenant, records.Owner{Type: ownerTenant, ID: tenant}, name)
+		if err != nil {
+			return nil, err
+		}
+		if len(list) == 0 {
+			continue
+		}
+		urls := map[string]string{}
+		for _, size := range s.sizes {
+			u, err := a.Variants.URL(ctx, a.Store, tenant, list[0].File.ID, size, linkLifetime)
+			if err != nil {
+				return nil, err
+			}
+			urls[size] = u
+		}
+		out[name] = urls
+	}
+	return out, nil
+}

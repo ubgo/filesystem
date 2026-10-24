@@ -1,0 +1,11 @@
+func replaceAndMeasure(ctx context.Context, s *records.Store, id string, body []byte) (string, error) {
+	f, err := s.Replace(ctx, tenant, id, bytes.NewReader(body), "", policy)
+	if err != nil {
+		return "", err
+	}
+	w, h, ok := dimensions.Of(f)
+	if !ok {
+		return "no dimensions", nil
+	}
+	return fmt.Sprintf("%dx%d", w, h), nil
+}

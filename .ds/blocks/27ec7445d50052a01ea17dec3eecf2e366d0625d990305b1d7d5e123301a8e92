@@ -1,0 +1,30 @@
+func (a *App) parse(ctx context.Context, f records.File) (rows, refused [][]string, err error) {
+	rc, err := a.Disk.Read(ctx, f.Key)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer func() { _ = rc.Close() }()
+	cr := csv.NewReader(rc)
+	cr.FieldsPerRecord = -1 // a short row is refused with a reason, not fatal
+	first, err := cr.Read()
+	if err != nil || len(first) != len(header) || !strings.EqualFold(strings.TrimSpace(first[0]), header[0]) || !strings.EqualFold(strings.TrimSpace(first[1]), header[1]) {
+		return nil, nil, fmt.Errorf("%w: line 1 must be the header %q", errBadFile, strings.Join(header, ","))
+	}
+	for line := 2; ; line++ {
+		rec, err := cr.Read()
+		if errors.Is(err, io.EOF) {
+			return rows, refused, nil
+		}
+		if line-1 > maxRows {
+			return nil, nil, fmt.Errorf("%w: more than %d rows", errBadFile, maxRows)
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("%w: line %d: not valid CSV", errBadFile, line)
+		}
+		if reason := checkRow(rec); reason != "" {
+			refused = append(refused, append([]string{fmt.Sprint(line), reason}, rec...))
+			continue
+		}
+		rows = append(rows, []string{strings.TrimSpace(rec[0]), strings.ToLower(strings.TrimSpace(rec[1]))})
+	}
+}

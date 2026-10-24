@@ -1,0 +1,8 @@
+func heicPolicy() upload.Policy {
+	p := imaging.NewPipeline(imaging.WithDecoder(heic.Decoder()))
+	return upload.Policy{
+		MaxSize: 20 << 20,
+		Allowed: []string{"image/jpeg", "image/png", heic.ContentType},
+		Process: imaging.Sanitize(imaging.Options{}, imaging.WithPipeline(p)),
+	}
+}

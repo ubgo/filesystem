@@ -1,0 +1,11 @@
+func (r *mutationResolver) UploadFiles(ctx context.Context, files []*graphql.Upload) ([]*upload.Result, error) {
+	stored, err := fsgql.ReceiveAll(ctx, r.Media, files, r.Policy, r.MaxFiles)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*upload.Result, len(stored))
+	for i := range stored {
+		out[i] = &stored[i]
+	}
+	return out, nil
+}

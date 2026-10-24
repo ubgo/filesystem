@@ -1,0 +1,8 @@
+func (a *App) rememberOrphan(ctx context.Context, f records.File, err error) {
+	fmt.Fprintf(os.Stderr, "delete %s/%s after commit: %v (queued for retry)\n", f.Disk, f.Key, err)
+	_, qerr := a.DB.ExecContext(ctx, "INSERT OR IGNORE INTO orphaned_objects (disk, storage_key, failed_at) VALUES (?, ?, ?)",
+		f.Disk, f.Key, time.Now().UTC().Format(time.RFC3339))
+	if qerr != nil {
+		fmt.Fprintf(os.Stderr, "queue %s/%s: %v\n", f.Disk, f.Key, qerr)
+	}
+}

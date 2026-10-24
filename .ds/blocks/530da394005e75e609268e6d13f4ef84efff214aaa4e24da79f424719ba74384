@@ -1,0 +1,27 @@
+func sweepWithClock(ctx context.Context, out io.Writer) error {
+	now := frozenTime
+	disk, err := filesystem.NewDisk("uploads", memory.New(memory.WithClock(func() time.Time { return now })))
+	if err != nil {
+		return err
+	}
+	id, err := disk.CreateMultipart(ctx, "videos/big.mp4", filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	now = now.Add(2 * abandonAfter)
+	cutoff := now.Add(-abandonAfter)
+	found, err := disk.FindAbandoned(ctx, cutoff)
+	if err != nil {
+		return err
+	}
+	for _, a := range found {
+		fmt.Fprintf(out, "would sweep: %s upload for %s\n", a.Kind, a.Key)
+	}
+	n, err := disk.SweepAbandoned(ctx, cutoff)
+	if err != nil {
+		return err
+	}
+	_, err = disk.ListParts(ctx, "videos/big.mp4", id)
+	fmt.Fprintf(out, "swept %d; the upload is now %s\n", n, filesystem.CodeOf(err))
+	return nil
+}

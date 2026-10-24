@@ -1,0 +1,11 @@
+func (c *Changelog) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	st, err := records.NewDDL(engine).CreateTable(records.Table{
+		Table: changes,
+		Columns: []ddl.ColumnSpec{
+			records.Column(changeScope, t.Key), records.Column(changeKind, t.Short),
+			records.Column(changeFileID, t.Key), records.Column(changeAt, t.Timestamp),
+		},
+	}).Statements()
+	return []records.Migration{{Owner: c.Name(), Name: "0001_changes", Statements: st}}, err
+}

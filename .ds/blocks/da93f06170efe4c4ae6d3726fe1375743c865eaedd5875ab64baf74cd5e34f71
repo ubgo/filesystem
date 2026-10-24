@@ -1,0 +1,8 @@
+func (a *App) Link(ctx context.Context, key string) (filesystem.SignedRequest, error) {
+	return a.Disk.SignedURL(ctx, key, filesystem.PresignOptions{
+		Method:             filesystem.MethodGet,
+		Expires:            linkLifetime,
+		ContentType:        "application/zip",
+		ContentDisposition: records.AttachmentDisposition(downloadName(key)),
+	})
+}

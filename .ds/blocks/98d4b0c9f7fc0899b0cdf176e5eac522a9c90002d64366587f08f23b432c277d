@@ -1,0 +1,16 @@
+func (a *app) openPhoto(w http.ResponseWriter, r *http.Request) {
+	f, err := a.store.File(r.Context(), currentUser(r), r.PathValue("id"))
+	if err == nil && f.DeletedAt != nil {
+		err = filesystem.Errorf(filesystem.CodeNotFound, "the photo is in the trash")
+	}
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	link, err := a.store.URL(r.Context(), f, linkLifetime)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	http.Redirect(w, r, link, http.StatusFound)
+}

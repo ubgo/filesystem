@@ -1,0 +1,28 @@
+# The upload schema from github.com/ubgo/filesystem/contrib/gqlgen. Copy it
+# into your schema directory, map the two types in gqlgen.yml:
+#
+#   models:
+#     Upload:
+#       model: github.com/99designs/gqlgen/graphql.Upload
+#     StoredUpload:
+#       model: github.com/ubgo/filesystem/upload.Result
+#
+# and receive each Upload argument with fsgql.Receive or fsgql.ReceiveRecord,
+# which run it through an upload.Policy.
+
+"A file sent with the GraphQL multipart request specification."
+scalar Upload
+
+"A file the server stored: its type is detected from its bytes, never taken from the client."
+type StoredUpload {
+  "Where the file is stored on the disk."
+  key: String!
+  "The client's file name, made safe, for display only."
+  filename: String!
+  "The type detected from the content."
+  contentType: String!
+  "The stored size in bytes."
+  size: Int!
+  "The hex SHA-256 of the stored bytes."
+  sha256: String!
+}

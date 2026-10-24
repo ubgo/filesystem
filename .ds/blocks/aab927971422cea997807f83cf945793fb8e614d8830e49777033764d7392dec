@@ -1,0 +1,25 @@
+func conditionalReadAndWrite(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	cached, err := disk.WriteBytes(ctx, docKey, []byte(`{"v":1}`), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	_, _, err = disk.ReadIf(ctx, docKey, filesystem.ReadOptions{IfNoneMatch: cached.ETag})
+	fmt.Fprintf(out, "read if changed: %s\n", filesystem.CodeOf(err))
+	next, err := disk.WriteBytes(ctx, docKey, []byte(`{"v":2}`), filesystem.WriteOptions{IfMatch: cached.ETag})
+	if err != nil {
+		return err
+	}
+	_, err = disk.WriteBytes(ctx, docKey, []byte(`{"v":3}`), filesystem.WriteOptions{IfMatch: cached.ETag})
+	fmt.Fprintf(out, "write with a stale etag: %s\n", filesystem.CodeOf(err))
+	rc, e, err := disk.ReadIf(ctx, docKey, filesystem.ReadOptions{IfNoneMatch: cached.ETag})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	b, err := io.ReadAll(rc)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "read if changed: %s (etag is the new one: %t)\n", b, e.ETag == next.ETag)
+	return nil
+}

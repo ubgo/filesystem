@@ -1,0 +1,7 @@
+func (d *Driver) Stat(ctx context.Context, key string) (filesystem.Entry, error) {
+	o, err := d.backend.Get(ctx, key)
+	if err != nil {
+		return filesystem.Entry{}, mapErr(err)
+	}
+	return entry(key, o), nil
+}

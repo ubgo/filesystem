@@ -1,0 +1,12 @@
+func (d *Driver) Read(ctx context.Context, key string, rng filesystem.ByteRange) (io.ReadCloser, error) {
+	o, err := d.backend.Get(ctx, key)
+	if err != nil {
+		return nil, mapErr(err)
+	}
+	size := int64(len(o.Data))
+	start, end := min(rng.Offset, size), size
+	if rng.Length > 0 {
+		end = min(start+rng.Length, size)
+	}
+	return io.NopCloser(bytes.NewReader(o.Data[start:end])), nil
+}

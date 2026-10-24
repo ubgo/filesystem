@@ -1,0 +1,7 @@
+func openWithDSN(ctx context.Context, addr, root string, creds credentials) (*filesystem.Disk, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(fssftp.Scheme, fssftp.Opener); err != nil {
+		return nil, err
+	}
+	return mux.Open(ctx, "partner", sftpDSN(addr, root, creds))
+}

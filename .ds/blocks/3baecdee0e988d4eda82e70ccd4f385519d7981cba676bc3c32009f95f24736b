@@ -1,0 +1,6 @@
+var uploadPolicy = upload.Policy{
+	MaxSize:    maxUpload,
+	Allowed:    []string{"image/*", "application/pdf", "video/mp4"},
+	Key:        upload.RandomKey("uploads"),
+	Visibility: filesystem.VisibilityPrivate,
+}

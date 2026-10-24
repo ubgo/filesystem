@@ -1,0 +1,17 @@
+func (a *App) list(w http.ResponseWriter, r *http.Request) {
+	customer, err := customerOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	attached, err := a.Store.Attachments(r.Context(), "", records.Owner{Type: ownerCustomer, ID: customer}, roleInvoices)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	out := make([]document, 0, len(attached))
+	for _, af := range attached {
+		out = append(out, document{ID: af.File.ID, Filename: af.File.Filename, ContentType: af.File.ContentType, Size: af.File.Size})
+	}
+	writeJSON(w, http.StatusOK, out)
+}

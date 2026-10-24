@@ -1,0 +1,7 @@
+func policyWith(s scan.Scanner) upload.Policy {
+	return upload.Policy{
+		MaxSize: maxUploadSize,
+		Allowed: []string{"text/plain", "application/pdf", "image/*"},
+		Inspect: scan.Inspect(s),
+	}
+}

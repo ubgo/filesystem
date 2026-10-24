@@ -1,0 +1,22 @@
+func newQuarantineStore(ctx context.Context, db *sql.DB, failure records.ScanFailure) (*records.Store, error) {
+	signer, err := signedurl.New("https://app.example.com/files", []signedurl.Key{{ID: "k1", Secret: []byte("0123456789abcdef0123456789abcdef")}})
+	if err != nil {
+		return nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithScanFailure(failure))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	return s, nil
+}

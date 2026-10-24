@@ -1,0 +1,4 @@
+type batchResponse struct {
+	Files  []stored             `json:"files"`
+	Failed []upload.FileFailure `json:"failed,omitempty"`
+}

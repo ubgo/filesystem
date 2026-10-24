@@ -1,0 +1,12 @@
+func uploadPolicy(scanner scan.Scanner) upload.Policy {
+	p := upload.Policy{
+		MaxSize:        maxUploadSize,
+		Allowed:        []string{"image/*", "application/pdf"},
+		MatchExtension: true,
+		Key:            upload.RandomKey(uploadDir),
+	}
+	if scanner != nil {
+		p.Inspect = scan.Inspect(scanner)
+	}
+	return p
+}

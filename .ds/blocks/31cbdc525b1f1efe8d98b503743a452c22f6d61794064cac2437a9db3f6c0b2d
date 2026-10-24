@@ -1,0 +1,15 @@
+func activity(ctx context.Context, s *records.Store, au *audit.Plugin, actor string) ([]audit.Entry, int, error) {
+	var all []audit.Entry
+	q := audit.Query{Scope: tenant, Actor: actor, Limit: activityPage}
+	for pages := 1; ; pages++ {
+		page, err := au.Entries(ctx, s, q)
+		if err != nil {
+			return nil, pages, err
+		}
+		all = append(all, page.Entries...)
+		if page.NextCursor == "" {
+			return all, pages, nil
+		}
+		q.Cursor = page.NextCursor
+	}
+}

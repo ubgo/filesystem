@@ -1,0 +1,6 @@
+var modes = map[string]imaging.Transform{
+	"fit":  {Mode: imaging.ModeFit, Width: box, Height: box, Format: imaging.FormatPNG},
+	"fill": {Mode: imaging.ModeFill, Width: box, Height: box, Format: imaging.FormatJPEG, Quality: 80},
+	"pad":  {Mode: imaging.ModePad, Width: box, Height: box, Format: imaging.FormatPNG},
+	"crop": {Mode: imaging.ModeFill, Width: box, Height: box, Format: imaging.FormatPNG, Crop: image.Rect(300, 0, 400, 100)},
+}

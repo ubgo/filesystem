@@ -1,0 +1,13 @@
+func readRange(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	rc, err := disk.ReadRange(ctx, greetingKey, filesystem.ByteRange{Offset: wordOffset, Length: wordLength})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	b, err := io.ReadAll(rc)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "range %d+%d: %q\n", wordOffset, wordLength, b)
+	return nil
+}

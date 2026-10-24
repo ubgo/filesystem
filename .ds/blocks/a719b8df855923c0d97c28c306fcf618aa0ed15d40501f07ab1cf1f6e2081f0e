@@ -1,0 +1,1 @@
+type bucketWide struct{ *memory.Driver }

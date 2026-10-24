@@ -1,0 +1,7 @@
+func newQuietLog(logger *slog.Logger) filesystem.Interceptor {
+	return layer.Log(logger, layer.LogOptions{
+		SuccessLevel:  slog.LevelInfo,
+		FailureLevel:  slog.LevelWarn,
+		NotFoundLevel: slog.LevelDebug,
+	})
+}

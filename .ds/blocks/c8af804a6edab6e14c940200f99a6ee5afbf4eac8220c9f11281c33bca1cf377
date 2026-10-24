@@ -1,0 +1,3 @@
+func webpPipeline() *imaging.Pipeline {
+	return imaging.NewPipeline(imaging.WithEncoder(webp.Encoder()), imaging.WithDecoder(webp.Decoder()))
+}

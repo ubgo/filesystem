@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim): \"ok add those to task\"\n\nContext: answering what \"accept the vendor picks\" means. I said the picks (Drive, Dropbox, OneDrive, Vercel Blob, Cloudinary; Google Cloud Vision for contrib/vision) stay, and suggested Box instead of or beside Dropbox, and AWS Rekognition or Azure AI Vision beside Google; contrib/vision has a backend interface, so a provider is one more sub-package.\n\nAcceptance: a sub-package beside contrib/vision/google implementing the same backend interface, tests against a fake server, README and docs.",
+  "commitment": "accepted",
+  "completed_at": null,
+  "created_at": "2026-10-08T11:42:19.725876000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11b52484d7d61a3a18cb70ccdcb77",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "low",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "todo",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "contrib/vision/rekognition: AWS Rekognition backend",
+  "updated_at": "2026-10-08T11:42:19.725876000Z"
+}

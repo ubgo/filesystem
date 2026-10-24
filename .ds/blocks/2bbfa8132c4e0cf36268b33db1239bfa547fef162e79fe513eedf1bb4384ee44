@@ -1,0 +1,16 @@
+func writeWithMetadata(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	_, err := disk.WriteBytes(ctx, "reports/q3.csv", []byte("month,total\njuly,42\n"), filesystem.WriteOptions{
+		ContentType: "text/csv",
+		Metadata:    map[string]string{"owner": "finance"},
+		Headers:     filesystem.HTTPHeaders{ContentDisposition: `attachment; filename="q3.csv"`},
+	})
+	if err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "reports/q3.csv")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stat: %s %s owner=%s disposition=%s\n", e.Key, e.ContentType, e.Metadata["owner"], e.Headers.ContentDisposition)
+	return nil
+}

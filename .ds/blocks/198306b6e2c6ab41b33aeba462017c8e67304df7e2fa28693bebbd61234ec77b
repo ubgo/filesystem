@@ -1,0 +1,11 @@
+func (p *Plugin) Release(ctx context.Context, s *records.Store, scope, fileID string) error {
+	del := sqlb.NewDelete(s.Dialect()).From(Table).Where(sqlb.Eq(Scope, scope), sqlb.Eq(FileID, fileID))
+	n, err := s.Exec(ctx, del)
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return filesystem.Errorf(filesystem.CodeNotFound, "%s: file %s is not held", PluginName, fileID)
+	}
+	return nil
+}

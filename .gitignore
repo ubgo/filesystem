@@ -1,0 +1,28 @@
+# BEGIN repolink (managed — do not edit)
+/CLAUDE.md
+/MISSION.md
+/docsi
+# END repolink
+
+# lore (LORE.md is agent guidance for the private, repolinked project notes)
+.lore/LORE.md
+.lore/lore.db
+.lore/lore.db-shm
+.lore/lore.db-wal
+.lore/state/
+.lore/backups/
+
+# coverage output (task cover)
+.cover/
+
+# macOS Finder metadata
+.DS_Store
+
+# files the examples write when run from examples/ (start-install uses file:storage)
+examples/storage/
+
+# the binaries `go build` leaves in cmd/fs and the example modules with a main package at their root
+/cmd/fs/fs
+/examples/imaging-codecs/imaging-codecs
+/examples/pickers-import/pickers-import
+/examples/remote-media/remote-media

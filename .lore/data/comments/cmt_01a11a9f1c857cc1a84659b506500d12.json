@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Shipped: Config.SSEKMSKeyFor(key) resolver (per tenant prefix on a shared disk) + RequestOptions.SSEKMSKeyID (per write); per-disk SSEKMSKeyID already existed. Tests: adapters/s3/kms_tenant_test.go (break-verified). Docs: docs/adapters/s3.md 'One KMS key per tenant on a shared disk', adapters/s3/README.md.",
+  "created_at": "2026-10-08T08:26:37.573828000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a11a81604074f5a9516e8d3b1dd6a1",
+  "entity_table": "tasks",
+  "id": "cmt_01a11a9f1c857cc1a84659b506500d12",
+  "updated_at": "2026-10-08T08:26:37.573828000Z"
+}

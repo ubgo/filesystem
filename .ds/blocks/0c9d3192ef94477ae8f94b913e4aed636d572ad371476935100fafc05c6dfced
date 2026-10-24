@@ -1,0 +1,3 @@
+func edit(ctx context.Context, s *records.Store, f records.File, body string) (records.File, error) {
+	return s.Replace(ctx, tenant, f.ID, strings.NewReader(body), "", textPolicy)
+}

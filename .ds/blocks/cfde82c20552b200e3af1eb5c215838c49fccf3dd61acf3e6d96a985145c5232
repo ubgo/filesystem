@@ -1,0 +1,13 @@
+func escapeUnstorable(out io.Writer) error {
+	esc := filesystem.KeyEscaper{Chars: `:*?<>|"`, SegmentEnd: ". "}
+	key := "reports/Q3: draft?.txt"
+	name := esc.EncodeKey(key)
+	back, err := esc.DecodeKey(name)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "escaped %q -> %q -> %q\n", key, name, back)
+	_, err = esc.DecodeKey("reports/%41.txt")
+	fmt.Fprintf(out, "decode a name never written: %s\n", filesystem.CodeOf(err))
+	return nil
+}

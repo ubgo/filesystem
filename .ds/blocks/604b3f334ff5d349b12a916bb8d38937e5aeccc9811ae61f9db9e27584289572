@@ -1,0 +1,22 @@
+func unicodeSpellings(ctx context.Context, out io.Writer) error {
+	const decomposed, composed = "cafe\u0301.txt", "caf\u00e9.txt"
+	for _, normalise := range []bool{false, true} {
+		var opts []filesystem.Option
+		if normalise {
+			opts = append(opts, filesystem.WithKeyNormalizer(keynorm.NFC))
+		}
+		disk, err := filesystem.NewDisk("media", memory.New(), opts...)
+		if err != nil {
+			return err
+		}
+		if _, err := disk.WriteBytes(ctx, decomposed, []byte("menu"), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+		ok, err := disk.Exists(ctx, composed)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "NFC normaliser %t: composed spelling found: %t\n", normalise, ok)
+	}
+	return nil
+}

@@ -1,0 +1,19 @@
+func newStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, *versions.Plugin, *quota.Plugin, error) {
+	v, err := versions.New(versions.WithKeep(keep))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	q, err := quota.New(unlimited)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithVisibilityDisks(publicDisk, privateDisk), records.WithPlugins(v, q))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, nil, err
+	}
+	return s, v, q, nil
+}

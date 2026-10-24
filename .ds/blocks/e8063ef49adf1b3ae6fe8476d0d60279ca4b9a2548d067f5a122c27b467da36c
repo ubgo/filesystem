@@ -1,0 +1,36 @@
+func bearerTokens(ctx context.Context, a *app, out io.Writer) error {
+	if _, err := a.private.WriteBytes(ctx, "reports/q3.pdf", []byte("quarterly"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	disks, err := filesystem.NewManager(a.private)
+	if err != nil {
+		return err
+	}
+	tokens := &tokenStore{claims: map[string]signedurl.Claims{}}
+	srv := httptest.NewServer(fshttp.Signed(disks, bearer{tokens}))
+	defer srv.Close()
+	grant := signedurl.Claims{Disk: "private", Key: "reports/q3.pdf", Method: filesystem.MethodGet, ExpiresAt: time.Now().Add(linkLifetime)}
+	put := grant
+	put.Method = filesystem.MethodPut
+	old := grant
+	old.ExpiresAt = time.Now().Add(-time.Minute)
+	for _, c := range []struct {
+		label, token string
+	}{
+		{"with its token", tokens.issue(grant)},
+		{"without a token", ""},
+		{"with an upload token", tokens.issue(put)},
+		{"with an expired token", tokens.issue(old)},
+	} {
+		h := http.Header{}
+		if c.token != "" {
+			h.Set(bearerHeader, "Bearer "+c.token)
+		}
+		resp, body, err := fetch(http.MethodGet, srv.URL+"/any/path", nil, h)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "bearer GET %s: %d %q\n", c.label, resp.StatusCode, strings.TrimSpace(body))
+	}
+	return nil
+}

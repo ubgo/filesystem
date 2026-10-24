@@ -1,0 +1,7 @@
+func openCache(dir string) (*filesystem.Disk, error) {
+	drv, err := local.New(dir, local.WithDurability(cacheDurability))
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("cache", drv)
+}

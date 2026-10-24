@@ -1,0 +1,3 @@
+func register(ctx context.Context, s *records.Store, wh *webhooks.Plugin, url string) (webhooks.Endpoint, error) {
+	return wh.AddEndpoint(ctx, s, tenant, url, records.EventFileCreated, records.EventFilePurged)
+}

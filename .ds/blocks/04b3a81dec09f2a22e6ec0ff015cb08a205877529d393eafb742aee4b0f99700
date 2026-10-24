@@ -1,0 +1,17 @@
+func listFolder(ctx context.Context, s *records.Store, fp *folders.Plugin, folder string) ([]string, int, error) {
+	var names []string
+	q := records.FileQuery{Scope: tenant, Limit: folderPage}
+	for pages := 1; ; pages++ {
+		page, err := fp.Files(ctx, s, folder, q)
+		if err != nil {
+			return nil, pages, err
+		}
+		for _, f := range page.Files {
+			names = append(names, f.Filename)
+		}
+		if page.NextCursor == "" {
+			return names, pages, nil
+		}
+		q.Cursor = page.NextCursor
+	}
+}

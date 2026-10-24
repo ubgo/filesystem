@@ -1,0 +1,15 @@
+func (b boxSource) Stat(ctx context.Context, c *http.Client, p pickers.Pick) (pickers.File, error) {
+	if !boxIDPattern.MatchString(p.ID) {
+		return pickers.File{}, filesystem.Errorf(filesystem.CodeInvalidArgument, "box: malformed file ID")
+	}
+	resp, err := get(ctx, c, b.API+"/files/"+p.ID)
+	if err != nil {
+		return pickers.File{}, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	var meta boxFile
+	if err := json.NewDecoder(io.LimitReader(resp.Body, maxBoxMeta)).Decode(&meta); err != nil {
+		return pickers.File{}, filesystem.Errorf(filesystem.CodeUnavailable, "box: unreadable metadata")
+	}
+	return pickers.File{Name: meta.Name, Size: meta.Size}, nil
+}

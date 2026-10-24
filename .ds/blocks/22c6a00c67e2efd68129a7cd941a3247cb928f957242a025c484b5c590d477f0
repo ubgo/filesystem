@@ -1,0 +1,6 @@
+func keepAuthorship() upload.Processor {
+	return imaging.Optimize(imaging.Options{}, imaging.OptimizeOptions{
+		Quality:      80,
+		KeepMetadata: []imaging.Metadata{imaging.MetadataCopyright, imaging.MetadataEXIFCopyright},
+	})
+}

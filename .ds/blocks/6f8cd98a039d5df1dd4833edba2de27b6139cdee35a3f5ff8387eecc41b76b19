@@ -1,0 +1,14 @@
+func hlsLadder(ctx context.Context, disk *filesystem.Disk, f records.File, written *[]string) (string, error) {
+	src, err := disk.Read(ctx, f.Key)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = src.Close() }()
+	dir := hlsDir(f)
+	err = tool.HLS(ctx, src, video.HLS{Renditions: ladder}, func(ctx context.Context, name, contentType string, body io.Reader) error {
+		*written = append(*written, name)
+		_, err := disk.Write(ctx, dir+name, body, filesystem.WriteOptions{ContentType: contentType})
+		return err
+	})
+	return dir + video.HLSMaster, err
+}

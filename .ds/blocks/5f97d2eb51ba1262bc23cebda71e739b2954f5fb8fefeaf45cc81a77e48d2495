@@ -1,0 +1,3 @@
+func newUploadHandler(disk *filesystem.Disk, sessions *upload.Sessions) http.Handler {
+	return upload.Handler(disk, endpoint, upload.HandlerOptions{Resolve: sessions.Resolver()})
+}

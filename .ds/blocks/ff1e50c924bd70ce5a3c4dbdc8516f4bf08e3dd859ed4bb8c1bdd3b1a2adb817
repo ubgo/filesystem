@@ -1,0 +1,6 @@
+func appContentType(key string) string {
+	if t, ok := appTypes[strings.ToLower(path.Ext(key))]; ok {
+		return t
+	}
+	return sniff.TypeByExtension(key)
+}

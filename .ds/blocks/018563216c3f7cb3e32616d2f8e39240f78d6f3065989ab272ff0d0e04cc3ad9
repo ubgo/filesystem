@@ -1,0 +1,22 @@
+func storeEverything(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	_, err := disk.WriteBytes(ctx, "thumbs/1.json", []byte(`{"w":64}`), filesystem.WriteOptions{
+		Visibility:  filesystem.VisibilityPublic,
+		Metadata:    map[string]string{"source": "1.png"},
+		Headers:     filesystem.HTTPHeaders{CacheControl: "public, max-age=60"},
+		IfNotExists: true,
+	})
+	if err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "thumbs/1.json")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stat: %s %s %s source=%s cache-control=%q at %s\n",
+		e.Key, e.ContentType, e.Visibility, e.Metadata["source"], e.Headers.CacheControl, e.ModTime.Format(time.RFC3339))
+	_, err = disk.WriteBytes(ctx, "thumbs/1.json", []byte("{}"), filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "second conditional write: %s\n", filesystem.CodeOf(err))
+	_, err = disk.SignedURL(ctx, "thumbs/1.json", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Minute})
+	fmt.Fprintf(out, "signed URL without a signer: %s\n", filesystem.CodeOf(err))
+	return nil
+}

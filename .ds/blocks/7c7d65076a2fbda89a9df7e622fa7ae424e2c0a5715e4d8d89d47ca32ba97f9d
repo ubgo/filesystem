@@ -1,0 +1,16 @@
+func openDisks(ctx context.Context, lookup filesystem.LookupFunc, signer *signedurl.Signer, chain []filesystem.Interceptor) (*filesystem.Manager, error) {
+	mux, err := newMux()
+	if err != nil {
+		return nil, err
+	}
+	disks, err := mux.OpenManager(ctx, envStoragePrefix, lookup, filesystem.WithURLSigner(signer), filesystem.WithInterceptors(chain...))
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, checkTimeout)
+	defer cancel()
+	if err := disks.Check(ctx); err != nil {
+		return nil, errors.Join(err, disks.Close())
+	}
+	return disks, nil
+}

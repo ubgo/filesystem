@@ -1,0 +1,3 @@
+func uploadDedup(ctx context.Context, s *records.Store, filename, body string) (records.File, error) {
+	return s.Upload(ctx, tenant, diskName, strings.NewReader(body), filename, notesPolicy, records.Dedup())
+}

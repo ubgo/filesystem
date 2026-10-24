@@ -1,0 +1,31 @@
+func acceptFastStoreLater(ctx context.Context, out io.Writer) error {
+	staging, err := mem("staging")
+	if err != nil {
+		return err
+	}
+	store, err := mem("store")
+	if err != nil {
+		return err
+	}
+	p := upload.Policy{MaxSize: 1 << 20, Allowed: []string{"image/*"}, Key: upload.RandomKey(pendingDir)}
+	res, err := upload.Receive(ctx, staging, strings.NewReader(pngFile), "photo.png", p)
+	if err != nil {
+		return err
+	}
+	key := strings.TrimPrefix(res.Key, pendingDir+"/")
+	_, before, err := readEither(ctx, store, staging, key)
+	if err != nil {
+		return err
+	}
+	promote := jobs.Promote(staging, pendingDir, store, minAge)
+	r, err := promote.Run(ctx, later)
+	if err != nil {
+		return err
+	}
+	_, after, err := readEither(ctx, store, staging, key)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "before promote: read from %s; %s moved %d; after: read from %s\n", before, promote.Name, r.Count, after)
+	return nil
+}

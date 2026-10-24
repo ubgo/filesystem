@@ -1,0 +1,29 @@
+func faults(ctx context.Context, out io.Writer) error {
+	always := layer.Fault(layer.FaultOptions{Rate: 1, Seed: faultSeed})
+	bare, err := filesystem.NewDisk("media", memory.New(), filesystem.WithInterceptors(always))
+	if err != nil {
+		return err
+	}
+	_, err = bare.WriteBytes(ctx, "a.txt", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "fault without retry: %s\n", filesystem.CodeOf(err))
+	attempts := 0
+	count := func(ctx context.Context, op *filesystem.Op, call filesystem.Call) error {
+		attempts++
+		return call(ctx)
+	}
+	disk, err := filesystem.NewDisk("media", memory.New(), filesystem.WithInterceptors(
+		layer.Retry(layer.RetryOptions{Attempts: 10, Sleep: noWait}),
+		count,
+		layer.Fault(layer.FaultOptions{Rate: faultRate, Seed: faultSeed, Ops: []filesystem.OpKind{filesystem.OpWrite}}),
+	))
+	if err != nil {
+		return err
+	}
+	for i := range faultWrites {
+		if _, err := disk.WriteBytes(ctx, fmt.Sprintf("f%d.txt", i), []byte("x"), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	fmt.Fprintf(out, "fault inside retry: %d writes stored in %d attempts\n", faultWrites, attempts)
+	return nil
+}

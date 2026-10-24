@@ -1,0 +1,11 @@
+func parseSigningKeys(raw string) ([]signedurl.Key, error) {
+	var keys []signedurl.Key
+	for item := range strings.SplitSeq(raw, keyListSeparator) {
+		id, secret, ok := strings.Cut(strings.TrimSpace(item), keyIDSeparator)
+		if !ok || id == "" || secret == "" {
+			return nil, fmt.Errorf("%s: each key is id%ssecret", envSigningKeys, keyIDSeparator)
+		}
+		keys = append(keys, signedurl.Key{ID: id, Secret: []byte(secret)})
+	}
+	return keys, nil
+}

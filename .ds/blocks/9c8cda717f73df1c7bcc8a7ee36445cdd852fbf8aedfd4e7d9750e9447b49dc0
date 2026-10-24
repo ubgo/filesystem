@@ -1,0 +1,11 @@
+func uploadAndMeasure(ctx context.Context, s *records.Store, name string, body []byte) (records.File, string, error) {
+	f, err := s.Upload(ctx, tenant, diskName, bytes.NewReader(body), name, policy)
+	if err != nil {
+		return records.File{}, "", err
+	}
+	w, h, ok := dimensions.Of(f)
+	if !ok {
+		return f, "no dimensions", nil
+	}
+	return f, fmt.Sprintf("%dx%d", w, h), nil
+}

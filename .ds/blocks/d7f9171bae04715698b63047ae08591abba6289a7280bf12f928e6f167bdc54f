@@ -1,0 +1,11 @@
+func (p *Plugin) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	create := "CREATE TABLE IF NOT EXISTS " + TableNameHolds + " (" +
+		ColScope + " " + t.Key + " NOT NULL, " +
+		ColFileID + " " + t.Key + " NOT NULL, " +
+		ColReason + " " + t.Text + " NOT NULL, " +
+		ColHeldBy + " " + t.Key + " NOT NULL, " +
+		ColHeldAt + " " + t.Timestamp + " NOT NULL, " +
+		"PRIMARY KEY (" + ColScope + ", " + ColFileID + "))" + t.TableSuffix
+	return []records.Migration{{Owner: PluginName, Name: "0001_legal_holds", Statements: []string{create}}}, nil
+}

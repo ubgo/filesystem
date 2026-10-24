@@ -1,0 +1,9 @@
+func newDisk(drv filesystem.Driver, logger *slog.Logger, ops, written *expvar.Map) (*filesystem.Disk, error) {
+	return filesystem.NewDisk(diskName, drv, filesystem.WithInterceptors(
+		layer.Observe(record(ops, written)),
+		layer.Log(logger),
+		layer.Retry(layer.RetryOptions{}),
+		layer.Timeout(opTimeout),
+		layer.Limit(maxConcurrent),
+	))
+}

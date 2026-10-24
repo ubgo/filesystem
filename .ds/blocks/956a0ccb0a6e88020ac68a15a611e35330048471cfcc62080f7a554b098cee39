@@ -1,0 +1,19 @@
+func stripMetadata(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	photo, err := photoWithPayload()
+	if err != nil {
+		return err
+	}
+	p := images
+	p.Process = imaging.Sanitize(imaging.Options{})
+	res, err := upload.Receive(ctx, disk, bytes.NewReader(photo), "holiday.jpg", p)
+	if err != nil {
+		return err
+	}
+	stored, err := disk.ReadAll(ctx, res.Key)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "sanitized %s: payload in upload %t, payload stored %t\n",
+		res.ContentType, bytes.Contains(photo, []byte(smuggled)), bytes.Contains(stored, []byte(smuggled)))
+	return nil
+}

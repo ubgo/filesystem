@@ -1,0 +1,10 @@
+func signAvatarForm(ctx context.Context, disk *filesystem.Disk, dir string) (filesystem.PresignedPost, error) {
+	return disk.PresignPost(ctx, filesystem.PostPolicy{
+		KeyPrefix:   dir,
+		ContentType: avatarType,
+		MinSize:     1,
+		MaxSize:     avatarMaxSize,
+		Expires:     formLifetime,
+		Headers:     filesystem.HTTPHeaders{CacheControl: avatarCacheFor},
+	})
+}

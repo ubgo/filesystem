@@ -1,0 +1,31 @@
+func (a *App) receive(ctx context.Context, user string, mr *multipart.Reader) (batchResponse, error) {
+	resp := batchResponse{Files: []stored{}}
+	for {
+		part, err := mr.NextPart()
+		if errors.Is(err, io.EOF) {
+			return resp, nil
+		}
+		if err != nil {
+			return resp, requestError(err)
+		}
+		if part.FormName() != formField || part.FileName() == "" {
+			_ = part.Close()
+			continue
+		}
+		if len(resp.Files)+len(resp.Failed) == maxFilesPerRequest {
+			_ = part.Close()
+			return resp, filesystem.Errorf(filesystem.CodeInvalidArgument, "more than %d files", maxFilesPerRequest)
+		}
+		s, err := a.storeOne(ctx, user, part, part.FileName())
+		_ = part.Close()
+		var mbe *http.MaxBytesError
+		switch {
+		case err == nil:
+			resp.Files = append(resp.Files, s)
+		case errors.As(err, &mbe):
+			return resp, requestError(err)
+		default:
+			resp.Failed = append(resp.Failed, upload.FileFailure{Filename: s.Filename, Error: clientMessage(err), Code: filesystem.CodeOf(err)})
+		}
+	}
+}

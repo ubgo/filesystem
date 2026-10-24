@@ -1,0 +1,37 @@
+func report(ctx context.Context, out io.Writer, disk *filesystem.Disk, f records.File) error {
+	fmt.Fprintf(out, "%s (%s)\n", f.Filename, f.ContentType)
+	if f.Status == records.StatusFailed {
+		fmt.Fprintf(out, "  failed    %s\n", f.StatusDetail)
+	}
+	if m, ok := pdf.Of(f); ok {
+		fmt.Fprintf(out, "  pages     %d\n", m.Pages)
+		if m.Title != "" {
+			fmt.Fprintf(out, "  title     %s\n", m.Title)
+		}
+	}
+	if _, ok := pdf.PreviewKey(f); ok {
+		fmt.Fprintln(out, "  preview   stored")
+	}
+	key, ok := pdf.TextKey(f)
+	if !ok {
+		key, ok = ocr.TextKey(f)
+	}
+	if !ok {
+		fmt.Fprintln(out, "  text      none")
+		return nil
+	}
+	text, err := disk.ReadAll(ctx, key)
+	if err != nil {
+		return err
+	}
+	how := "text layer"
+	if f.Metadata[pdf.MetaTextOCR] == "true" || strings.HasPrefix(key, f.Key+ocr.TextInfix) {
+		how = "OCR"
+	}
+	line := strings.Join(strings.Fields(string(text)), " ")
+	if len(line) > excerpt {
+		line = line[:excerpt] + "..."
+	}
+	fmt.Fprintf(out, "  text      %d bytes (%s): %s\n", len(text), how, line)
+	return nil
+}

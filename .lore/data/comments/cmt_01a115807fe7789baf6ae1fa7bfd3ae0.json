@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Done 2026-10-07. GCS: CompareAndSwap (generation precondition), Holder (temporary hold + retention, RetainFor/RetentionMode), StorageClass per disk + Driver.SetStorageClass (rewrite), Versions/ReadVersion/RestoreVersion (Config.Versioned), CSEK CustomerKey (redacted, disables Presign), ObjectInfo (class, CRC32C, MD5, generation); DSN storage_class, versioned, customer_key_env. Tags and Restore not declared (GCS has none / all classes online), documented. Azure: Tagger (blob index tags), Appender (append blobs, MaxAppendBlock 4 MiB), CompareAndSwap (If-Match commit, swapLost), Holder (legal hold + immutability policy, RetainFor), AccessTier per disk + SetAccessTier, Restorer (rehydrate, ErrArchived as CodeConflict), Versions/ReadVersion/RestoreVersion, CPK CustomerKey, ValidateCRC64, ObjectInfo; DSN access_tier, versioned, customer_key_env. Tests: adapters/gcs/advanced_test.go, adapters/azure/advanced_test.go (scripted Blob service for what Azurite lacks), conformance on fake-gcs and Azurite (task test:azure green, 94.9%). Every check break-verified. Needs real account: GCS hold/retention enforcement, CSEK decryption; Azure CPK, holds, immutability, versions, rehydration. Open: core DriverAs to reach driver extras from DSN-opened disks.",
+  "created_at": "2026-10-07T08:35:05.319549000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a1151fb80c7dafa20776a535893b00",
+  "entity_table": "tasks",
+  "id": "cmt_01a115807fe7789baf6ae1fa7bfd3ae0",
+  "updated_at": "2026-10-07T08:35:05.319550000Z"
+}

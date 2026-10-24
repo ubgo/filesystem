@@ -1,0 +1,20 @@
+func newRoute() (*filesystem.Disk, *filesystem.Disk, error) {
+	root, err := mem("default")
+	if err != nil {
+		return nil, nil, err
+	}
+	avatars, err := mem("avatars", filesystem.WithPublicURL(cdnBase))
+	if err != nil {
+		return nil, nil, err
+	}
+	exports, err := mem("exports")
+	if err != nil {
+		return nil, nil, err
+	}
+	disk, err := filesystem.Route("app", []filesystem.Mount{
+		{Disk: root}, // "" is the catch-all
+		{Prefix: "avatars", Disk: avatars},
+		{Prefix: "exports", Disk: exports},
+	})
+	return disk, avatars, err
+}

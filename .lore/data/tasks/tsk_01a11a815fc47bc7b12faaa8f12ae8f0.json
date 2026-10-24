@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  first docuent all thse tasks or deicon we will check\n\nContext:\n  Found by the feature-status page (the internal audit notes) as an open item from the internal notes with no lore task.\n\nAcceptance:\n  Owner confirms the current rule or picks another; records/locks and its docs match.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T15:16:06.072904000Z",
+  "created_at": "2026-10-08T07:54:08.708764000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a815fc47bc7b12faaa8f12ae8f0",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Decide: should locks block Trash and Purge (today they do; only PurgeScope bypasses)",
+  "updated_at": "2026-10-08T15:16:06.072906000Z"
+}

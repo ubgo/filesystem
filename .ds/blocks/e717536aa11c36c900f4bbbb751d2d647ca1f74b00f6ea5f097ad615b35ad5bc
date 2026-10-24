@@ -1,0 +1,22 @@
+func (a *App) buildArchive(ctx context.Context, w io.Writer, userID string) error {
+	profile, err := a.Data.Profile(ctx, userID)
+	if err != nil {
+		return err
+	}
+	orders, err := a.Data.Orders(ctx, userID)
+	if err != nil {
+		return err
+	}
+	zw := zip.NewWriter(w)
+	pw, err := zw.Create("profile.json")
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(pw).Encode(profile); err != nil {
+		return err
+	}
+	if err := writeOrders(zw, orders); err != nil {
+		return err
+	}
+	return zw.Close()
+}

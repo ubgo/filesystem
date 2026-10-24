@@ -1,0 +1,39 @@
+func regionsAndDomains(ctx context.Context, out io.Writer) error {
+	buckets := map[string]*memory.Driver{}
+	mux, err := regionalMux(buckets)
+	if err != nil {
+		return err
+	}
+	disks, err := filesystem.NewManager()
+	if err != nil {
+		return err
+	}
+	for _, t := range tenantConfigs {
+		d, err := openTenant(ctx, mux, t)
+		if err != nil {
+			return err
+		}
+		if err := disks.Add(d); err != nil {
+			return err
+		}
+	}
+	for _, t := range tenantConfigs {
+		d, err := disks.Disk(t.Name)
+		if err != nil {
+			return err
+		}
+		if _, err := d.WriteBytes(ctx, "logo.png", []byte(t.Name), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+		link, err := d.PublicURL(ctx, "logo.png")
+		if err != nil {
+			return err
+		}
+		stored, err := buckets[t.Bucket].Stat(ctx, filesystem.JoinKey(tenantsDir, t.Name, "logo.png"))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "%s: stored in %s as %s, served at %s\n", t.Name, t.Bucket, stored.Key, link)
+	}
+	return nil
+}

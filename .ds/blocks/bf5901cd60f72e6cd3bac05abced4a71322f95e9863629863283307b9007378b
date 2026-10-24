@@ -1,0 +1,21 @@
+func promote(ctx context.Context, s *records.Store) (int, error) {
+	moved := 0
+	for {
+		page, err := s.Files(ctx, records.FileQuery{
+			Scope:   tenant,
+			Filters: []sqlb.Predicate{sqlb.Eq(records.FileDisk, incoming)},
+		})
+		if err != nil {
+			return moved, err
+		}
+		if len(page.Files) == 0 {
+			return moved, nil
+		}
+		for _, f := range page.Files {
+			if _, err := s.MoveFile(ctx, tenant, f.ID, kept); err != nil {
+				return moved, fmt.Errorf("promote %s: %w", f.ID, err)
+			}
+			moved++
+		}
+	}
+}

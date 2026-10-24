@@ -1,0 +1,21 @@
+func directories(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	if err := disk.MakeDir(ctx, "returns/2026"); err != nil {
+		return err
+	}
+	made, err := disk.DirExists(ctx, "returns/2026")
+	if err != nil {
+		return err
+	}
+	if _, err := disk.Write(ctx, "returns/2026/r1.csv", strings.NewReader("id\n7\n"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	if err := disk.Delete(ctx, "returns/2026/r1.csv"); err != nil {
+		return err
+	}
+	kept, err := disk.DirExists(ctx, "returns")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "made returns/2026: exists=%t; after deleting its only file, returns exists=%t\n", made, kept)
+	return nil
+}

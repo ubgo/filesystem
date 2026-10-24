@@ -1,0 +1,11 @@
+func (a *App) image(ctx context.Context, f records.File) (productImage, error) {
+	thumb, err := a.Variants.URL(ctx, a.Store, f.Scope, f.ID, sizeThumb, linkLifetime)
+	if err != nil {
+		return productImage{}, err
+	}
+	card, err := a.Variants.URL(ctx, a.Store, f.Scope, f.ID, sizeCard, linkLifetime)
+	if err != nil {
+		return productImage{}, err
+	}
+	return productImage{FileID: f.ID, Thumb: thumb, Card: card, Zoom: variantsPrefix + f.ID + "/" + sizeZoom}, nil
+}

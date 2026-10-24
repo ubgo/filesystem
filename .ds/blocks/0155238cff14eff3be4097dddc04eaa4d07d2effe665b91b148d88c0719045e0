@@ -1,0 +1,8 @@
+func withUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if user := r.Header.Get(headerUser); user != "" {
+			r = r.WithContext(records.WithActor(r.Context(), user))
+		}
+		next.ServeHTTP(w, r)
+	})
+}

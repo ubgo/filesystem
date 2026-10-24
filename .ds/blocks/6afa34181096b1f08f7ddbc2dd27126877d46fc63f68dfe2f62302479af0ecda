@@ -1,0 +1,16 @@
+func newRecordsHandler(store *records.Store) (http.Handler, error) {
+	return recordshttp.Handler(recordshttp.Config{
+		Store:  store,
+		Disk:   diskMedia,
+		Policy: policy,
+		Scope: func(r *http.Request) (string, error) {
+			if r.Header.Get(headerUser) == "" {
+				return "", errSignedOut
+			}
+			return tenant, nil
+		},
+		Authorize: func(r *http.Request, _ recordshttp.Action, t recordshttp.Target) error {
+			return authorize(r.Context(), store, r.Header.Get(headerUser), t)
+		},
+	})
+}

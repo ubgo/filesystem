@@ -1,0 +1,13 @@
+func (a *App) store(ctx context.Context, key, userID string) error {
+	pr, pw := io.Pipe()
+	go func() { pw.CloseWithError(a.buildArchive(ctx, pw, userID)) }()
+	opts := filesystem.WriteOptions{ContentType: "application/zip", IfNotExists: true, MaxSize: maxExportBytes}
+	if a.Disk.Capabilities().Headers {
+		opts.Headers.ContentDisposition = records.AttachmentDisposition(downloadName(key))
+	}
+	_, err := a.Disk.Write(ctx, key, pr, opts)
+	// Unblocks the producer if Write stopped reading early (refused,
+	// too large, or the object already existed).
+	pr.CloseWithError(err)
+	return err
+}

@@ -1,0 +1,18 @@
+func largeBody(ctx context.Context, out io.Writer, d drive, disk *filesystem.Disk) error {
+	body := bytes.Repeat([]byte("0123456789abcdef"), largeSize/16)
+	// io.MultiReader hides the length, as an HTTP request body does, so
+	// the driver cannot know the size up front.
+	before := d.chunks()
+	e, err := disk.Write(ctx, "backups/large.bin", io.MultiReader(bytes.NewReader(body)), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	got, err := disk.ReadAll(ctx, "backups/large.bin")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "%s: large body %d bytes in %d session requests, read back identical=%t\n", d.name, e.Size, d.chunks()-before, bytes.Equal(got, body))
+	_, err = disk.Write(ctx, "backups/large.bin", io.MultiReader(bytes.NewReader(body)), filesystem.WriteOptions{IfMatch: e.ETag})
+	fmt.Fprintf(out, "%s: IfMatch on a large body: %s\n", d.name, outcome(err))
+	return nil
+}

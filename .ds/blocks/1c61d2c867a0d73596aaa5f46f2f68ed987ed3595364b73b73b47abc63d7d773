@@ -1,0 +1,8 @@
+func replacePhoto(ctx context.Context, s *records.Store, fileID string, w, h int) error {
+	data, err := makePNG(w, h)
+	if err != nil {
+		return err
+	}
+	_, err = s.Replace(ctx, tenant, fileID, bytes.NewReader(data), "", photoPolicy)
+	return err
+}

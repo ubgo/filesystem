@@ -1,0 +1,7 @@
+func diskFor(_ *http.Request, t recordshttp.Target) (string, error) {
+	name, ok := tenantDisks[t.Scope]
+	if !ok {
+		return "", filesystem.Errorf(filesystem.CodePermission, "no storage configured for this workspace")
+	}
+	return name, nil
+}

@@ -1,0 +1,9 @@
+func newPolicyHandler(s *records.Store, p *share.Plugin) http.Handler {
+	return share.Handler(s, p,
+		share.WithAccessCheck(membersOnly),
+		share.WithDeliver(brandedPage),
+		share.WithErrors(linkErrors),
+		share.WithUploads(diskName, docPolicy),
+		share.WithUploadPolicy(portalPolicy),
+	)
+}

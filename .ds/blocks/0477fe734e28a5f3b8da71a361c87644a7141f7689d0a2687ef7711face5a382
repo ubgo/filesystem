@@ -1,0 +1,27 @@
+func New(ctx context.Context, dataDir, publicBase string) (*App, error) {
+	disks, disk, err := openDisk(dataDir, publicBase)
+	if err != nil {
+		return nil, err
+	}
+	v, err := newVariants()
+	if err != nil {
+		return nil, err
+	}
+	store, err := openStore(ctx, dataDir, disks, v)
+	if err != nil {
+		return nil, err
+	}
+	api, err := galleryAPI(store)
+	if err != nil {
+		return nil, err
+	}
+	app := &App{Store: store, Variants: v}
+	mux := http.NewServeMux()
+	mux.Handle("/api/", http.StripPrefix("/api", api))
+	mux.HandleFunc("GET /products/{id}", app.product)
+	mux.HandleFunc("DELETE /products/{id}/images/{fileID}", app.removeImage)
+	mux.Handle(variantsPrefix, http.StripPrefix(variantsPrefix, variants.Handler(store, v, catalogScope, variants.HandlerOptions{})))
+	mux.Handle(publicPrefix+"/", http.StripPrefix(publicPrefix, fshttp.Public(disk)))
+	app.Handler = mux
+	return app, nil
+}

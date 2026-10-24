@@ -1,0 +1,7 @@
+func openWithNew(dir string) (*filesystem.Disk, error) {
+	drv, err := local.New(dir, local.WithPermissions(filePublic, filePrivate, dirMode))
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("uploads", drv)
+}

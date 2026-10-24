@@ -1,0 +1,10 @@
+func refuseMarked(ctx context.Context, disk *filesystem.Disk, r upload.Result) error {
+	b, err := disk.ReadAll(ctx, r.Key)
+	if err != nil {
+		return err
+	}
+	if bytes.Contains(b, []byte(blockedMarker)) {
+		return filesystem.Errorf(filesystem.CodeRejected, "inspection refused %s", r.Filename)
+	}
+	return nil
+}

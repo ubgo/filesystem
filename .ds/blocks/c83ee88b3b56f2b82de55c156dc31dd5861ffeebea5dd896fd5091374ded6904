@@ -1,0 +1,11 @@
+func requireUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Header.Get(userHeader)
+		if user == "" {
+			writeJSON(w, http.StatusUnauthorized, upload.ErrorResponse{Error: "sign in first: send the " + userHeader + " header", Code: filesystem.CodePermission})
+			return
+		}
+		ctx := records.WithActor(context.WithValue(r.Context(), userKey{}, user), user)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

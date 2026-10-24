@@ -1,0 +1,19 @@
+func envelopeHandlers(disk *filesystem.Disk, s *records.Store, sp *share.Plugin, respond bool) (uploads, media, links http.Handler, err error) {
+	uo := upload.HandlerOptions{}
+	rc := recordshttp.Config{
+		Store: s, Disk: disk.Name(), Policy: policy,
+		Scope:     func(*http.Request) (string, error) { return envelopeScope, nil },
+		Authorize: func(*http.Request, recordshttp.Action, recordshttp.Target) error { return nil }, // the app's own rule here
+	}
+	var so []share.HandlerOption
+	if respond {
+		uo.Respond = dataEnvelope[upload.SuccessBody]
+		rc.Respond = dataEnvelope[recordshttp.SuccessBody]
+		so = append(so, share.WithRespond(dataEnvelope[share.SuccessBody]))
+	}
+	media, err = recordshttp.Handler(rc)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return upload.Handler(disk, policy, uo), media, share.Handler(s, sp, so...), nil
+}

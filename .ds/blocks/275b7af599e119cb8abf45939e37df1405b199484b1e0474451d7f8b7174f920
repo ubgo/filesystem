@@ -1,0 +1,29 @@
+func signedDownload(ctx context.Context, out io.Writer, dir string) error {
+	srv := httptest.NewServer(nil)
+	defer srv.Close()
+	disk, signer, err := openSigned(ctx, dir, srv.URL+"/files")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	mgr, err := filesystem.NewManager(disk)
+	if err != nil {
+		return err
+	}
+	srv.Config.Handler = http.StripPrefix("/files", fshttp.Signed(mgr, signer))
+	if _, err := disk.WriteBytes(ctx, "contracts/c1.txt", []byte("signed copy"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	link, err := disk.SignedURL(ctx, "contracts/c1.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	resp, err := http.Get(link.URL)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, err := io.ReadAll(resp.Body)
+	fmt.Fprintf(out, "signed GET: %d %q\n", resp.StatusCode, body)
+	return err
+}

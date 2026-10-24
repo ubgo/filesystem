@@ -1,0 +1,16 @@
+func durabilityLevels(ctx context.Context, out io.Writer, dir string) error {
+	fmt.Fprintf(out, "durability levels: %v\n", local.DurabilityValues)
+	cache, err := openCache(dir)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = cache.Close() }()
+	e, err := cache.WriteBytes(ctx, "thumbs/p1.txt", []byte("rebuildable"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "cache write (%s): %s is %d bytes\n", cacheDurability, e.Key, e.Size)
+	_, err = local.New(dir, local.WithDurability("fast"))
+	fmt.Fprintf(out, "unknown durability: %s\n", filesystem.CodeOf(err))
+	return nil
+}

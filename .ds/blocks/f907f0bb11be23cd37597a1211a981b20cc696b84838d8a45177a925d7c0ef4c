@@ -1,0 +1,5 @@
+var policy = upload.Policy{
+	MaxSize: maxUploadBytes,
+	Allowed: []string{"video/mp4", "video/quicktime", "image/jpeg", "image/png", "application/pdf"},
+	Key:     upload.RandomKey("uploads"),
+}

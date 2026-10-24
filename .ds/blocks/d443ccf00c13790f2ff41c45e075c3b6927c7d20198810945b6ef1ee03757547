@@ -1,0 +1,16 @@
+func authorize(ctx context.Context, store *records.Store, user string, t recordshttp.Target) error {
+	if t.FileID == "" {
+		if t.Owner.Type == ownerUser && t.Owner.ID == user {
+			return nil
+		}
+		return errNotYours
+	}
+	f, err := store.File(ctx, t.Scope, t.FileID)
+	if err != nil {
+		return err
+	}
+	if f.UploadedBy != user {
+		return errNotYours
+	}
+	return nil
+}

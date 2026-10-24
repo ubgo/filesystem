@@ -1,0 +1,28 @@
+func Copy(ctx context.Context, src, dst *filesystem.Disk, o Options) (Report, error) {
+	r := Report{Failed: map[string]error{}}
+	var mu sync.Mutex
+	jobs := make(chan filesystem.Entry)
+	var wg sync.WaitGroup
+	for range max(o.Workers, 1) {
+		wg.Go(func() {
+			for e := range jobs {
+				if err := copyOne(ctx, src, dst, e, o, &r); err != nil {
+					mu.Lock()
+					r.Failed[e.Key] = err
+					mu.Unlock()
+				}
+			}
+		})
+	}
+	var listErr error
+	for e, err := range src.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			listErr = err
+			break
+		}
+		jobs <- e
+	}
+	close(jobs)
+	wg.Wait()
+	return r, listErr
+}

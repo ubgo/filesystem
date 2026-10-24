@@ -1,0 +1,8 @@
+func newClient(endpoint string) *s3.Client {
+	return s3.New(s3.Options{
+		Region:       fakeRegion,
+		BaseEndpoint: aws.String(endpoint),
+		UsePathStyle: true,
+		Credentials:  credentials.NewStaticCredentialsProvider(fakeAccessKey, fakeSecretKey, ""),
+	})
+}

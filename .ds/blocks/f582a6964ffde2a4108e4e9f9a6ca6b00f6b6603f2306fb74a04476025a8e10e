@@ -1,0 +1,26 @@
+func (a *App) queued(ctx context.Context) ([]records.File, error) {
+	var scope, id string
+	q := sqlb.NewSelect(a.Store.Dialect()).
+		Columns(sqlb.Bind(records.FileScope, &scope), sqlb.Bind(records.FileID, &id)).
+		From(records.TableFiles).
+		Where(sqlb.Eq(records.FileStatus, records.StatusProcessing), sqlb.Eq(records.FileDisk, diskName), sqlb.IsNull(records.FileDeletedAt)).
+		Order(sqlb.OrderBy(records.FileCreatedAt, sqlb.SortAsc)).Limit(queueBatch)
+	var keys [][2]string
+	if err := a.Store.Each(ctx, q, func() error {
+		keys = append(keys, [2]string{scope, id})
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	// Read the rows after the listing is closed: the query holds its
+	// connection until then, and SQLite here has only one.
+	out := make([]records.File, 0, len(keys))
+	for _, k := range keys {
+		f, err := a.Store.File(ctx, k[0], k[1])
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, f)
+	}
+	return out, nil
+}

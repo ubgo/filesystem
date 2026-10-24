@@ -1,0 +1,13 @@
+func formFailures(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	h := upload.Handler(disk, policy, upload.HandlerOptions{MaxFiles: maxFilesPerRequest, Partial: true})
+	_, body, err := postForm(ctx, h, formFile{"page.html", htmlFile}, formFile{"b.pdf", pdfFile})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "  partial body: %s\n", body)
+	return nil
+}

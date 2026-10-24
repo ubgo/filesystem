@@ -1,0 +1,15 @@
+func openDisk(ctx context.Context) (*filesystem.Disk, func(), error) {
+	dsn, ok := os.LookupEnv(envDSN)
+	if !ok {
+		return openFakeS3(ctx)
+	}
+	mux := filesystem.NewMux()
+	if err := mux.Register(fss3.Scheme, fss3.Opener); err != nil {
+		return nil, nil, err
+	}
+	disk, err := mux.Open(ctx, diskName, dsn)
+	if err != nil {
+		return nil, nil, err
+	}
+	return disk, func() { _ = disk.Close() }, nil
+}

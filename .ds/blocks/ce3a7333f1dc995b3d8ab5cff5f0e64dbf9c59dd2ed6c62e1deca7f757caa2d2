@@ -1,0 +1,13 @@
+func Budget(max int64) (filesystem.Interceptor, *atomic.Int64) {
+	var used atomic.Int64
+	return func(ctx context.Context, op *filesystem.Op, call filesystem.Call) error {
+		if op.Kind == filesystem.OpWrite && used.Load() >= max {
+			return filesystem.Errorf(filesystem.CodeQuotaExceeded, "disk %s used its %d bytes", op.Disk, max)
+		}
+		err := call(ctx)
+		if err == nil && op.Bytes > 0 {
+			used.Add(op.Bytes)
+		}
+		return err
+	}, &used
+}

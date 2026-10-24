@@ -1,0 +1,7 @@
+func newScanner(lookup func(string) (string, bool)) scan.Scanner {
+	if addr, ok := lookup(envClamdAddr); ok && addr != "" {
+		return scan.Clamd{Network: "tcp", Address: addr, Timeout: scanTimeout}
+	}
+	fmt.Fprintf(os.Stderr, "WARN: %s is not set: using a stand-in scanner that detects only the EICAR test file\n", envClamdAddr)
+	return scan.ScannerFunc(eicarOnly)
+}

@@ -1,0 +1,14 @@
+func (a *App) sweepLoop(ctx context.Context) {
+	t := time.NewTicker(sweepEvery)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			if n, err := a.Sweep(ctx); err != nil || n > 0 {
+				fmt.Fprintf(os.Stderr, "export sweep: deleted %d, err %v\n", n, err)
+			}
+		}
+	}
+}

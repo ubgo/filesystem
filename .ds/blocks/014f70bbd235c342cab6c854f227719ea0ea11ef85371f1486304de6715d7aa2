@@ -1,0 +1,3 @@
+func newMetrics() (ops, written *expvar.Map) {
+	return new(expvar.Map).Init(), new(expvar.Map).Init()
+}

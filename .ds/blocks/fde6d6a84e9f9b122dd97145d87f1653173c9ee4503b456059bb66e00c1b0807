@@ -1,0 +1,4 @@
+type flaky struct {
+	*memory.Driver
+	stats, writes int
+}

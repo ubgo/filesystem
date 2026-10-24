@@ -1,0 +1,7 @@
+func (d *Driver) Capabilities() filesystem.Capabilities {
+	return filesystem.Capabilities{
+		ContentType:      true,
+		Metadata:         true,
+		ConditionalWrite: true,
+	}
+}

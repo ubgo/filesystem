@@ -1,0 +1,11 @@
+# sqlc configuration for the records tables on sqlite. Copy the directory
+# beside your code, or point "queries" at your own files and keep "schema".
+version: "2"
+sql:
+  - engine: "sqlite"
+    schema: "schema.sql"
+    queries: ["../queries.sql", "pages.sql"]
+    gen:
+      go:
+        package: "fsdb"
+        out: "fsdb"

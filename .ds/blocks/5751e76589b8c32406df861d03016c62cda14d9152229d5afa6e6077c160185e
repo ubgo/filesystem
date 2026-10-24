@@ -1,0 +1,6 @@
+func sftpDSN(addr, root string, creds credentials) string {
+	q := url.Values{}
+	q.Set(fssftp.ParamKnownHosts, creds.KnownHosts)
+	q.Set(fssftp.ParamIdentity, creds.Identity)
+	return fssftp.Scheme + "://" + sftpUser + "@" + addr + root + "?" + q.Encode()
+}

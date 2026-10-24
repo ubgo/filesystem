@@ -1,0 +1,16 @@
+{
+  "_table": "commit_links",
+  "_v": 1,
+  "author": "khanakia <khanakia@gmail.com>",
+  "committed_at": "2026-10-08T16:36:44+05:30",
+  "created_at": "2026-10-08T11:07:04.074184000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "entity_id": "tsk_01a11b1e151775a9ae626a0de323734a",
+  "entity_table": "tasks",
+  "id": "cml_95afe33a5a2d7093adc372f9cfed090c",
+  "message": "Finish the P0-P4 features: directories, quarantine, upload sessions, BYO S3",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_path": null,
+  "sha": "9efb6831e35486df7d4fa4dcb1eccc0d146f6137",
+  "updated_at": "2026-10-08T11:07:04.074185000Z"
+}

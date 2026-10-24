@@ -1,0 +1,40 @@
+func everyChange(ctx context.Context, s *records.Store, actor string) (records.File, error) {
+	ctx = audit.WithActor(ctx, actor)
+	post := records.Owner{Type: ownerPost, ID: postID}
+	f, err := s.Upload(ctx, tenant, diskName, strings.NewReader("draft one"), "notes.txt", textPolicy) // file.created
+	if err != nil {
+		return records.File{}, err
+	}
+	a, err := s.Attach(ctx, tenant, f.ID, post, roleGallery) // attachment.created
+	if err != nil {
+		return records.File{}, err
+	}
+	if err := s.Reorder(ctx, tenant, post, roleGallery, []string{a.ID}); err != nil { // attachments.reordered
+		return records.File{}, err
+	}
+	if _, err := s.Replace(ctx, tenant, f.ID, strings.NewReader("draft two"), "", textPolicy); err != nil { // file.replaced
+		return records.File{}, err
+	}
+	if _, err := s.SetStatus(ctx, tenant, f.ID, records.StatusQuarantined, "rescan"); err != nil { // file.status_changed
+		return records.File{}, err
+	}
+	if _, err := s.PassScan(ctx, tenant, f.ID); err != nil { // file.status_changed, file.released
+		return records.File{}, err
+	}
+	if err := s.SetVisibility(ctx, tenant, f.ID, filesystem.VisibilityPublic); err != nil { // file.visibility_changed
+		return records.File{}, err
+	}
+	if _, err := s.MoveFile(ctx, tenant, f.ID, archiveDisk); err != nil { // file.moved
+		return records.File{}, err
+	}
+	if err := s.Detach(ctx, tenant, a.ID); err != nil { // attachment.deleted
+		return records.File{}, err
+	}
+	if err := s.Trash(ctx, tenant, f.ID); err != nil { // file.trashed
+		return records.File{}, err
+	}
+	if err := s.Restore(ctx, tenant, f.ID); err != nil { // file.restored
+		return records.File{}, err
+	}
+	return f, s.Purge(ctx, tenant, f.ID) // file.purged
+}

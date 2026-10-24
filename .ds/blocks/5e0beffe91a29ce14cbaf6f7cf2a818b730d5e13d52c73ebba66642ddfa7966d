@@ -1,0 +1,27 @@
+func newModelStore(ctx context.Context, db *sql.DB, client *http.Client) (*records.Store, *webhooks.Plugin, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	wh, err := webhooks.New(
+		webhooks.WithClient(client),
+		webhooks.WithSigner(githubSigner{key: hubKey}),
+		webhooks.WithPayload(cloudEvent),
+		webhooks.WithLogger(slog.New(slog.DiscardHandler)),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(wh))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, wh, nil
+}

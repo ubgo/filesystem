@@ -1,0 +1,11 @@
+func (n Notes) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	create := "CREATE TABLE IF NOT EXISTS " + TableNameNotes + " (file_id " + t.Key + " NOT NULL PRIMARY KEY, body " + t.Doc + " NOT NULL)" + t.TableSuffix
+	if n.Edited {
+		create = strings.Replace(create, "body", "text", 1)
+	}
+	return []records.Migration{
+		{Owner: n.Name(), Name: "0001_notes", Statements: []string{create}},
+		{Owner: n.Name(), Name: "0002_notes_author", Statements: records.AddColumn(engine, TableNameNotes, ColNoteAuthor, t.Key+" NOT NULL DEFAULT ''")},
+	}, nil
+}

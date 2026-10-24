@@ -1,0 +1,6 @@
+type Report struct {
+	Copied  int64
+	Skipped int64
+	Bytes   int64
+	Failed  map[string]error
+}

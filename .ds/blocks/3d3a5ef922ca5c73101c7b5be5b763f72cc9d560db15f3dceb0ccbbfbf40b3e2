@@ -1,0 +1,8 @@
+func uploadThenFail(ctx context.Context, s *records.Store, scope string) error {
+	return s.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if _, err := uploadText(ctx, s, scope, "draft"); err != nil {
+			return err
+		}
+		return errAbort
+	})
+}

@@ -1,0 +1,17 @@
+func bucketDisks(ctx context.Context, cdnDSN, vaultDSN, cdnBase string) (Disks, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(s3.Scheme, s3.Opener); err != nil {
+		return Disks{}, err
+	}
+	cdn, err := mux.Open(ctx, diskCDN, cdnDSN,
+		filesystem.WithDefaultVisibility(filesystem.VisibilityPublic),
+		filesystem.WithPublicURL(cdnBase))
+	if err != nil {
+		return Disks{}, err
+	}
+	vault, err := mux.Open(ctx, diskVault, vaultDSN)
+	if err != nil {
+		return Disks{}, err
+	}
+	return Disks{CDN: cdn, Vault: vault}, nil
+}

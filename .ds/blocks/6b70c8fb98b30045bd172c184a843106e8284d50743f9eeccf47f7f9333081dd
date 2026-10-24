@@ -1,0 +1,32 @@
+func cloudinaryBasics(ctx context.Context, out io.Writer, disk *filesystem.Disk, fake *fakes.Cloudinary) error {
+	w, err := disk.WriteBytes(ctx, "avatars/u1.png", pngHeader, filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "write entry type %q, stat type %q, %d bytes, etag=version %s\n", w.ContentType, e.ContentType, e.Size, e.ETag)
+	got, err := disk.ReadAll(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "read back identical: %t\n", bytes.Equal(got, pngHeader))
+	if _, err := disk.Move(ctx, "avatars/u1.png", "avatars/user-1.png"); err != nil {
+		return err
+	}
+	if _, err := disk.Copy(ctx, "avatars/user-1.png", "avatars/user-1-copy.png"); err != nil {
+		return err
+	}
+	page, err := disk.ListPage(ctx, "avatars", filesystem.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after move and copy: %s\n", keysOf(page))
+	if err := disk.DeletePrefix(ctx, "avatars"); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after DeletePrefix: %d resources; Admin API calls so far: %d\n", len(fake.PublicIDs()), fake.AdminCalls())
+	return nil
+}

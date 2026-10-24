@@ -1,0 +1,12 @@
+func makeTree(ctx context.Context, s *records.Store, fp *folders.Plugin) (tree, error) {
+	var t tree
+	var err error
+	if t.projects, err = fp.Create(ctx, s, tenant, folders.RootID, "Projects"); err != nil {
+		return t, err
+	}
+	if t.website, err = fp.Create(ctx, s, tenant, t.projects.ID, "Website"); err != nil {
+		return t, err
+	}
+	t.assets, err = fp.Create(ctx, s, tenant, t.website.ID, "Assets")
+	return t, err
+}

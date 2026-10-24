@@ -1,0 +1,18 @@
+func newHandler(s *records.Store, disks *filesystem.Manager, signer *signedurl.Signer) (http.Handler, error) {
+	media, err := recordshttp.Handler(recordshttp.Config{
+		Store:        s,
+		Disk:         diskName,
+		Policy:       policy,
+		MaxFiles:     maxFilesPerRequest,
+		Scope:        scopeOf,
+		Authorize:    authorizer(s),
+		LinkLifetime: linkLifetime,
+	})
+	if err != nil {
+		return nil, err
+	}
+	mux := http.NewServeMux()
+	mux.Handle("/media/", http.StripPrefix("/media", withActor(media)))
+	mux.Handle("/files/", http.StripPrefix("/files", fshttp.Signed(disks, signer)))
+	return mux, nil
+}

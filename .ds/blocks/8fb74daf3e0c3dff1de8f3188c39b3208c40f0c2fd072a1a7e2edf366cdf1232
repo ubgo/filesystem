@@ -1,0 +1,13 @@
+func confirmUpload(w http.ResponseWriter, r *http.Request, disk *filesystem.Disk) {
+	var req confirmRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, 4<<10)).Decode(&req); err != nil {
+		http.Error(w, "bad confirm request", http.StatusBadRequest)
+		return
+	}
+	res, err := upload.ConfirmExpected(r.Context(), disk, req.Key, req.Filename, avatarPolicy(), upload.Expected{Size: req.Size})
+	if err != nil {
+		http.Error(w, err.Error(), fshttp.StatusOf(err))
+		return
+	}
+	writeJSON(w, res)
+}

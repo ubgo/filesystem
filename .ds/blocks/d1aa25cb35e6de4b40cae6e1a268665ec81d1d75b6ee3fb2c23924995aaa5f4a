@@ -1,0 +1,6 @@
+func newVariants() (*variants.Plugin, error) {
+	logFailure := func(_ context.Context, f records.File, name string, err error) {
+		fmt.Fprintf(os.Stderr, "variant %s of %s: %v\n", name, f.ID, err)
+	}
+	return variants.New(sizes, imaging.Options{}, variants.WithEager(logFailure, "avatar-"+sizeSmall, "avatar-"+sizeLarge))
+}

@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Open owner decision from the architecture brainstorm Q12. The feature catalogue proposed the record model in core with sql/ent stores in contrib; the reference study proposed a separate module requiring only sqlb (the ubgo/auth model). Brainstorm recommends B (sqlb-only), extracting a Store interface only if a second store appears. Record the answer as an ADR in the internal notes.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-03T03:26:40.709638000Z",
+  "created_at": "2026-10-02T15:40:28.114929000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a0fd4626527e3cbc368e96cd211fff",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "title": "Decide Q12: file records in a sqlb-only records module (recommended) or behind a Store interface in the stdlib core",
+  "updated_at": "2026-10-03T03:26:40.709788000Z"
+}

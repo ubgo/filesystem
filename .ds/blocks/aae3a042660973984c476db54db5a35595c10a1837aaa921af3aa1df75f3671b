@@ -1,0 +1,17 @@
+func newStore(ctx context.Context, db *sql.DB, log *Changelog) (*records.Store, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithOwnerTypes(ownerPost),
+		records.WithPlugins(log, Guard{}, TypeLock{}))
+	if err != nil {
+		return nil, err
+	}
+	_, err = s.Migrate(ctx)
+	return s, err
+}

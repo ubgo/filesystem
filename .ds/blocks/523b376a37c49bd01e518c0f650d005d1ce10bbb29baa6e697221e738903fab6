@@ -1,0 +1,5 @@
+var policy = upload.Policy{
+	MaxSize: maxFileSize,
+	Allowed: []string{"image/*", "text/plain"},
+	Key:     upload.RandomKey("uploads"),
+}

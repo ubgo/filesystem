@@ -1,0 +1,10 @@
+func newTelemetry() Telemetry {
+	spans := tracetest.NewSpanRecorder()
+	reader := sdkmetric.NewManualReader()
+	return Telemetry{
+		Spans:  spans,
+		Tracer: sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(spans)),
+		Reader: reader,
+		Meter:  sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader)),
+	}
+}

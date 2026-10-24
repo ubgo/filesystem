@@ -1,0 +1,27 @@
+func New(ctx context.Context, dataDir, base string, secret []byte) (*App, error) {
+	disks, signer, err := openDisk(dataDir, base, secret)
+	if err != nil {
+		return nil, err
+	}
+	db, store, err := openStore(ctx, dataDir, disks)
+	if err != nil {
+		return nil, err
+	}
+	app := &App{DB: db, Store: store}
+	media, err := recordshttp.Handler(recordshttp.Config{
+		Store: store, Disk: diskName, Policy: attachmentPolicy,
+		MaxFiles: maxAttachmentsPerMessage, LinkLifetime: linkLifetime,
+		Scope: app.scope, Authorize: app.authorize,
+	})
+	if err != nil {
+		return nil, err
+	}
+	mux := http.NewServeMux()
+	mux.Handle(mediaPrefix+"/", http.StripPrefix(mediaPrefix, media))
+	mux.HandleFunc("POST /conversations/{id}/messages", app.postMessage)
+	mux.HandleFunc("DELETE /messages/{id}", app.deleteMessage)
+	mux.HandleFunc("GET /downloads/{id}", app.download)
+	mux.Handle(signedPrefix+"/", http.StripPrefix(signedPrefix, fshttp.Signed(disks, signer)))
+	app.Handler = mux
+	return app, nil
+}

@@ -1,0 +1,29 @@
+func layouts(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	sharded := policy
+	sharded.Key = upload.ShardedKey("photos", shardDepth)
+	res, err := upload.Receive(ctx, disk, strings.NewReader(pngFile), "a.png", sharded)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "sharded: %d directory levels under photos/\n", strings.Count(path.Dir(res.Key), "/"))
+	for _, c := range []upload.Collision{upload.CollisionRename, upload.CollisionFail} {
+		named := policy
+		named.Key = upload.NameKey("drive/" + string(c))
+		named.Collision = c
+		var got []string
+		for range 2 {
+			res, err := upload.Receive(ctx, disk, strings.NewReader(pngFile), "photo.png", named)
+			if err != nil {
+				got = append(got, string(filesystem.CodeOf(err)))
+				continue
+			}
+			got = append(got, res.Key)
+		}
+		fmt.Fprintf(out, "collision %s: %s\n", c, strings.Join(got, ", "))
+	}
+	return nil
+}

@@ -1,0 +1,7 @@
+var policy = upload.Policy{
+	MaxSize: 25 << 20,
+	Allowed: []string{"audio/*"},
+	Key:     upload.RandomKey("notes"),
+	Process: tool.TranscodeProcessor(audio.Transcode{Format: audio.Opus, Mono: true}),
+	Inspect: tool.Inspect(audio.Limits{MaxDuration: maxNote}),
+}

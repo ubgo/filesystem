@@ -1,0 +1,20 @@
+func copyOne(ctx context.Context, src, dst *filesystem.Disk, e filesystem.Entry, o Options, r *Report) error {
+	need, err := needsCopy(ctx, dst, e)
+	if err != nil || !need {
+		if err == nil {
+			atomic.AddInt64(&r.Skipped, 1)
+		}
+		return err
+	}
+	if o.DryRun {
+		fmt.Printf("would copy %s (%d bytes)\n", e.Key, e.Size)
+		atomic.AddInt64(&r.Copied, 1)
+		return nil
+	}
+	if _, err := filesystem.CopyAcross(ctx, src, e.Key, dst, e.Key); err != nil {
+		return err
+	}
+	atomic.AddInt64(&r.Copied, 1)
+	atomic.AddInt64(&r.Bytes, e.Size)
+	return nil
+}

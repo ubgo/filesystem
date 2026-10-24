@@ -1,0 +1,4 @@
+var sizes = map[string]imaging.Transform{
+	"avatar-" + sizeSmall: {Mode: imaging.ModeFill, Width: 64, Height: 64, Format: imaging.FormatJPEG},
+	"avatar-" + sizeLarge: {Mode: imaging.ModeFill, Width: 256, Height: 256, Format: imaging.FormatJPEG},
+}

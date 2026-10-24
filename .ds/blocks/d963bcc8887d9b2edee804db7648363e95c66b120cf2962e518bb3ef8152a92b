@@ -1,0 +1,8 @@
+func writeError(w http.ResponseWriter, err error) {
+	status := fshttp.StatusOf(err)
+	msg := http.StatusText(status)
+	if clientVisible[filesystem.CodeOf(err)] {
+		msg = err.Error()
+	}
+	writeJSON(w, status, upload.ErrorResponse{Error: msg, Code: filesystem.CodeOf(err)})
+}

@@ -1,0 +1,12 @@
+var InfoCases = []InfoCase{
+	{"object", "/" + InfoKey, "alice", http.StatusOK, `"size":18`},
+	{"escaped key", "/notes/read%20me.txt", "alice", http.StatusOK, `"key":"notes/read me.txt"`},
+	{"escaped slash", "/notes%2Fread%20me.txt", "alice", http.StatusOK, `"key":"notes/read me.txt"`},
+	{"literal %20 in key", "/notes/50%2520off.txt", "alice", http.StatusOK, `"key":"notes/50%20off.txt"`},
+	{"literal % in key", "/notes/100%25.txt", "alice", http.StatusOK, `"key":"notes/100%.txt"`},
+	{"signed out", "/" + InfoKey, "", http.StatusUnauthorized, `"code":"permission"`},
+	{"missing", "/reports/none.txt", "alice", http.StatusNotFound, `{"error":"Not Found","code":"not_found"}`},
+	{"directory", "/reports", "alice", http.StatusNotFound, `"code":"not_found"`},
+	{"encoded traversal", "/%2E%2E%2Fsecret.txt", "alice", http.StatusBadRequest, `"code":"invalid_key"`},
+	{"encoded slash traversal", "/reports%2F..%2F..%2Fsecret.txt", "alice", http.StatusBadRequest, `"code":"invalid_key"`},
+}

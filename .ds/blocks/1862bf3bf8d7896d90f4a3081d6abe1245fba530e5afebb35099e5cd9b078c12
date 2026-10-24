@@ -1,0 +1,3 @@
+func newRotatedPlugin() *audit.Plugin {
+	return audit.New(audit.WithHashChainKeyring(rotatedRing()), audit.WithSource())
+}

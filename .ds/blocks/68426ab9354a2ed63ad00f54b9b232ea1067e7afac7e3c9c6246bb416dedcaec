@@ -1,0 +1,1 @@
+func (Attachment) Edges() []ent.Edge { return []ent.Edge{fsent.AttachmentFile(File.Type)} }

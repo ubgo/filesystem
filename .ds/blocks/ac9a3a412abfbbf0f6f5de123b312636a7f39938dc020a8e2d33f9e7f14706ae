@@ -1,0 +1,11 @@
+func trashCounts(ctx context.Context, s *records.Store) (live, trashed int, err error) {
+	page, err := s.Files(ctx, records.FileQuery{Scope: tenant})
+	if err != nil {
+		return 0, 0, err
+	}
+	bin, err := s.Files(ctx, records.FileQuery{Scope: tenant, Trashed: true})
+	if err != nil {
+		return 0, 0, err
+	}
+	return len(page.Files), len(bin.Files), nil
+}

@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "2026-10-08: jobs/river 100% (host Postgres), jobs/asynq 97.2% (throwaway Redis); COVERAGE.md updated",
+  "created_at": "2026-10-08T09:39:12.737662000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a11a7aabc6744d9f62621c5df536bc",
+  "entity_table": "tasks",
+  "id": "cmt_01a11ae190e17a448d69c112303a34bc",
+  "updated_at": "2026-10-08T09:39:12.737663000Z"
+}

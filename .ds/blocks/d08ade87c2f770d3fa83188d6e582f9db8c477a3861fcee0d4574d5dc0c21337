@@ -1,0 +1,35 @@
+func twoDisks(ctx context.Context, out io.Writer) error {
+	disks, err := newLayout()
+	if err != nil {
+		return err
+	}
+	store, db, err := openStore(ctx, disks)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = db.Close() }()
+	p := upload.Policy{MaxSize: 1 << 20, Allowed: []string{"image/*"}, Visibility: filesystem.VisibilityPublic}
+	f, err := store.Upload(ctx, "acme", "", strings.NewReader("\x89PNG\r\n\x1a\n"), "banner.png", p)
+	if err != nil {
+		return err
+	}
+	if err := describe(ctx, store, f, out); err != nil {
+		return err
+	}
+	if err := store.SetVisibility(ctx, "acme", f.ID, filesystem.VisibilityPrivate); err != nil {
+		return err
+	}
+	if f, err = store.File(ctx, "acme", f.ID); err != nil {
+		return err
+	}
+	if err := describe(ctx, store, f, out); err != nil {
+		return err
+	}
+	cdn, err := disks.Disk(publicDisk)
+	if err != nil {
+		return err
+	}
+	onCDN, err := cdn.Exists(ctx, f.Key)
+	fmt.Fprintf(out, "still on the CDN disk: %t\n", onCDN)
+	return err
+}

@@ -1,0 +1,38 @@
+func cachedReads(ctx context.Context, out io.Writer) error {
+	bucket := &metered{Driver: memory.New()}
+	remote, err := filesystem.NewDisk("bucket", bucket)
+	if err != nil {
+		return err
+	}
+	cache, err := mem("cache")
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.CachedRead("media", remote, cache, filesystem.CacheOptions{TTL: cacheTTL})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "video.mp4", []byte("first cut"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	for range 3 {
+		if _, err := disk.ReadAll(ctx, "video.mp4"); err != nil {
+			return err
+		}
+	}
+	fmt.Fprintf(out, "cache: 3 reads, %d reached the bucket\n", bucket.reads)
+	if _, err := disk.WriteBytes(ctx, "video.mp4", []byte("final cut"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	b, err := disk.ReadAll(ctx, "video.mp4")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "cache: after a write, read %q (bucket reads: %d)\n", b, bucket.reads)
+	trimmed, err := filesystem.TrimCache(ctx, cache, cacheBudget)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "cache: trimmed %d copy to stay under %d bytes\n", trimmed, cacheBudget)
+	return nil
+}

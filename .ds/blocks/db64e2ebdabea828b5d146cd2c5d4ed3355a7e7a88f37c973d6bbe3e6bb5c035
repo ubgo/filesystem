@@ -1,0 +1,7 @@
+func limits(_ context.Context, scope string) (quota.Limit, error) {
+	l, ok := planOf[scope]
+	if !ok {
+		return quota.Limit{}, filesystem.Errorf(filesystem.CodePermission, "no plan for scope %q", scope)
+	}
+	return l, nil
+}

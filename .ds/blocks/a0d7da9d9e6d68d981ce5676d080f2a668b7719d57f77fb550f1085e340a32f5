@@ -1,0 +1,28 @@
+func keyFromRequest(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	h := withTenant(upload.Handler(disk, tenantPolicy(), upload.HandlerOptions{}))
+	for _, tenant := range []string{"acme", "globex", ""} {
+		var body bytes.Buffer
+		mw := multipart.NewWriter(&body)
+		fw, err := mw.CreateFormFile(upload.DefaultField, "logo.png")
+		if err != nil {
+			return err
+		}
+		if _, err := io.WriteString(fw, pngFile); err != nil {
+			return err
+		}
+		if err := mw.Close(); err != nil {
+			return err
+		}
+		req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/uploads", &body)
+		req.Header.Set("Content-Type", mw.FormDataContentType())
+		req.Header.Set(tenantHeader, tenant)
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		fmt.Fprintf(out, "key from the request, tenant %q: %d %s\n", tenant, rec.Code, keyDirs(ctx, disk, tenant))
+	}
+	return nil
+}

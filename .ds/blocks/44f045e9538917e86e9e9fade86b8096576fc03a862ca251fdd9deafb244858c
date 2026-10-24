@@ -1,0 +1,7 @@
+func openDisk(ctx context.Context, projectURL string) (*filesystem.Disk, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(fss3.Scheme, fss3.Opener); err != nil {
+		return nil, err
+	}
+	return mux.Open(ctx, "avatars", supabaseDSN(projectURL))
+}

@@ -1,0 +1,3 @@
+func checkIn(ctx context.Context, s *records.Store, lp *locks.Plugin, fileID, user string) error {
+	return lp.Unlock(ctx, s, tenant, fileID, user)
+}

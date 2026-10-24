@@ -1,0 +1,8 @@
+func newPluginWithOwnKey() *audit.Plugin {
+	return audit.New(audit.WithActorFunc(func(ctx context.Context) string {
+		if id, ok := ctx.Value(sessionUserKey{}).(string); ok {
+			return "user:" + id
+		}
+		return ""
+	}))
+}

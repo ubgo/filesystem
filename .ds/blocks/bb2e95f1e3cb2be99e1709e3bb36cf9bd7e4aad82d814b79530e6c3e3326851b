@@ -1,0 +1,7 @@
+func shareFolder(ctx context.Context, s *records.Store, ap *acl.Plugin, folderID, fileID string) error {
+	if _, err := ap.Grant(ctx, s, tenant, acl.Grant{Subject: legal, Kind: acl.OnFolder, Resource: folderID, Level: acl.Write}); err != nil {
+		return err
+	}
+	_, err := ap.Grant(ctx, s, tenant, acl.Grant{Subject: bob, Kind: acl.OnFile, Resource: fileID, Level: acl.Read})
+	return err
+}

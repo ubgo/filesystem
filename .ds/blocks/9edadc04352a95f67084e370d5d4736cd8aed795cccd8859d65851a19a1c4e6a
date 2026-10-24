@@ -1,0 +1,30 @@
+func idempotent(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	store, err := upload.NewMemoryIdempotency(upload.MemoryIdempotencyOptions{TTL: replayWindow})
+	if err != nil {
+		return err
+	}
+	h := upload.Handler(disk, policy, upload.HandlerOptions{
+		Idempotency: &upload.Idempotency{Store: store, Owner: owner},
+	})
+	key := http.Header{upload.HeaderIdempotencyKey: {"9b2e7c0a-queued-photo-1"}}
+	for attempt, body := range []string{photo, photo, photo + "changed"} {
+		rec, err := post(ctx, h, key, file("photo.png", body))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "attempt %d: %d replayed=%q\n", attempt+1, rec.Code, rec.Header().Get(upload.HeaderIdempotentReplayed))
+	}
+	n := 0
+	for _, err := range disk.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return err
+		}
+		n++
+	}
+	fmt.Fprintf(out, "objects stored: %d\n", n)
+	return nil
+}

@@ -1,0 +1,10 @@
+func TestAvatarSaved(t *testing.T) {
+	disk := filesystemtest.NewFake(t, "media")
+	key, err := NewAvatars(disk.Disk).Save(t.Context(), "u1", strings.NewReader(gif))
+	if err != nil {
+		t.Fatal(err)
+	}
+	disk.AssertExists(key)
+	disk.AssertContent("avatars/u1", gif)
+	disk.AssertCount("avatars", 1)
+}

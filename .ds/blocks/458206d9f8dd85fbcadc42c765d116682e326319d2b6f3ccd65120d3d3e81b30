@@ -1,0 +1,8 @@
+func rolledBack(ctx context.Context, s *records.Store) error {
+	return s.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if _, err := s.Upload(ctx, tenant, diskName, strings.NewReader("x"), "x.txt", textPolicy); err != nil {
+			return err
+		}
+		return errAbort
+	})
+}

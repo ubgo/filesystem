@@ -1,0 +1,20 @@
+func vercelTokenAndURLs(ctx context.Context, out io.Writer) error {
+	cfg := vercelblob.Config{Token: vercelToken, Access: vercelblob.AccessPublic}
+	drv, err := vercelblob.New(cfg)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("blob", drv, filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	if err != nil {
+		return err
+	}
+	for _, key := range []string{"avatars/u1.png", "docs/annual report.pdf"} {
+		u, err := disk.PublicURL(ctx, key)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "public URL: %s\n", u)
+	}
+	fmt.Fprintf(out, "config prints as: %v\n", cfg)
+	return nil
+}

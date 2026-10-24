@@ -1,0 +1,8 @@
+func readEither(ctx context.Context, store, staging *filesystem.Disk, key string) ([]byte, string, error) {
+	b, err := store.ReadAll(ctx, key)
+	if filesystem.CodeOf(err) == filesystem.CodeNotFound {
+		b, err = staging.ReadAll(ctx, filesystem.JoinKey(pendingDir, key))
+		return b, staging.Name(), err
+	}
+	return b, store.Name(), err
+}

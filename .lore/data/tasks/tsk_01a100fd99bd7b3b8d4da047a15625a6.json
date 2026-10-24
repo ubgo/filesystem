@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": null,
+  "commitment": "accepted",
+  "completed_at": "2026-10-03T08:59:42.431351000Z",
+  "created_at": "2026-10-03T08:59:42.397734000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a100fd99bd7b3b8d4da047a15625a6",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "records content replacement (Replace, ReplaceObject), versions plugin, examples/drive",
+  "updated_at": "2026-10-03T08:59:42.431353000Z"
+}

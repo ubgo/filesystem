@@ -1,0 +1,10 @@
+func (Guard) BeforeCreate(_ context.Context, _ *records.Store, f *records.File) error {
+	if f.Metadata[metaClass] == "" {
+		meta := map[string]string{metaClass: defaultClass}
+		for k, v := range f.Metadata {
+			meta[k] = v
+		}
+		f.Metadata = meta
+	}
+	return nil
+}

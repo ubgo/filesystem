@@ -1,0 +1,9 @@
+func supabaseDSN(projectURL string) string {
+	q := url.Values{}
+	q.Set(fss3.ParamRegion, region)
+	q.Set(fss3.ParamEndpoint, projectURL+s3Path)
+	q.Set(fss3.ParamPathStyle, "true")
+	q.Set(fss3.ParamAccessKeyEnv, accessKeyEnv)
+	q.Set(fss3.ParamSecretKeyEnv, secretKeyEnv)
+	return fss3.Scheme + "://" + bucket + "?" + q.Encode()
+}

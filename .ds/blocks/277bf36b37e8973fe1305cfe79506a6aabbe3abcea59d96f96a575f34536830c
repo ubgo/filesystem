@@ -1,0 +1,7 @@
+func placeholderColour(img image.Image) string {
+	c, ok := imaging.DominantColour(img)
+	if !ok {
+		return ""
+	}
+	return imaging.Hex(c)
+}

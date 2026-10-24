@@ -1,0 +1,15 @@
+func timeout(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", &slow{Driver: memory.New(), release: make(chan struct{})},
+		filesystem.WithInterceptors(
+			layer.Observe(report(out)),
+			layer.Retry(layer.RetryOptions{Sleep: noWait}),
+			layer.Timeout(attemptBudget),
+		))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "timeout:")
+	_, err = disk.Stat(ctx, "a.txt")
+	fmt.Fprintf(out, "  deadline exceeded: %t\n", errors.Is(err, context.DeadlineExceeded))
+	return nil
+}

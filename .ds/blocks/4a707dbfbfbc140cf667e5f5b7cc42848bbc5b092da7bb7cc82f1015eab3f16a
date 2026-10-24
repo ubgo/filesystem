@@ -1,0 +1,15 @@
+func newStore(db *sql.DB, disks *filesystem.Manager, limits quota.LimitFunc, logger *slog.Logger) (*records.Store, *audit.Plugin, error) {
+	q, err := quota.New(limits)
+	if err != nil {
+		return nil, nil, err
+	}
+	auditLog := audit.New()
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithOwnerTypes(ownerUser),
+		records.WithPlugins(q, auditLog),
+		records.WithObjectErrorHandler(func(ctx context.Context, f records.File, err error) {
+			logger.ErrorContext(ctx, "object left behind", "disk", f.Disk, "key", f.Key, "error", err)
+		}),
+	)
+	return store, auditLog, err
+}

@@ -1,0 +1,6 @@
+func planLimit(_ context.Context, workspace string) (quota.Limit, error) {
+	if teamWorkspaces[workspace] {
+		return plans["team"], nil
+	}
+	return plans["free"], nil
+}

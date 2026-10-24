@@ -1,0 +1,35 @@
+func batch(ctx context.Context, out io.Writer) error {
+	src, err := mem("src")
+	if err != nil {
+		return err
+	}
+	dst, err := mem("dst")
+	if err != nil {
+		return err
+	}
+	ks := []string{"a.txt", "b.txt", "missing-1.txt", "c.txt", "missing-2.txt"}
+	for _, k := range ks {
+		if !strings.HasPrefix(k, "missing") {
+			if _, err := src.WriteBytes(ctx, k, []byte(k), filesystem.WriteOptions{}); err != nil {
+				return err
+			}
+		}
+	}
+	err = filesystem.Batch(ctx, ks, parallel, func(ctx context.Context, key string) error {
+		_, err := filesystem.CopyAcross(ctx, src, key, dst, key)
+		return err
+	})
+	var failed *filesystem.BatchError
+	if !errors.As(err, &failed) {
+		return fmt.Errorf("expected a batch error, got %v", err)
+	}
+	copied, err := keys(ctx, dst)
+	if err != nil {
+		return err
+	}
+	for _, f := range failed.Failures {
+		fmt.Fprintf(out, "batch: %s failed: %s\n", f.Key, filesystem.CodeOf(f.Err))
+	}
+	fmt.Fprintf(out, "batch: copied %q\n", copied)
+	return nil
+}

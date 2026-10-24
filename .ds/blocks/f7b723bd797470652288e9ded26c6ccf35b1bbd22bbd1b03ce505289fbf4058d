@@ -1,0 +1,11 @@
+func (d *Driver) Write(ctx context.Context, key string, body io.Reader, opts filesystem.WriteOptions) (filesystem.Entry, error) {
+	data, err := io.ReadAll(body)
+	if err != nil {
+		return filesystem.Entry{}, err
+	}
+	o := Object{Data: data, ContentType: opts.ContentType, Metadata: maps.Clone(opts.Metadata), Modified: time.Now().UTC()}
+	if err := d.backend.Put(ctx, key, o, opts.IfNotExists); err != nil {
+		return filesystem.Entry{}, mapErr(err)
+	}
+	return entry(key, o), nil
+}

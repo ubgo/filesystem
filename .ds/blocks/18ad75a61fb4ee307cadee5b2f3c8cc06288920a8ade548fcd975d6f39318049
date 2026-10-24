@@ -1,0 +1,33 @@
+func mirrorConverges(ctx context.Context, out io.Writer) error {
+	down := true
+	outage := layer.Guard(func(context.Context, *filesystem.Op) error {
+		if down {
+			return filesystem.NewError(filesystem.CodeUnavailable, errMirrorDown)
+		}
+		return nil
+	})
+	primary, err := filesystem.NewDisk("s3-old", memory.New())
+	if err != nil {
+		return err
+	}
+	replica, err := filesystem.NewDisk("s3-new", memory.New(), filesystem.WithInterceptors(outage))
+	if err != nil {
+		return err
+	}
+	both, err := filesystem.Mirror("media", primary, replica)
+	if err != nil {
+		return err
+	}
+	body := []byte("%PDF-1.7 mirrored")
+	_, err = both.WriteBytes(ctx, "a.pdf", body, filesystem.WriteOptions{})
+	onPrimary, _ := primary.Exists(ctx, "a.pdf")
+	onReplica, _ := replica.Exists(ctx, "a.pdf")
+	fmt.Fprintf(out, "mirror down: %s; primary %t, replica %t\n", filesystem.CodeOf(err), onPrimary, onReplica)
+	down = false
+	if _, err := both.WriteBytes(ctx, "a.pdf", body, filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	onReplica, _ = replica.Exists(ctx, "a.pdf")
+	fmt.Fprintf(out, "written again: replica %t\n", onReplica)
+	return nil
+}

@@ -1,0 +1,11 @@
+func cropTo(region image.Rectangle) upload.Processor {
+	t := imaging.Transform{Mode: imaging.ModeFill, Width: avatarSide, Height: avatarSide, Format: imaging.FormatJPEG, Quality: avatarQuality, Crop: region}
+	return func(_ context.Context, in upload.Info, body io.Reader) (io.Reader, upload.Info, error) {
+		res, err := imaging.Process(body, t, inputLimits)
+		if err != nil {
+			return nil, upload.Info{}, err
+		}
+		name := strings.TrimSuffix(in.Filename, filepath.Ext(in.Filename)) + t.Extension()
+		return bytes.NewReader(res.Data), upload.Info{Filename: name, ContentType: res.ContentType}, nil
+	}
+}

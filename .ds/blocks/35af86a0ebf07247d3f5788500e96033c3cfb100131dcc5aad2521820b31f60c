@@ -1,0 +1,12 @@
+func (p *Plugin) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	st, err := records.NewDDL(engine).CreateTable(records.Table{
+		Table: Table,
+		Columns: []ddl.ColumnSpec{
+			records.Column(Scope, t.Key), records.Column(FileID, t.Key), records.Column(Reason, t.Text),
+			records.Column(HeldBy, t.Key), records.Column(HeldAt, t.Timestamp),
+		},
+		PrimaryKey: []ddl.ColumnRef{Scope, FileID},
+	}).Statements()
+	return []records.Migration{{Owner: PluginName, Name: "0001_legal_holds", Statements: st}}, err
+}

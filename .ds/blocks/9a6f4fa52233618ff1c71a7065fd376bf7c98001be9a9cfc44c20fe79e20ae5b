@@ -1,0 +1,4 @@
+func requestContext(ctx context.Context, user, ip string) context.Context {
+	ctx = records.WithActor(ctx, user)
+	return records.WithSource(ctx, records.Source{Channel: "ios", Client: "app/3.2", IP: ip})
+}

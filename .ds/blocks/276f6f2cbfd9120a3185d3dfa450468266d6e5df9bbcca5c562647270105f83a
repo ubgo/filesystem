@@ -1,0 +1,3 @@
+func brandedPage(w http.ResponseWriter, _ *http.Request, _ share.Share, f records.File, url string) {
+	_ = downloadPage.Execute(w, map[string]string{"Name": f.Filename, "URL": url})
+}

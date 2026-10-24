@@ -1,0 +1,13 @@
+func bandwidth(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", memory.New(), filesystem.WithInterceptors(layer.Bandwidth(bandwidthCap)))
+	if err != nil {
+		return err
+	}
+	start := time.Now()
+	if _, err := disk.Write(ctx, "big.bin", strings.NewReader(strings.Repeat("x", bandwidthBody)), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "bandwidth: %d bytes at %d B/s took at least %s: %t\n",
+		bandwidthBody, bandwidthCap, bandwidthFloor, time.Since(start) >= bandwidthFloor)
+	return nil
+}

@@ -1,0 +1,11 @@
+func checkNames(names ...string) []string {
+	out := make([]string, 0, len(names))
+	for _, n := range names {
+		result := nameOK
+		if err := folders.CheckName(n); err != nil {
+			result = string(filesystem.CodeOf(err))
+		}
+		out = append(out, fmt.Sprintf("%q=%s", n, result))
+	}
+	return out
+}

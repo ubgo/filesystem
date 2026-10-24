@@ -1,0 +1,3 @@
+func takedown(ctx context.Context, s *records.Store, id string) error {
+	return s.Purge(records.WithActor(ctx, "admin:trust-and-safety"), tenant, id)
+}

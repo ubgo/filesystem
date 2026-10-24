@@ -1,0 +1,21 @@
+func signedLinks(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	get, err := disk.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{
+		Method: filesystem.MethodGet, Expires: linkLifetime, ContentDisposition: "attachment",
+	})
+	if err != nil {
+		return err
+	}
+	put, err := disk.SignedURL(ctx, "uploads/new.png", filesystem.PresignOptions{
+		Method: filesystem.MethodPut, Expires: linkLifetime, ContentType: "image/png",
+	})
+	if err != nil {
+		return err
+	}
+	u, err := url.Parse(get.URL)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "signed GET: algorithm=%s disposition=%s\n", u.Query().Get("X-Goog-Algorithm"), u.Query().Get("response-content-disposition"))
+	fmt.Fprintf(out, "signed PUT: client must send Content-Type: %s\n", put.Header.Get("Content-Type"))
+	return nil
+}

@@ -1,0 +1,18 @@
+func checksumVerified(ctx context.Context, out io.Writer, client *s3.Client, fake *fakeS3) error {
+	disk, err := newBucketDisk(ctx, client, "invoices", fss3.Config{})
+	if err != nil {
+		return err
+	}
+	body := []byte("invoice 42: 120.00 EUR\n")
+	sum := sha256.Sum256(body)
+	if _, err := disk.WriteBytes(ctx, "42.txt", body, filesystem.WriteOptions{SHA256: hex.EncodeToString(sum[:]), SizeHint: int64(len(body))}); err != nil {
+		return err
+	}
+	sent := fake.lastSent(http.MethodPut, "/invoices/42.txt", "PutObject")
+	fmt.Fprintf(out, "checksum sent: x-amz-checksum-sha256=%t, payload hash is the digest=%t\n",
+		sent.Get("X-Amz-Checksum-Sha256") != "", sent.Get("X-Amz-Content-Sha256") == hex.EncodeToString(sum[:]))
+	wrong := sha256.Sum256([]byte("another body"))
+	_, err = disk.WriteBytes(ctx, "43.txt", body, filesystem.WriteOptions{SHA256: hex.EncodeToString(wrong[:]), SizeHint: int64(len(body))})
+	fmt.Fprintf(out, "wrong digest: %s\n", filesystem.CodeOf(err))
+	return nil
+}

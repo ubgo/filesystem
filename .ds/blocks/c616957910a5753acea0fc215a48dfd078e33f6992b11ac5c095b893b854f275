@@ -1,0 +1,7 @@
+var galleryPolicy = upload.Policy{
+	MaxSize:    maxImageBytes,
+	Allowed:    []string{"image/jpeg", "image/png", "image/webp"},
+	Key:        upload.RandomKey("products"),
+	Visibility: filesystem.VisibilityPublic,
+	Process:    imaging.Sanitize(imageLimits),
+}

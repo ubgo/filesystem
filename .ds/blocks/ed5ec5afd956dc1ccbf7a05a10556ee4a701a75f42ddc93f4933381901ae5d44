@@ -1,0 +1,10 @@
+func publish(ctx context.Context, s *records.Store, id string) (string, error) {
+	if err := s.SetVisibility(ctx, tenant, id, filesystem.VisibilityPublic); err != nil {
+		return "", err
+	}
+	f, err := s.File(ctx, tenant, id)
+	if err != nil {
+		return "", err
+	}
+	return s.URL(ctx, f, linkTTL)
+}

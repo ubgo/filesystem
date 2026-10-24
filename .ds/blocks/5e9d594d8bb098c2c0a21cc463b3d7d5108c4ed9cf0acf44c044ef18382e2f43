@@ -1,0 +1,15 @@
+func frontDoorDisk(endpoint string, cred azcore.TokenCredential, opts *azblob.ClientOptions, account string) (*filesystem.Disk, error) {
+	client, err := azblob.NewClient(endpoint, cred, opts)
+	if err != nil {
+		return nil, err
+	}
+	cfg := azure.Config{Client: client, Container: "media", UserDelegation: true}
+	if account != "" {
+		cfg.AccountName, cfg.Credential, cfg.DelegationClientOptions = account, cred, opts
+	}
+	drv, err := azure.New(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("media", drv)
+}

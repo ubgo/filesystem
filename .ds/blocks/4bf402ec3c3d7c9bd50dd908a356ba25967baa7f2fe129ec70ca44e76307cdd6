@@ -1,0 +1,10 @@
+func resizeAll(w io.Writer, src []byte) error {
+	for _, name := range []string{"fit", "fill", "pad", "crop"} {
+		res, err := imaging.Process(bytes.NewReader(src), modes[name], imaging.Options{})
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%-4s %dx%d %s\n", name, res.Width, res.Height, res.ContentType)
+	}
+	return nil
+}

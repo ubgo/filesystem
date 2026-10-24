@@ -1,0 +1,7 @@
+func describe(ctx context.Context, s *records.Store, f records.File) (records.File, error) {
+	return s.SetText(ctx, f.Scope, f.ID, records.Text{
+		Alt:     "Bar chart of revenue against costs",
+		Caption: "Q3 revenue.\nSource: finance export.",
+		Title:   "Q3 report",
+	})
+}

@@ -1,0 +1,17 @@
+func scanning(ctx context.Context, _ *filesystem.Disk, out io.Writer) {
+	for _, c := range []struct {
+		data string
+		down bool
+	}{{"PNG EICAR", false}, {pngBytes, true}, {pngBytes, false}} {
+		disk, err := filesystem.NewDisk("scanned", memory.New())
+		if err != nil {
+			fmt.Fprintln(out, err)
+			return
+		}
+		p := images
+		p.Allowed = []string{"image/*", "text/plain"}
+		p.Inspect = scan.Inspect(demoScanner(c.down))
+		_, err = upload.Receive(ctx, disk, strings.NewReader(c.data), "file", p)
+		fmt.Fprintf(out, "scan (down=%t): %q stored=%d %v\n", c.down, filesystem.CodeOf(err), objects(ctx, disk), err)
+	}
+}

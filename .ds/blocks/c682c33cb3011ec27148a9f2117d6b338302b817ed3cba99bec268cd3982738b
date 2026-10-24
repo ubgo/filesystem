@@ -1,0 +1,1 @@
+var inputLimits = imaging.Options{MaxBytes: maxAvatarBytes}

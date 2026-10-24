@@ -1,0 +1,26 @@
+func (c *Confirmer) Handle(ctx context.Context, e notify.Event) error {
+	if e.Kind != notify.KindCreated || !filesystem.KeyInDir(e.Key, incomingDir) {
+		return nil
+	}
+	if c.seen[e.ID] {
+		fmt.Fprintf(c.Out, "duplicate %s: skipped\n", e.Key)
+		return nil
+	}
+	if err := c.fail; err != nil {
+		c.fail = nil
+		return err
+	}
+	res, err := upload.Confirm(ctx, c.Disk, e.Key, path.Base(e.Key), avatars)
+	switch {
+	case filesystem.CodeOf(err) == filesystem.CodeRejected || filesystem.CodeOf(err) == filesystem.CodeTooLarge:
+		fmt.Fprintf(c.Out, "refused %s: %s, object deleted\n", e.Key, filesystem.CodeOf(err))
+	case filesystem.CodeOf(err) == filesystem.CodeNotFound:
+		fmt.Fprintf(c.Out, "gone %s: deleted before the event arrived\n", e.Key)
+	case err != nil:
+		return err // anything else is worth another delivery
+	default:
+		fmt.Fprintf(c.Out, "confirmed %s: %s, %d bytes\n", res.Key, res.ContentType, res.Size)
+	}
+	c.seen[e.ID] = true
+	return nil
+}

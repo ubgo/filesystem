@@ -1,0 +1,33 @@
+func unusable(ctx context.Context, w io.Writer, a *app, f records.File) error {
+	sh, err := shareFile(ctx, a.store, a.share, f.ID)
+	if err != nil {
+		return err
+	}
+	if err := stopSharing(ctx, a.store, a.share, sh.ID); err != nil {
+		return err
+	}
+	_, err = open(ctx, a.store, a.share, sh.Token)
+	fmt.Fprintf(w, "revoked: %v\n", err)
+	_, err = open(ctx, a.store, a.share, "no-such-token")
+	fmt.Fprintf(w, "unknown: %v\n", err)
+	live, err := shareFile(ctx, a.store, a.share, f.ID)
+	if err != nil {
+		return err
+	}
+	if err := a.store.Trash(ctx, tenant, f.ID); err != nil {
+		return err
+	}
+	_, err = open(ctx, a.store, a.share, live.Token)
+	fmt.Fprintf(w, "file trashed: %v\n", err)
+	list, err := linksOf(ctx, a.store, a.share, f.ID)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "links of the file: %d (revoked: %t, token listed: %q)\n", len(list), list[1].RevokedAt != nil, list[0].Token)
+	if err := a.store.Purge(ctx, tenant, f.ID); err != nil {
+		return err
+	}
+	list, err = linksOf(ctx, a.store, a.share, f.ID)
+	fmt.Fprintf(w, "links after purge: %d\n", len(list))
+	return err
+}

@@ -1,0 +1,14 @@
+func wholeDisk(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("cdn", bucketWide{memory.New()}, filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "logo.png", []byte("png"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	_, err = disk.WriteBytes(ctx, "secret.pdf", []byte("pdf"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPrivate})
+	fmt.Fprintf(out, "private write on a public bucket: %s\n", filesystem.CodeOf(err))
+	err = disk.SetVisibility(ctx, "logo.png", filesystem.VisibilityPrivate)
+	fmt.Fprintf(out, "SetVisibility on a public bucket: %s\n", filesystem.CodeOf(err))
+	return nil
+}

@@ -1,0 +1,13 @@
+func extensionFromType(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	p := images
+	p.Key = upload.RandomKey("avatars")
+	for _, name := range []string{"photo", "photo.gif", "photo.png.exe.jpg"} {
+		res, err := upload.Receive(ctx, disk, strings.NewReader(pngBytes), name, p)
+		if err != nil {
+			fmt.Fprintf(out, "named %q: %s\n", name, filesystem.CodeOf(err))
+			continue
+		}
+		fmt.Fprintf(out, "named %q: stored with extension %s\n", name, path.Ext(res.Key))
+	}
+	return nil
+}

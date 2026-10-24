@@ -1,0 +1,34 @@
+func cloudfrontLinks(ctx context.Context, out io.Writer) error {
+	// Real code loads the key from a secret store, e.g. with
+	// sign.LoadPEMPrivKey; the demo makes a throwaway one.
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return err
+	}
+	signer, err := cloudfront.New(cloudfront.Config{BaseURL: cloudfrontBase, KeyPairID: "K2JCJMDEHXQW5F", PrivateKey: key})
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("media", memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return err
+	}
+	req, err := disk.SignedURL(ctx, "videos/42/poster.jpg", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "cloudfront URL: %s\n", shape(req.URL))
+	_, err = disk.SignedURL(ctx, "page.html", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime, ContentType: "text/html"})
+	fmt.Fprintf(out, "cloudfront HTML link: %s\n", filesystem.CodeOf(err))
+	cookies, _, err := signer.SignCookies(ctx, "videos/42", time.Hour)
+	if err != nil {
+		return err
+	}
+	names := make([]string, len(cookies))
+	for i, c := range cookies {
+		names[i] = c.Name
+	}
+	fmt.Fprintf(out, "cloudfront cookies: %s (Secure %t, HttpOnly %t)\n", strings.Join(names, ","), cookies[0].Secure, cookies[0].HttpOnly)
+	fmt.Fprintf(out, "printed signer: %v\n", signer)
+	return nil
+}

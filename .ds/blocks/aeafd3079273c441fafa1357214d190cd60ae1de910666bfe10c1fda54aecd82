@@ -1,0 +1,7 @@
+func policyFor(user string) upload.Policy {
+	return upload.Policy{
+		MaxSize: maxUploadBytes,
+		Allowed: allowedTypes,
+		Key:     upload.RandomKey(path.Join(pendingDir, user)),
+	}
+}

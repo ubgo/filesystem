@@ -1,0 +1,4 @@
+var plans = map[string]quota.Limit{
+	"free": {Bytes: 1 << 20, Files: 100},
+	"team": {Bytes: 100 << 30, Files: 1_000_000},
+}

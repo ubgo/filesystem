@@ -1,0 +1,17 @@
+func writeOrders(zw *zip.Writer, orders []Order) error {
+	w, err := zw.Create("orders.csv")
+	if err != nil {
+		return err
+	}
+	cw := csv.NewWriter(w)
+	if err := cw.Write([]string{"id", "placed_at", "total_cents"}); err != nil {
+		return err
+	}
+	for _, o := range orders {
+		if err := cw.Write([]string{o.ID, o.Placed.UTC().Format(time.RFC3339), strconv.FormatInt(o.Total, 10)}); err != nil {
+			return err
+		}
+	}
+	cw.Flush()
+	return cw.Error()
+}

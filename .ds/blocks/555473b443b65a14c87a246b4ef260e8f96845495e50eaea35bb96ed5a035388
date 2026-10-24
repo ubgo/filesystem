@@ -1,0 +1,7 @@
+func dataEnvelope[B any](w http.ResponseWriter, _ *http.Request, status int, body B) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(struct {
+		Data B `json:"data"`
+	}{body})
+}

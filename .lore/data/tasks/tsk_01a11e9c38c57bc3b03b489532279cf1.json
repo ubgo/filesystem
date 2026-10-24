@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim): \"continue\" (after the audit; the open question was which findings to fix, and the recommendation was B1+B2 first, then B3, B4, B6/B7, B10, B12, B13/B14, I1/I2).\n\nContext: the internal audit notes. Product decisions taken with the safe default: B1 a set WithURLSigner wins for downloads, presign still used for uploads; B2 clear keys only after the type matches, no key renames; B3 a custom detector is consulted only when the built-in answer is octet-stream, active-type deny floor unchanged; B7 a store/locker composer hook, default unchanged; B10 WithLocation per plugin keeping the random generation part; B14 KMS key ARNs option only (no arbitrary statements).\n\nAcceptance: each finding fixed per the satl-no-hardwire fix mode (interface + one typed option, default unchanged, allow/deny/error-fails-closed/default tests break-verified, docs beside the feature), full gates green, ask before commit.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-09T04:48:32.079861000Z",
+  "created_at": "2026-10-09T03:01:57.061763000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11e9c38c57bc3b03b489532279cf1",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "No-hardwire fixes: B1 B2 B3 B4 B6 B7 B10 B12 B13 B14 I1 I2",
+  "updated_at": "2026-10-09T04:48:32.079862000Z"
+}

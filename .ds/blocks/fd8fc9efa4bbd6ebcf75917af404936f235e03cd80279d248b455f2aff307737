@@ -1,0 +1,4 @@
+func traversal(ctx context.Context, disk *filesystem.Disk, out io.Writer) {
+	_, err := disk.WriteBytes(ctx, "avatars/../../etc/cron.d/job", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "traversal key: %s\n", filesystem.CodeOf(err))
+}

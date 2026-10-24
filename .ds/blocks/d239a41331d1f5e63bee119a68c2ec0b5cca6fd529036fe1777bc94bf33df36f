@@ -1,0 +1,14 @@
+func rolledBackUpload(ctx context.Context, d *demo, out io.Writer) error {
+	err := d.store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if _, err := d.store.Upload(ctx, scope, diskName, strings.NewReader(pdf), "invoice.pdf", policy); err != nil {
+			return err
+		}
+		return errAppFailed
+	})
+	objects, rows, serr := d.state(ctx)
+	if serr != nil {
+		return serr
+	}
+	fmt.Fprintf(out, "rolled back upload: %v; objects %d, rows %d\n", errors.Is(err, errAppFailed), objects, rows)
+	return nil
+}

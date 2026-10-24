@@ -1,0 +1,30 @@
+func openWithConfig(ctx context.Context, out io.Writer, addr, root string, creds credentials) error {
+	hostKeys, err := knownhosts.New(creds.KnownHosts)
+	if err != nil {
+		return err
+	}
+	conn, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
+		User:            sftpUser,
+		Auth:            []ssh.AuthMethod{ssh.PublicKeys(creds.clientKey)},
+		HostKeyCallback: hostKeys,
+	})
+	if err != nil {
+		return err
+	}
+	client, err := sftp.NewClient(conn)
+	if err != nil {
+		return errors.Join(err, conn.Close())
+	}
+	drv, err := fssftp.New(fssftp.Config{Client: client, Root: root, Closer: conn})
+	if err != nil {
+		return errors.Join(err, client.Close(), conn.Close())
+	}
+	disk, err := filesystem.NewDisk("partner-config", drv)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	ok, err := disk.Exists(ctx, "archive/2026-10/orders.csv")
+	fmt.Fprintf(out, "via Config: archived file exists=%t\n", ok)
+	return err
+}

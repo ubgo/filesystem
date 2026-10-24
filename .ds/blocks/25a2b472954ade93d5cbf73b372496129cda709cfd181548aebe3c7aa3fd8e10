@@ -1,0 +1,24 @@
+func newStore(ctx context.Context) (*records.Store, *filesystem.Disk, error) {
+	disk, err := filesystem.NewDisk(diskMedia, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		return nil, nil, err
+	}
+	db.SetMaxOpenConns(1) // one connection keeps the in-memory database alive
+	plugin := video.NewPlugin(tool, video.WithPoster(posterAt))
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(plugin))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := store.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return store, disk, nil
+}

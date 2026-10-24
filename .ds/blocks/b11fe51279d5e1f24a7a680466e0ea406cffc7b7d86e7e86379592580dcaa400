@@ -1,0 +1,20 @@
+func (a *Avatars) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	user := r.Header.Get(headerUser)
+	if user == "" {
+		http.Error(w, "sign in first", http.StatusUnauthorized)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxAvatarSize+formOverhead)
+	file, _, err := r.FormFile(avatarField)
+	if err != nil {
+		http.Error(w, "send the image in the "+avatarField+" field", http.StatusBadRequest)
+		return
+	}
+	defer func() { _ = file.Close() }()
+	key, err := a.Save(r.Context(), user, file)
+	if err != nil {
+		http.Error(w, fshttp.ClientMessage(err), fshttp.StatusOf(err))
+		return
+	}
+	_, _ = fmt.Fprintln(w, key)
+}

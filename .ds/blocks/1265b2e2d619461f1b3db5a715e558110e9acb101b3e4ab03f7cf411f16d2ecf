@@ -1,0 +1,3 @@
+func avifPipeline() *imaging.Pipeline {
+	return imaging.NewPipeline(imaging.WithEncoder(avif.Encoder()), imaging.WithDecoder(avif.Decoder()))
+}

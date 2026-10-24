@@ -1,0 +1,3 @@
+func uploadText(ctx context.Context, s *records.Store, scope, body string) (records.File, error) {
+	return s.Upload(ctx, scope, diskName, strings.NewReader(body), "note.txt", textPolicy)
+}

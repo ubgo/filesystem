@@ -1,0 +1,13 @@
+func cloudinaryRefusals(ctx context.Context, out io.Writer, public, private *filesystem.Disk) error {
+	fmt.Fprintf(out, "upload type capabilities: %s\n", public.Capabilities())
+	fmt.Fprintf(out, "authenticated type capabilities: %s\n", private.Capabilities())
+	_, err := private.PublicURL(ctx, "brand/terms.txt")
+	fmt.Fprintf(out, "authenticated PublicURL: %s\n", outcome(err))
+	_, err = private.SignedURL(ctx, "brand/terms.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: cloudinary.DownloadExpiry})
+	fmt.Fprintf(out, "SignedURL: %s\n", outcome(err))
+	_, err = public.WriteBytes(ctx, "x.txt", []byte("x"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPrivate})
+	fmt.Fprintf(out, "private write on the upload type: %s\n", outcome(err))
+	_, err = private.WriteBytes(ctx, "x.txt", []byte("x"), filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "IfNotExists: %s\n", outcome(err))
+	return nil
+}

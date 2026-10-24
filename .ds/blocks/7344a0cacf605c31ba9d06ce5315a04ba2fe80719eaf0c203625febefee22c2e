@@ -1,0 +1,18 @@
+func openCloudinary(secret string, typ cloudinary.Type, fakeURL string) (*filesystem.Disk, error) {
+	drv, err := cloudinary.New(cloudinary.Config{
+		CloudName:   cloudName,
+		APIKey:      cloudAPIKey,
+		APISecret:   secret,
+		Type:        typ,
+		APIURL:      fakeURL + "/v1_1",
+		DeliveryURL: fakeURL,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var opts []filesystem.Option
+	if typ == cloudinary.TypeUpload {
+		opts = append(opts, filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	}
+	return filesystem.NewDisk("cloudinary-"+string(typ), drv, opts...)
+}

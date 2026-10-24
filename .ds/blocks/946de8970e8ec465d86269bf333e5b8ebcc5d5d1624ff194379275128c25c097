@@ -1,0 +1,20 @@
+func sweepSessions(dir string, cutoff time.Time) (int, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0, err
+	}
+	removed := 0
+	var errs []error
+	for _, e := range entries {
+		info, err := e.Info()
+		if err != nil || e.IsDir() || !info.ModTime().Before(cutoff) {
+			continue
+		}
+		if err := os.Remove(filepath.Join(dir, e.Name())); err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		removed++
+	}
+	return removed, errors.Join(errs...)
+}

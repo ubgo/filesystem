@@ -1,0 +1,18 @@
+func conditionalWrites(ctx context.Context, out io.Writer, disk *filesystem.Disk, e filesystem.Entry) error {
+	_, err := disk.Write(ctx, "users/42.png", strings.NewReader("new"), filesystem.WriteOptions{IfMatch: "stale-etag"})
+	fmt.Fprintf(out, "swap with a stale etag: %s\n", filesystem.CodeOf(err))
+	if _, err := disk.Write(ctx, "users/42.png", strings.NewReader("new"), filesystem.WriteOptions{IfMatch: e.ETag}); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "swap with the current etag: ok")
+
+	_, err = disk.Write(ctx, "users/gone.png", strings.NewReader("x"), filesystem.WriteOptions{IfMatch: e.ETag})
+	fmt.Fprintf(out, "swap on a missing key: %s\n", filesystem.CodeOf(err))
+
+	_, err = disk.Write(ctx, "users/42.png", strings.NewReader("x"), filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "create-only over an existing key: %s\n", filesystem.CodeOf(err))
+
+	_, err = disk.Write(ctx, "users/huge.png", strings.NewReader(strings.Repeat("x", maxAvatar+1)), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "over MaxObjectSize: %s\n", filesystem.CodeOf(err))
+	return nil
+}

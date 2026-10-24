@@ -1,0 +1,6 @@
+func (a *App) scope(r *http.Request) (string, error) {
+	if _, err := userOf(r); err != nil {
+		return "", err
+	}
+	return workspace, nil
+}

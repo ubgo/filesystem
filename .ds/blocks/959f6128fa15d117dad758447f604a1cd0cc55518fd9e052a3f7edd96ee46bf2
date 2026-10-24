@@ -1,0 +1,13 @@
+func recordForProcessing(ctx context.Context, s *records.Store, key string) (records.File, error) {
+	disk, err := s.Disks().Disk(diskName)
+	if err != nil {
+		return records.File{}, err
+	}
+	if _, err := disk.WriteBytes(ctx, key, pngBytes, filesystem.WriteOptions{}); err != nil {
+		return records.File{}, err
+	}
+	return s.CreateFile(ctx, records.NewFile{
+		Scope: tenant, Disk: diskName, Key: key,
+		Status: records.StatusProcessing, StatusDetail: "queued",
+	})
+}

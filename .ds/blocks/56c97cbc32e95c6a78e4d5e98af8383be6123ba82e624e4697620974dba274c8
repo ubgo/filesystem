@@ -1,0 +1,3 @@
+func logEager(_ context.Context, f records.File, name string, err error) {
+	log.Printf("variant %s of %s: %v", name, f.ID, err)
+}

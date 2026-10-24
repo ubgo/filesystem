@@ -1,0 +1,24 @@
+func (a *App) upload(w http.ResponseWriter, r *http.Request) {
+	user := r.Header.Get(headerUser)
+	if user == "" {
+		writeError(w, filesystem.Errorf(filesystem.CodePermission, "sign in first"))
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxFilesPerRequest*maxPhotoBytes+formOverhead)
+	mr, err := r.MultipartReader()
+	if err != nil {
+		writeError(w, filesystem.NewError(filesystem.CodeInvalidArgument, err))
+		return
+	}
+	resp, err := a.receive(r.Context(), user, mr)
+	switch {
+	case err != nil:
+		writeError(w, err)
+	case len(resp.Files) == 0 && len(resp.Failed) > 0:
+		writeJSON(w, fshttp.StatusOf(filesystem.NewError(resp.Failed[0].Code, nil)), resp)
+	case len(resp.Failed) > 0:
+		writeJSON(w, http.StatusOK, resp)
+	default:
+		writeJSON(w, http.StatusCreated, resp)
+	}
+}

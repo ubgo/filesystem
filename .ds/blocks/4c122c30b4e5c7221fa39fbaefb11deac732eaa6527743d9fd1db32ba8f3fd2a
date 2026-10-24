@@ -1,0 +1,11 @@
+func newPlugins() (*App, error) {
+	q, err := quota.New(planLimit)
+	if err != nil {
+		return nil, err
+	}
+	v, err := versions.New(versions.WithKeep(keptVersions))
+	if err != nil {
+		return nil, err
+	}
+	return &App{Quota: q, Folders: folders.New(), Versions: v, Shares: share.New(), Audit: audit.New()}, nil
+}

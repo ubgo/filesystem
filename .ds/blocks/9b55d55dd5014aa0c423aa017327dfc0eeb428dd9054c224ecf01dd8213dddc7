@@ -1,0 +1,24 @@
+func fileInfo(disk *filesystem.Disk) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if c.Request().Header.Get(app.HeaderUser) == "" {
+			return c.JSON(http.StatusUnauthorized, app.Problem{Error: app.ErrSignedOutMessage, Code: filesystem.CodePermission})
+		}
+		// echo routes on the escaped path (URL.RawPath) only when it holds
+		// an escape Go would not write itself, such as %2F; only then is
+		// the parameter still percent-encoded. Otherwise it is already
+		// decoded, and unescaping it again would turn a literal "%20" in a
+		// key into a space.
+		key := c.Param("*")
+		if c.Request().URL.RawPath != "" {
+			var err error
+			if key, err = url.PathUnescape(key); err != nil {
+				return c.JSON(http.StatusBadRequest, app.Problem{Error: "malformed path", Code: filesystem.CodeInvalidKey})
+			}
+		}
+		entry, err := disk.Stat(c.Request().Context(), key)
+		if err != nil {
+			return c.JSON(fshttp.StatusOf(err), app.ProblemOf(err))
+		}
+		return c.JSON(http.StatusOK, app.InfoOf(entry))
+	}
+}

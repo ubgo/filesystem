@@ -1,0 +1,19 @@
+func activeContent(ctx context.Context, a *app, out io.Writer) error {
+	page := []byte("<html><script>alert(document.cookie)</script></html>")
+	if _, err := a.private.WriteBytes(ctx, "uploads/page.html", page, filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	link, err := a.private.SignedURL(ctx, "uploads/page.html", filesystem.PresignOptions{
+		Method: filesystem.MethodGet, Expires: linkLifetime, ContentDisposition: "inline",
+	})
+	if err != nil {
+		return err
+	}
+	resp, _, err := fetch(http.MethodGet, link.URL, nil, nil)
+	if err != nil {
+		return err
+	}
+	h := resp.Header
+	fmt.Fprintf(out, "html: %s | %s | %s | %s\n", h.Get("Content-Type"), h.Get("Content-Disposition"), h.Get(fshttp.HeaderContentTypeOptions), h.Get(fshttp.HeaderCSP))
+	return nil
+}

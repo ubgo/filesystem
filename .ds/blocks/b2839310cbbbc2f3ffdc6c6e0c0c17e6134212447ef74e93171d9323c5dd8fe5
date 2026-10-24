@@ -1,0 +1,22 @@
+func newApp(ctx context.Context, cfg config) (*app, error) {
+	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
+		return nil, err
+	}
+	signer, err := signedurl.New(cfg.BaseURL+filesPrefix, []signedurl.Key{{ID: signingKeyID, Secret: cfg.Secret}})
+	if err != nil {
+		return nil, err
+	}
+	disks, err := openDisks(ctx, cfg, signer)
+	if err != nil {
+		return nil, err
+	}
+	db, err := openDB(filepath.Join(cfg.DataDir, "app.db"))
+	if err != nil {
+		return nil, errors.Join(err, disks.Close())
+	}
+	store, err := openStore(ctx, db, disks)
+	if err != nil {
+		return nil, errors.Join(err, db.Close(), disks.Close())
+	}
+	return &app{db: db, disks: disks, store: store, signer: signer}, nil
+}

@@ -1,0 +1,11 @@
+func newServeMux(h Handlers) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.Handle("POST "+pathUpload, h.Upload)
+	mux.Handle("POST "+pathTicket, h.Ticket)
+	mux.Handle(pathUppy+"/", http.StripPrefix(pathUppy, h.Uppy))
+	mux.Handle(pathTus, http.StripPrefix(pathTus, h.Tus))
+	mux.Handle(pathFiles+"/", http.StripPrefix(pathFiles, h.Files))
+	mux.Handle(pathPublic+"/", http.StripPrefix(pathPublic, h.Public))
+	mux.Handle(pathRecords+"/", http.StripPrefix(pathRecords, h.Records))
+	return mux
+}

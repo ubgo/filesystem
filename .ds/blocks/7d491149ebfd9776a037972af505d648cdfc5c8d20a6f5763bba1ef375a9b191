@@ -1,0 +1,12 @@
+func guardKeys(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("shared", memory.New(), filesystem.WithInterceptors(layer.Guard(sameTenant)))
+	if err != nil {
+		return err
+	}
+	ctx = context.WithValue(ctx, tenantKey{}, "acme")
+	_, err = disk.WriteBytes(ctx, "tenants/acme/a.txt", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "guard own key: %v\n", err)
+	_, err = disk.Copy(ctx, "tenants/acme/a.txt", "tenants/globex/a.txt")
+	fmt.Fprintf(out, "guard copy into another tenant: %s\n", filesystem.CodeOf(err))
+	return nil
+}

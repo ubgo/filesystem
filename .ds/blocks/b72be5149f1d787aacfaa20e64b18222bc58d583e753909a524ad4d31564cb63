@@ -1,0 +1,7 @@
+func (a *App) tenantDisk(tenant string) (*filesystem.Disk, error) {
+	disk, err := a.Disks.Disk(a.diskFor(tenant))
+	if err != nil {
+		return nil, err
+	}
+	return disk.Scope(disk.Name()+"."+tenant, prefixOf(tenant))
+}

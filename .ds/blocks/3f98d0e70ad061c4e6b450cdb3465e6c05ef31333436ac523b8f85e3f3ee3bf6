@@ -1,0 +1,1 @@
+func crc32c() hash.Hash { return crc32.New(crc32.MakeTable(crc32.Castagnoli)) }

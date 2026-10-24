@@ -1,0 +1,17 @@
+func guard(ctx context.Context, out io.Writer) error {
+	onlyAcme := func(_ context.Context, op *filesystem.Op) error {
+		if !strings.HasPrefix(op.Key, tenantPrefix) {
+			return fmt.Errorf("key %q is outside %s", op.Key, tenantPrefix)
+		}
+		return nil
+	}
+	disk, err := filesystem.NewDisk("media", memory.New(), filesystem.WithInterceptors(layer.Guard(onlyAcme)))
+	if err != nil {
+		return err
+	}
+	_, err = disk.WriteBytes(ctx, tenantPrefix+"logo.png", []byte("png"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "guard inside: %v\n", err)
+	_, err = disk.WriteBytes(ctx, "tenants/globex/logo.png", []byte("png"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "guard outside: %s\n", filesystem.CodeOf(err))
+	return nil
+}

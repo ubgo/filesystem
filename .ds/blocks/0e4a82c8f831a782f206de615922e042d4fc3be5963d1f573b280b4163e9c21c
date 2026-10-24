@@ -1,0 +1,4 @@
+type Changelog struct {
+	// Sent collects notifications, standing in for webhook calls.
+	Sent []string
+}

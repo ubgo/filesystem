@@ -1,0 +1,20 @@
+func (a *App) putCover(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxCoverBytes+formOverhead)
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "send the image in the form field \"file\""))
+		return
+	}
+	defer func() { _ = file.Close() }()
+	f, err := a.setCover(r.Context(), r.PathValue("id"), file, header.Filename)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	resp, err := a.describe(r.Context(), f)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, resp)
+}

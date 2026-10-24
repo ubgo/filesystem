@@ -1,0 +1,8 @@
+func checkFirst(ctx context.Context, disk *filesystem.Disk, out io.Writer) {
+	opts := filesystem.WriteOptions{}
+	if disk.Capabilities().Metadata {
+		opts.Metadata = map[string]string{"owner": "u1"}
+	}
+	_, err := disk.WriteBytes(ctx, "report.txt", []byte("x"), opts)
+	fmt.Fprintf(out, "write after checking Metadata: %v\n", err)
+}

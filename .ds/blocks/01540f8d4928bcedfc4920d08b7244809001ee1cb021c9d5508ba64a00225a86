@@ -1,0 +1,8 @@
+func trace(name string, out io.Writer) filesystem.Interceptor {
+	return func(ctx context.Context, op *filesystem.Op, call filesystem.Call) error {
+		fmt.Fprintf(out, "  enter %s (%s %s)\n", name, op.Kind, op.Key)
+		err := call(ctx)
+		fmt.Fprintf(out, "  leave %s\n", name)
+		return err
+	}
+}

@@ -1,0 +1,10 @@
+func ReportSlow(threshold time.Duration, now func() time.Time, report func(SlowOp)) filesystem.Interceptor {
+	return func(ctx context.Context, op *filesystem.Op, call filesystem.Call) error {
+		start := now()
+		err := call(ctx)
+		if took := now().Sub(start); took > threshold {
+			report(SlowOp{Kind: op.Kind, Key: op.Key, Attempts: op.Attempt, Took: took})
+		}
+		return err
+	}
+}

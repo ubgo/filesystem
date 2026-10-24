@@ -1,0 +1,23 @@
+func contentAddressed(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	p := upload.Policy{MaxSize: 1 << 20, Allowed: []string{"image/*"}}
+	owner := func(context.Context) (string, error) { return tenant, nil }
+	p.Key, p.Settle = upload.ContentAddressed("blobs", upload.ContentAddressing{Owner: owner})
+	var keys []string
+	for _, name := range []string{"logo.png", "logo-copy.png"} {
+		res, err := upload.Receive(ctx, disk, strings.NewReader(pngFile), name, p)
+		if err != nil {
+			return err
+		}
+		keys = append(keys, res.Key)
+	}
+	n := 0
+	for _, err := range disk.List(ctx, "blobs", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return err
+		}
+		n++
+	}
+	fmt.Fprintf(out, "content-addressed: same key twice: %t, key is the sha256: %t, objects: %d\n",
+		keys[0] == keys[1], strings.TrimSuffix(path.Base(keys[0]), ".png") == digest(pngFile), n)
+	return nil
+}

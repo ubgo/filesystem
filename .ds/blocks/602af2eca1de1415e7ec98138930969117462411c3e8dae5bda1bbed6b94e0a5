@@ -1,0 +1,36 @@
+func (p *Plugin) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	st, err := records.NewDDL(engine).CreateTable(records.Table{
+		Table: Table,
+		Columns: []ddl.ColumnSpec{
+			records.Column(ID, t.Key), records.Column(Scope, t.Key), records.Column(FileID, t.Key), records.Column(TokenHash, t.Short),
+			records.Column(ExpiresAt, t.Timestamp), records.Column(MaxDownloads, t.Int), records.Column(Downloads, t.Int),
+			records.Column(RevokedAt, t.Timestamp), records.Column(CreatedAt, t.Timestamp),
+		},
+		PrimaryKey: []ddl.ColumnRef{ID},
+		Indexes: []records.Index{
+			{Name: "fs_shares_token", Unique: true, Columns: []records.IndexColumn{records.Key(TokenHash)}},
+			{Name: "fs_shares_file", Columns: []records.IndexColumn{records.Key(FileID)}},
+		},
+	}).Statements()
+	more, err2 := records.NewDDL(engine).
+		AddColumn(Table, records.Column(PasswordHash, t.Text).Default("")).
+		AddColumn(Table, records.Column(TargetKind, t.Short).Default(KindFile)).
+		AddColumn(Table, records.Column(TargetRef, t.Key).Default("")).
+		AddColumn(Table, records.Column(Mode, t.Short).Default(ModeDownload)).
+		CreateTable(records.Table{
+			Table: EventsTable,
+			Columns: []ddl.ColumnSpec{
+				records.Column(EventID, t.Key), records.Column(EventScope, t.Key), records.Column(EventShareID, t.Key),
+				records.Column(EventAt, t.Timestamp), records.Column(EventViewer, t.Key),
+			},
+			PrimaryKey: []ddl.ColumnRef{EventID},
+			Indexes: []records.Index{
+				{Name: "fs_share_events_share", Columns: []records.IndexColumn{records.Key(EventShareID), records.Key(EventAt), records.Key(EventID)}},
+			},
+		}).Statements()
+	return []records.Migration{
+		{Owner: PluginName, Name: "0001_shares", Statements: st},
+		{Owner: PluginName, Name: "0002_shares_access", Statements: more},
+	}, errors.Join(err, err2)
+}

@@ -1,0 +1,9 @@
+func newPolicy() (upload.Policy, error) {
+	dims, err := imaging.CheckDimensions(imaging.DimensionLimits{MinWidth: minCoverWidth, MinHeight: minCoverHeight})
+	if err != nil {
+		return upload.Policy{}, err
+	}
+	p := coverPolicy
+	p.Inspect = dims
+	return p, nil
+}

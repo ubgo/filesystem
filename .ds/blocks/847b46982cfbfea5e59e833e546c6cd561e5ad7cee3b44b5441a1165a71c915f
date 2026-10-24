@@ -1,0 +1,3 @@
+func openGorm(db *sql.DB) (*gorm.DB, error) {
+	return gorm.Open(gormlite.OpenDB(db), &gorm.Config{Logger: logger.Discard})
+}

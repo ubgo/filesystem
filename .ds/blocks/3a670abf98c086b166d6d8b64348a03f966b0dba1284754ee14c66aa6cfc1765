@@ -1,0 +1,3 @@
+func svgPipeline() *imaging.Pipeline {
+	return imaging.NewPipeline(imaging.WithDecoder(raster.Decoder(raster.Options{Side: rasterSide})))
+}

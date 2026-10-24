@@ -1,0 +1,60 @@
+func largeBlobs(ctx context.Context, out io.Writer) error {
+	for _, c := range []struct {
+		label       string
+		blockSize   int64
+		concurrency int
+		body        int64
+	}{
+		{"defaults", 0, 0, 9 * mib},
+		{"2 MiB blocks, one at a time", 2 * mib, 1, 5 * mib},
+		{"1 MiB blocks, three at once", 1 * mib, 3, 9 * mib},
+	} {
+		counter := &blockCounter{}
+		srv := httptest.NewServer(counter)
+		client, err := azblob.NewClientWithNoCredential(srv.URL+"/", &azblob.ClientOptions{ClientOptions: azcore.ClientOptions{Retry: policy.RetryOptions{MaxRetries: -1}}})
+		if err != nil {
+			srv.Close()
+			return err
+		}
+		disk, err := backupDisk(client, c.blockSize, c.concurrency)
+		if err != nil {
+			srv.Close()
+			return err
+		}
+		_, err = disk.Write(ctx, "db/2026-10-09.dump", bytes.NewReader(make([]byte, c.body)), filesystem.WriteOptions{})
+		srv.Close()
+		if err != nil {
+			return err
+		}
+		counter.mu.Lock()
+		staged := slices.Clone(counter.sizes)
+		peak := counter.peak
+		counter.mu.Unlock()
+		// Blocks staged at once arrive in any order; the last block is the
+		// remainder, so print them largest first.
+		slices.SortFunc(staged, func(a, b int64) int { return cmp.Compare(b, a) })
+		sizes := make([]string, len(staged))
+		for i, n := range staged {
+			sizes[i] = fmt.Sprint(n / mib)
+		}
+		limit := c.concurrency
+		if limit == 0 {
+			limit = azure.DefaultConcurrency
+		}
+		fmt.Fprintf(out, "%s: %d MiB staged as %d blocks (MiB: %s), at most %d in flight: %t\n",
+			c.label, c.body/mib, len(sizes), strings.Join(sizes, ","), limit, peak <= limit)
+	}
+	client, err := azblob.NewClientWithNoCredential("http://127.0.0.1:1/", nil)
+	if err != nil {
+		return err
+	}
+	for _, c := range []struct {
+		label       string
+		blockSize   int64
+		concurrency int
+	}{{"512 KiB blocks", azure.MinBlockSize / 2, 0}, {"4001 MiB blocks", azure.MaxBlockSize + mib, 0}, {"negative concurrency", 0, -1}} {
+		_, err := backupDisk(client, c.blockSize, c.concurrency)
+		fmt.Fprintf(out, "%s: %s\n", c.label, filesystem.CodeOf(err))
+	}
+	return nil
+}

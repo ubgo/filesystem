@@ -1,0 +1,15 @@
+func buildGallery(ctx context.Context, s *records.Store, post records.Owner) ([]records.Attachment, error) {
+	var out []records.Attachment
+	for _, name := range []string{"beach.jpg", "dunes.jpg", "sunset.jpg"} {
+		f, err := store(ctx, s, name)
+		if err != nil {
+			return nil, err
+		}
+		a, err := s.Attach(ctx, tenant, f.ID, post, roleGallery)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, a)
+	}
+	return out, nil
+}

@@ -1,0 +1,17 @@
+func (n Notes) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	body := records.Column(noteBody, t.Doc)
+	if n.Edited {
+		body = records.Column(noteText, t.Doc)
+	}
+	table, err1 := records.NewDDL(engine).CreateTable(records.Table{
+		Table:      notes,
+		Columns:    []ddl.ColumnSpec{records.Column(noteFileID, t.Key), body},
+		PrimaryKey: []ddl.ColumnRef{noteFileID},
+	}).Statements()
+	author, err2 := addAuthor(engine)
+	return []records.Migration{
+		{Owner: n.Name(), Name: "0001_notes", Statements: table},
+		{Owner: n.Name(), Name: "0002_notes_author", Statements: author},
+	}, errors.Join(err1, err2)
+}

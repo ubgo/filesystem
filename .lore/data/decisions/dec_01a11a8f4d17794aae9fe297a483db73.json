@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "The dry run of Disk.SweepAbandoned is Disk.FindAbandoned through filesystem.AbandonedFinder and Capabilities.FindAbandoned (requires SweepAbandoned; verifyCapabilities refuses it alone). A separate bit, not implied by SweepAbandoned, so drivers that can sweep but have not yet implemented the preview (sftp, ftp, webdav, contrib/crypt at the time) stay honest. Each driver implements both from one scan function so the preview and the sweep cannot disagree on what is abandoned. Like SweepAbandoned it is backend-wide and never forwarded by scoped, mirror, failover, cached-read or route disks. (2026-10-08, tsk_01a115fba3bf78319e00dc3998121dc7)",
+  "confidence": null,
+  "created_at": "2026-10-08T08:09:21.431608000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11a8f4d17794aae9fe297a483db73",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "FindAbandoned is a separate capability bit implemented from the same scan as SweepAbandoned",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:09:21.431608000Z"
+}

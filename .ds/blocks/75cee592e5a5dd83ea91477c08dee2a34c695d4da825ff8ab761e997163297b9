@@ -1,0 +1,8 @@
+func photoPolicy() upload.Policy {
+	return upload.Policy{
+		MaxSize:        maxPhotoSize,
+		Allowed:        []string{"image/png", "image/jpeg", "image/webp", "image/gif"},
+		MatchExtension: true,
+		Key:            upload.RandomKey(rolePhotos),
+	}
+}

@@ -1,0 +1,7 @@
+func tenantDay(scope string, at time.Time) string {
+	loc, ok := zoneOf[scope]
+	if !ok {
+		loc = time.UTC
+	}
+	return at.In(loc).Format(egress.DayLayout)
+}

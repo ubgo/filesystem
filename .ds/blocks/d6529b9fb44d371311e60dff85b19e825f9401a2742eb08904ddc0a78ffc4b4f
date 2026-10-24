@@ -1,0 +1,12 @@
+func digest(ctx context.Context, d *filesystem.Disk, key string) (string, error) {
+	rc, err := d.Read(ctx, key)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = rc.Close() }()
+	h := sha256.New()
+	if _, err := io.Copy(h, rc); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
+}

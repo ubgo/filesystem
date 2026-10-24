@@ -1,0 +1,13 @@
+func limitsFor(planOf func(ctx context.Context, scope string) (string, error)) quota.LimitFunc {
+	return func(ctx context.Context, scope string) (quota.Limit, error) {
+		plan, err := planOf(ctx, scope)
+		if err != nil {
+			return quota.Limit{}, err
+		}
+		limit, ok := planLimit(plan)
+		if !ok {
+			return quota.Limit{}, fmt.Errorf("scope %q has unknown plan %q", scope, plan)
+		}
+		return limit, nil
+	}
+}

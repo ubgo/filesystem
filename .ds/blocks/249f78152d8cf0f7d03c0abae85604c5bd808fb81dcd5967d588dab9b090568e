@@ -1,0 +1,24 @@
+func scopedDisks(ctx context.Context, shared *filesystem.Disk, out io.Writer) error {
+	for _, tenant := range []string{"acme", "globex"} {
+		d, err := tenantDisk(shared, tenant)
+		if err != nil {
+			return err
+		}
+		if _, err := d.WriteBytes(ctx, "logo.png", []byte(tenant+" logo"), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	acme, err := tenantDisk(shared, "acme")
+	if err != nil {
+		return err
+	}
+	b, err := acme.ReadAll(ctx, "logo.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "acme reads logo.png: %q\n", b)
+	fmt.Fprintf(out, "shared disk holds: %s\n", strings.Join(keys(ctx, shared, ""), " "))
+	_, err = acme.ReadAll(ctx, "../globex/logo.png")
+	fmt.Fprintf(out, "acme reads ../globex/logo.png: %s\n", filesystem.CodeOf(err))
+	return nil
+}

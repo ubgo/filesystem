@@ -1,0 +1,15 @@
+func (a *App) uploadAsset(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxUpload+64<<10)
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "send the file in the form field \"file\""))
+		return
+	}
+	defer func() { _ = file.Close() }()
+	f, err := a.Store.Upload(r.Context(), "", "", file, header.Filename, uploadPolicy)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	a.respond(w, r, f)
+}

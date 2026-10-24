@@ -1,0 +1,5 @@
+func (a *App) download(w http.ResponseWriter, r *http.Request) {
+	a.redirect(w, r, func(ctx context.Context, f records.File) (string, error) {
+		return a.Store.DownloadURL(ctx, f, linkLifetime)
+	})
+}

@@ -1,0 +1,12 @@
+func (a *App) enqueue(ctx context.Context, tenant string, body io.Reader, filename string) (records.File, error) {
+	var f records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		stored, err := a.Store.Upload(ctx, tenant, diskName, body, filename, importPolicy)
+		if err != nil {
+			return err
+		}
+		f, err = a.Store.SetStatus(ctx, tenant, stored.ID, records.StatusProcessing, detailQueued)
+		return err
+	})
+	return f, err
+}

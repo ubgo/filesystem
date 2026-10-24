@@ -1,0 +1,24 @@
+func newPerLinkStore(ctx context.Context, db *sql.DB, now func() time.Time) (*records.Store, *egress.Plugin, *share.Plugin, error) {
+	signer, err := signedurl.New("https://app.example.com/files", []signedurl.Key{{ID: "k1", Secret: []byte("0123456789abcdef0123456789abcdef")}})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	eg := egress.New(egress.WithPerSubject(records.ServeShare))
+	sp := share.New()
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithClock(now), records.WithPlugins(eg, sp))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, nil, err
+	}
+	return s, eg, sp, nil
+}

@@ -1,0 +1,6 @@
+func modernPipeline() *imaging.Pipeline {
+	return imaging.NewPipeline(
+		imaging.WithEncoder(webp.Encoder()), imaging.WithDecoder(webp.Decoder()),
+		imaging.WithEncoder(avif.Encoder()), imaging.WithDecoder(avif.Decoder()),
+	)
+}

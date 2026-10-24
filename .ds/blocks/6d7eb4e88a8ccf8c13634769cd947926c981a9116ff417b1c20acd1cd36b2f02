@@ -1,0 +1,65 @@
+func New(ctx context.Context, dataDir, baseURL string, secret []byte) (*App, error) {
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, err
+	}
+	signer, err := signedurl.New(baseURL+"/files", []signedurl.Key{{ID: "k1", Secret: secret}})
+	if err != nil {
+		return nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, drv, filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, err
+	}
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "drive.db")+"?_pragma=busy_timeout(5000)")
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+
+	q, err := quota.New(func(context.Context, string) (quota.Limit, error) { return quota.Limit{Bytes: workspaceBytes}, nil })
+	if err != nil {
+		return nil, err
+	}
+	v, err := versions.New(versions.WithKeep(keptVersions))
+	if err != nil {
+		return nil, err
+	}
+	app := &App{Folders: folders.New(), Tags: tags.New(), Versions: v, Shares: share.New(), Audit: audit.New(), Quota: q}
+	app.Store, err = records.New(db, sqlb.SQLiteDialect{}, disks, records.WithOwnerTypes(ownerProject),
+		records.WithPlugins(app.Quota, app.Versions, app.Folders, app.Tags, app.Shares, app.Audit, dimensions.New()))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := app.Store.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	files, err := recordshttp.Handler(recordshttp.Config{
+		Store: app.Store, Disk: diskName, Policy: policy,
+		Scope: func(r *http.Request) (string, error) { return identify(r) },
+		// Every member of a workspace may do everything in it; a real app
+		// checks roles or project membership here.
+		Authorize: func(*http.Request, recordshttp.Action, recordshttp.Target) error { return nil },
+	})
+	if err != nil {
+		return nil, err
+	}
+	mux := http.NewServeMux()
+	mux.Handle("/api/", http.StripPrefix("/api", files))
+	mux.HandleFunc("POST /api/folders", app.createFolder)
+	mux.HandleFunc("PUT /api/files/{id}/folder", app.moveFile)
+	mux.HandleFunc("PUT /api/files/{id}/tags", app.setTags)
+	mux.HandleFunc("GET /api/files/{id}/versions", app.listVersions)
+	mux.HandleFunc("POST /api/versions/{id}/restore", app.restoreVersion)
+	mux.HandleFunc("POST /api/files/{id}/share", app.shareFile)
+	mux.HandleFunc("GET /api/activity", app.activity)
+	mux.HandleFunc("GET /api/usage", app.usage)
+	mux.Handle("/s/", http.StripPrefix("/s/", share.Handler(app.Store, app.Shares)))
+	mux.Handle("/files/", http.StripPrefix("/files", fshttp.Signed(disks, signer)))
+	app.Handler = withActor(mux)
+	return app, nil
+}

@@ -1,0 +1,11 @@
+func previewTrash(ctx context.Context, out io.Writer, store *records.Store, now time.Time) error {
+	sweep := jobs.SweepTrash(store, trashRetention)
+	plan, err := sweep.DryRun(ctx, now)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "dry run: would purge %d file(s)\n", plan.Count)
+	done, err := sweep.Run(ctx, now)
+	fmt.Fprintf(out, "sweep: purged %d file(s)\n", done.Count)
+	return err
+}

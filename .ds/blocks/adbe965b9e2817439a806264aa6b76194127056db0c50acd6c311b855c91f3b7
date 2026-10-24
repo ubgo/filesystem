@@ -1,0 +1,7 @@
+func dimensionLine(ctx context.Context, s *records.Store, q *quota.Plugin, key string) (string, error) {
+	u, err := q.DimensionUsage(ctx, s, key)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s: %d bytes, %d files", key, u.Bytes, u.Files), nil
+}

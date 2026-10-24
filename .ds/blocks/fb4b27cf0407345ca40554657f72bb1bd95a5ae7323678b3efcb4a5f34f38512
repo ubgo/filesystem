@@ -1,0 +1,13 @@
+func conditionalWrite(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("locks", memory.New())
+	if err != nil {
+		return err
+	}
+	opts := filesystem.WriteOptions{IfNotExists: true}
+	if _, err := disk.WriteBytes(ctx, "jobs/nightly.lock", []byte("worker-1"), opts); err != nil {
+		return err
+	}
+	_, err = disk.WriteBytes(ctx, "jobs/nightly.lock", []byte("worker-2"), opts)
+	fmt.Fprintf(out, "second IfNotExists write: %s\n", filesystem.CodeOf(err))
+	return nil
+}

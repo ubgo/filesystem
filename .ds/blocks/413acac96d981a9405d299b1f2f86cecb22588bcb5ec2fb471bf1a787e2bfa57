@@ -1,0 +1,11 @@
+func signingKeys(lookup func(string) (string, bool)) []signedurl.Key {
+	current, ok := lookup(envKeyCurrent)
+	if !ok {
+		current = string(demoSecret)
+	}
+	keys := []signedurl.Key{{ID: keyIDCurrent, Secret: []byte(current)}}
+	if previous, ok := lookup(envKeyPrevious); ok {
+		keys = append(keys, signedurl.Key{ID: keyIDPrevious, Secret: []byte(previous)})
+	}
+	return keys
+}

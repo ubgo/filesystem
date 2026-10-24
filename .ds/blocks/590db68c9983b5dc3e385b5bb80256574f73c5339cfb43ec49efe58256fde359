@@ -1,0 +1,13 @@
+func refusals(ctx context.Context, mux *filesystem.Mux, out io.Writer) {
+	_, err := mux.Open(ctx, "media", "mem://?visiblity=public")
+	fmt.Fprintf(out, "typo: %v\n", err)
+	_, err = mux.Open(ctx, "media", "s3://AKIA:topsecret@bucket?region=auto")
+	fmt.Fprintf(out, "unregistered: %v\n", err)
+	ro, err := mux.Open(ctx, "archive", "mem://?readonly=true")
+	if err != nil {
+		fmt.Fprintf(out, "readonly: %v\n", err)
+		return
+	}
+	_, err = ro.WriteBytes(ctx, "a.txt", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "readonly write: %s\n", filesystem.CodeOf(err))
+}

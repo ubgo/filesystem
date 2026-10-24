@@ -1,0 +1,13 @@
+func TestReportSlow(t *testing.T) {
+	clock := time.Unix(0, 0)
+	now := func() time.Time { clock = clock.Add(time.Second); return clock }
+	var got []SlowOp
+	d, err := filesystem.NewDisk("d", memory.New(), filesystem.WithInterceptors(ReportSlow(slowThreshold, now, func(s SlowOp) { got = append(got, s) })))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = d.Stat(t.Context(), "k")
+	if len(got) != 1 || got[0].Kind != filesystem.OpStat || got[0].Attempts != 1 || got[0].Took != time.Second {
+		t.Errorf("reports = %+v", got)
+	}
+}

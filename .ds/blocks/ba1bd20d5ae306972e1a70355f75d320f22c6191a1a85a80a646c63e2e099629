@@ -1,0 +1,9 @@
+func openDB(ctx context.Context, dataDir string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "app.db")+"?_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)")
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+	_, err = db.ExecContext(ctx, appSchema)
+	return db, err
+}

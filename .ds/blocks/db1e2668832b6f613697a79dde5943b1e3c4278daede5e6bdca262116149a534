@@ -1,0 +1,23 @@
+func dataURI(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("icons", memory.New())
+	if err != nil {
+		return err
+	}
+	files := map[string][]byte{
+		"pixel.png": pixel,
+		"logo.svg":  []byte(`<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>`),
+		"hero.png":  append(slices.Clone(pixel), make([]byte, inlineLimit)...),
+	}
+	for _, key := range []string{"pixel.png", "logo.svg", "hero.png"} {
+		if _, err := disk.Write(ctx, key, bytes.NewReader(files[key]), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+		uri, err := disk.DataURI(ctx, key, inlineLimit)
+		if err != nil {
+			fmt.Fprintf(out, "data URI %s: %s\n", key, filesystem.CodeOf(err))
+			continue
+		}
+		fmt.Fprintf(out, "data URI %s: %s… (%d chars)\n", key, uri[:len("data:image/png;base64,")], len(uri))
+	}
+	return nil
+}

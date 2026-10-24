@@ -1,0 +1,15 @@
+func loadHashList(r io.Reader) ([]scan.Digest, error) {
+	var list []scan.Digest
+	lines := bufio.NewScanner(r)
+	for n := 1; lines.Scan(); n++ {
+		line := strings.TrimSpace(lines.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if b, err := hex.DecodeString(line); err != nil || len(b) != sha256.Size {
+			return nil, fmt.Errorf("hash list line %d: not a SHA-256: %q", n, line)
+		}
+		list = append(list, scan.Digest{Algorithm: scan.AlgorithmSHA256, Value: line})
+	}
+	return list, lines.Err()
+}

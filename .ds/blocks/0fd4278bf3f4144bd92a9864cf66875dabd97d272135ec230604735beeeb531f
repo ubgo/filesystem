@@ -1,0 +1,11 @@
+func galleryAPI(store *records.Store) (http.Handler, error) {
+	return recordshttp.Handler(recordshttp.Config{
+		Store:        store,
+		Disk:         diskName,
+		Policy:       galleryPolicy,
+		MaxFiles:     maxImagesPerRequest,
+		Scope:        catalogScope,
+		Authorize:    authorize,
+		LinkLifetime: linkLifetime,
+	})
+}

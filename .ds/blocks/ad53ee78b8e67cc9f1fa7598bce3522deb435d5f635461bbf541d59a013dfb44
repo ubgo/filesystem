@@ -1,0 +1,16 @@
+func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	userID := r.PathValue("id")
+	var purged int
+	err := a.Store.Tx(r.Context(), func(ctx context.Context, tx *sql.Tx) error {
+		var err error
+		if purged, err = a.Store.PurgeOwner(ctx, "", records.Owner{Type: ownerUser, ID: userID}); err != nil {
+			return err
+		}
+		return deleteUserRow(ctx, tx, userID)
+	})
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]int{"files_purged": purged})
+}

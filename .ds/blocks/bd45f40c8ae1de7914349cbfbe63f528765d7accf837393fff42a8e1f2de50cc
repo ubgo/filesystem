@@ -1,0 +1,7 @@
+func restore(ctx context.Context, s *records.Store, v *versions.Plugin, versionID string) (records.File, error) {
+	ver, err := v.Version(ctx, s, tenant, versionID)
+	if err != nil {
+		return records.File{}, err
+	}
+	return v.Restore(ctx, s, tenant, ver.ID)
+}

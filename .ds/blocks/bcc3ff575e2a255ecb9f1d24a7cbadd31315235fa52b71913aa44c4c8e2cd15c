@@ -1,0 +1,5 @@
+func objectFirst(ctx context.Context, d *demo, out io.Writer) error {
+	_, err := d.store.CreateFile(ctx, records.NewFile{Scope: scope, Disk: diskName, Key: "uploads/never-written.pdf", Filename: "x.pdf"})
+	fmt.Fprintf(out, "record a missing object: %s\n", filesystem.CodeOf(err))
+	return nil
+}

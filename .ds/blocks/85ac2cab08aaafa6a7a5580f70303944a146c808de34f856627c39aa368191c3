@@ -1,0 +1,9 @@
+func names(out io.Writer) {
+	for _, n := range []string{"shell.php.jpg", ".htaccess", "setup.exe", "holiday.jpg"} {
+		fmt.Fprintf(out, "name %s: %q\n", n, filesystem.CodeOf(images.AcceptsName(n, "image/jpeg")))
+	}
+	strict := images
+	strict.MatchExtension = true
+	err := strict.AcceptsName("invoice.pdf", "image/png")
+	fmt.Fprintf(out, "PNG named invoice.pdf with MatchExtension: %v\n", err)
+}

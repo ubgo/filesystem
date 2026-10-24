@@ -1,0 +1,17 @@
+func newApp(a *app.App) *fiber.App {
+	f := fiber.New(fiber.Config{
+		BodyLimit:    bodyLimit,
+		ReadTimeout:  readTimeout,
+		ErrorHandler: fsfiber.ErrorHandler(fiber.DefaultErrorHandler),
+	})
+	f.Use(recover.New())
+	f.Post(app.PathUpload, fsfiber.Handler(a.Upload))
+	fsfiber.Mount(f, app.PathFiles, a.Files)
+	me := f.Group(app.GroupMe,
+		fsfiber.Actor(func(c fiber.Ctx) (string, error) { return c.Get(app.HeaderUser), nil }),
+		fsfiber.Scope(tenant),
+	)
+	fsfiber.Mount(me, app.MountMedia, a.Records)
+	me.Get(app.PathExport+"/:"+app.ParamRole, func(c fiber.Ctx) error { return export(c, a) })
+	return f
+}

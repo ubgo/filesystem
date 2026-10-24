@@ -1,0 +1,10 @@
+func openDisk(ctx context.Context, host string) (*filesystem.Disk, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(webdav.Scheme, webdav.Opener); err != nil {
+		return nil, err
+	}
+	if err := mux.Register(webdav.SchemeSecure, webdav.Opener); err != nil {
+		return nil, err
+	}
+	return mux.Open(ctx, "cloud", "webdav://"+davUser+"@"+host+davPrefix+"/app?password_env="+passwordEnv)
+}

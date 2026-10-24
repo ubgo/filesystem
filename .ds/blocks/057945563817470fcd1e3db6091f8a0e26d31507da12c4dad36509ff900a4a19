@@ -1,0 +1,23 @@
+func responseContentType(ctx context.Context, out io.Writer, client *s3.Client, _ *fakeS3) error {
+	disk, err := newBucketDisk(ctx, client, "exports", fss3.Config{})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "export.dat", []byte("id,name\n1,ada\n"), filesystem.WriteOptions{ContentType: "application/octet-stream"}); err != nil {
+		return err
+	}
+	req, err := disk.SignedURL(ctx, "export.dat", filesystem.PresignOptions{
+		Method:      filesystem.MethodGet,
+		Expires:     linkLifetime,
+		ContentType: "text/plain", // signed as response-content-type
+	})
+	if err != nil {
+		return err
+	}
+	resp, err := httpGet(ctx, req.URL)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "signed GET with a type override: %d %s\n", resp.StatusCode, resp.Header.Get("Content-Type"))
+	return nil
+}

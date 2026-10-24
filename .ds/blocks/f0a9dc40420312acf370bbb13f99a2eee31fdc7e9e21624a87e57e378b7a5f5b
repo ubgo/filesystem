@@ -1,0 +1,15 @@
+func checksums(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	body := []byte("invoice 1042, total 42.00")
+	sum := sha256.Sum256(body)
+	if _, err := disk.WriteBytes(ctx, "invoices/1042.txt", body, filesystem.WriteOptions{SHA256: hex.EncodeToString(sum[:])}); err != nil {
+		return err
+	}
+	wrong := sha256.Sum256([]byte("tampered"))
+	_, err := disk.WriteBytes(ctx, "invoices/1043.txt", body, filesystem.WriteOptions{SHA256: hex.EncodeToString(wrong[:])})
+	stored, existsErr := disk.Exists(ctx, "invoices/1043.txt")
+	if existsErr != nil {
+		return existsErr
+	}
+	fmt.Fprintf(out, "checksums: matching digest stored, wrong digest %s, stored=%t\n", filesystem.CodeOf(err), stored)
+	return nil
+}

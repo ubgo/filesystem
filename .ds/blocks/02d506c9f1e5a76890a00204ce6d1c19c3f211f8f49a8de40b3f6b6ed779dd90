@@ -1,0 +1,12 @@
+func health(disks *filesystem.Manager, logger *slog.Logger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), checkTimeout)
+		defer cancel()
+		if err := disks.Check(ctx); err != nil {
+			logger.WarnContext(ctx, "storage check failed", "error", err)
+			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+			return
+		}
+		_, _ = io.WriteString(w, "ok\n") // a probe that hung up cannot be told
+	})
+}

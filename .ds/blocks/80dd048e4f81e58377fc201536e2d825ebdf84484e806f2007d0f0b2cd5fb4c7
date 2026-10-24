@@ -1,0 +1,8 @@
+func embedOnPost(f records.File) (records.File, json.RawMessage, error) {
+	raw, err := records.Embed(f)
+	if err != nil {
+		return records.File{}, nil, err
+	}
+	back, err := records.Unembed(raw)
+	return back, raw, err
+}

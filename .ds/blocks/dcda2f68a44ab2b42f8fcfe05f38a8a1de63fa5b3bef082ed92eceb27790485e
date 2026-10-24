@@ -1,0 +1,3 @@
+func newPolicy() (upload.Policy, error) {
+	return svg.Policy(images, svg.Options{AllowDataImages: true})
+}

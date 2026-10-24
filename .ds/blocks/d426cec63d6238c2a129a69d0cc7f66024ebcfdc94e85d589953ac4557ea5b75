@@ -1,0 +1,12 @@
+func cdnURL(ctx context.Context, _ *app, out io.Writer) error {
+	disk, err := filesystem.NewDisk("cdn", memory.New(), filesystem.WithPublicURL(cdnBase))
+	if err != nil {
+		return err
+	}
+	u, err := disk.PublicURL(ctx, "products/blue shirt.jpg")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "public URL %s\n", u)
+	return nil
+}

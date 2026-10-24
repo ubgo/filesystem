@@ -1,0 +1,9 @@
+func newProxyHandler(s *records.Store, p *variants.Plugin) http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("/variants/", http.StripPrefix("/variants/",
+		variants.Handler(s, p, scopeOf, variants.HandlerOptions{
+			Mode:         variants.ModeProxy,
+			CacheControl: proxyCacheControl,
+		})))
+	return mux
+}

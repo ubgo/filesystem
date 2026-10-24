@@ -1,0 +1,5 @@
+func blobPolicy() upload.Policy {
+	p := upload.Policy{MaxSize: maxUpload, Allowed: []string{"text/plain"}}
+	p.Key, p.Settle = upload.ContentAddressed(blobDir, upload.ContentAddressing{Owner: tenantFromContext})
+	return p
+}

@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": null,
+  "commitment": "accepted",
+  "completed_at": "2026-10-05T15:43:21.802162000Z",
+  "created_at": "2026-10-05T15:20:18.856008000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a10ca6c6a8702789dc909a89ee63d8",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "low",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-05T15:41:23.803618000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "adapters/sftp: SweepAbandoned for staged temp files left by a crash between staging and rename",
+  "updated_at": "2026-10-05T15:43:21.802174000Z"
+}

@@ -1,0 +1,6 @@
+func (Guard) BeforePurge(_ context.Context, _ *records.Store, f records.File) error {
+	if f.Metadata[metaHold] == "true" {
+		return filesystem.Errorf(filesystem.CodePermission, "file %s is under legal hold", f.ID)
+	}
+	return nil
+}

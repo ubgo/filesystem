@@ -1,0 +1,14 @@
+func copyAndMove(ctx context.Context, out io.Writer, name string, disk *filesystem.Disk) error {
+	if _, err := disk.Copy(ctx, "notes/todo.txt", "archive/todo.txt"); err != nil {
+		return err
+	}
+	if _, err := disk.Move(ctx, "archive/todo.txt", "archive/2026/todo.txt"); err != nil {
+		return err
+	}
+	listed, err := keys(ctx, disk, "")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "%s: after copy and move: %v\n", name, listed)
+	return nil
+}

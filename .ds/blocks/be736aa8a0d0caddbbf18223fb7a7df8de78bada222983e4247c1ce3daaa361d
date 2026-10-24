@@ -1,0 +1,13 @@
+func refusedDSNs(ctx context.Context, out io.Writer) {
+	mux := filesystem.NewMux()
+	_ = mux.Register(fss3.Scheme, fss3.Opener)
+	for _, c := range []struct{ why, dsn string }{
+		{"keys in the URL", "s3://AKIAEXAMPLE:secret@my-bucket?region=auto"},
+		{"access_key_env alone", "s3://my-bucket?region=auto&access_key_env=" + accessKeyEnv},
+		{"unset key variable", "s3://my-bucket?region=auto&access_key_env=NOT_SET_ANYWHERE&secret_key_env=" + secretKeyEnv},
+		{"path_style=yes", "s3://my-bucket?region=auto&path_style=yes"},
+	} {
+		_, err := mux.Open(ctx, "refused", c.dsn)
+		fmt.Fprintf(out, "refused DSN (%s): %s\n", c.why, filesystem.CodeOf(err))
+	}
+}

@@ -1,0 +1,3 @@
+func slug(tag string) (string, error) {
+	return tags.Check(strings.Join(strings.Fields(strings.ToLower(tag)), "-"))
+}

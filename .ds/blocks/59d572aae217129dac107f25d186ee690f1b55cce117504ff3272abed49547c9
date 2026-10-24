@@ -1,0 +1,11 @@
+func history(ctx context.Context, s *records.Store, v *versions.Plugin, fileID string) (string, []versions.Version, error) {
+	list, err := v.Versions(ctx, s, tenant, fileID)
+	if err != nil {
+		return "", nil, err
+	}
+	parts := make([]string, 0, len(list))
+	for _, ver := range list {
+		parts = append(parts, fmt.Sprintf("v%d:%dB@%s", ver.Number, ver.Size, ver.Disk))
+	}
+	return strings.Join(parts, " "), list, nil
+}

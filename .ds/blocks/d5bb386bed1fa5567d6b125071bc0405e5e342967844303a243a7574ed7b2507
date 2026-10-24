@@ -1,0 +1,6 @@
+func listBig(ctx context.Context, s *records.Store) (records.FilePage, error) {
+	return s.Files(ctx, records.FileQuery{
+		Scope:   tenant,
+		Filters: []sqlb.Predicate{sqlb.Greater(records.FileSize, int64(bigFile))},
+	})
+}

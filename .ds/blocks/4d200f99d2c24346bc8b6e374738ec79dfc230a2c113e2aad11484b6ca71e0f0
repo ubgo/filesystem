@@ -1,0 +1,19 @@
+func (a *App) replaceFile(w http.ResponseWriter, r *http.Request) {
+	ws, err := workspaceOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	file, name, err := formFile(w, r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	defer func() { _ = file.Close() }()
+	f, err := a.Store.Replace(r.Context(), ws, r.PathValue("id"), file, name, policy)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, toResponse(f))
+}

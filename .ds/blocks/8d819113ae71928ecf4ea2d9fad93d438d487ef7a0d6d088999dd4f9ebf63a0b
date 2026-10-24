@@ -1,0 +1,7 @@
+func planKeep(_ context.Context, req versions.KeepRequest) (versions.KeepPolicy, error) {
+	pol, ok := historyPlans[req.File.Scope]
+	if !ok {
+		return versions.KeepPolicy{}, filesystem.Errorf(filesystem.CodePermission, "no plan for scope %q", req.File.Scope)
+	}
+	return pol, nil
+}

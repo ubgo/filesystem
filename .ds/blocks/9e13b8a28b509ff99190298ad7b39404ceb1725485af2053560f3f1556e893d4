@@ -1,0 +1,1 @@
+func newSlugPlugin() *tags.Plugin { return tags.New(tags.WithNormalize(slug)) }

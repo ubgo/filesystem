@@ -1,0 +1,16 @@
+func renderForm(out io.Writer, post filesystem.PresignedPost) error {
+	fields := make([]formField, 0, len(post.Fields))
+	for name, value := range post.Fields {
+		if name == "policy" || name == "X-Amz-Signature" {
+			value = value[:8] + "…" // shortened for the printout only
+		}
+		fields = append(fields, formField{name, value})
+	}
+	sort.Slice(fields, func(i, j int) bool { return fields[i].Name < fields[j].Name })
+	return formTemplate.Execute(out, struct {
+		URL    string
+		Fields []formField
+		File   string
+		Accept string
+	}{post.URL, fields, filesystem.PostFileField, avatarType})
+}

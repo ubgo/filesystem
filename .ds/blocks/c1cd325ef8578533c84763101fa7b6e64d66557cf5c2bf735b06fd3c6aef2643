@@ -1,0 +1,13 @@
+func (p *Plugin) OnEvent(ctx context.Context, s *records.Store, e records.Event) error {
+	if e.Kind != records.EventFileTrashed {
+		return nil
+	}
+	held, err := p.isHeld(ctx, s, e.Scope, e.FileID)
+	if err != nil {
+		return err
+	}
+	if held {
+		return filesystem.NewError(filesystem.CodePermission, errHeld)
+	}
+	return nil
+}

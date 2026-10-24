@@ -1,0 +1,3 @@
+func setAvatar(ctx context.Context, s *records.Store, user records.Owner, fileID string) (records.Attachment, error) {
+	return s.SetAttachment(ctx, tenant, fileID, user, roleAvatar, records.PreviousTrash)
+}

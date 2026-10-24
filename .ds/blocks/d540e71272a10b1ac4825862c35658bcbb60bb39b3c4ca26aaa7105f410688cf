@@ -1,0 +1,17 @@
+func fileInfo(disk *filesystem.Disk) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if c.Request().Header.Get(app.HeaderUser) == "" {
+			return c.JSON(http.StatusUnauthorized, app.Problem{Error: app.ErrSignedOutMessage, Code: filesystem.CodePermission})
+		}
+		// echo hands wildcard parameters over still percent-encoded.
+		key, err := url.PathUnescape(c.Param("*"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, app.Problem{Error: "malformed path", Code: filesystem.CodeInvalidKey})
+		}
+		entry, err := disk.Stat(c.Request().Context(), key)
+		if err != nil {
+			return c.JSON(fshttp.StatusOf(err), app.ProblemOf(err))
+		}
+		return c.JSON(http.StatusOK, app.InfoOf(entry))
+	}
+}

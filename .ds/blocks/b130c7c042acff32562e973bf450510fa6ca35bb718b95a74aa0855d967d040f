@@ -1,0 +1,8 @@
+func moveLastToFront(ctx context.Context, s *records.Store, post records.Owner, atts []records.Attachment) error {
+	last := len(atts) - 1
+	ids := []string{atts[last].ID}
+	for _, a := range atts[:last] {
+		ids = append(ids, a.ID)
+	}
+	return s.Reorder(ctx, tenant, post, roleGallery, ids)
+}

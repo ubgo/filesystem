@@ -1,0 +1,11 @@
+func emptyAndDelete(ctx context.Context, s *records.Store, fp *folders.Plugin, folder string, f records.File) (refused filesystem.Code, after string, err error) {
+	refused = filesystem.CodeOf(fp.Delete(ctx, s, tenant, folder))
+	if err = s.Trash(ctx, tenant, f.ID); err != nil {
+		return "", "", err
+	}
+	if err = fp.Delete(ctx, s, tenant, folder); err != nil {
+		return "", "", err
+	}
+	after, err = fp.FolderOf(ctx, s, tenant, f.ID)
+	return refused, after, err
+}

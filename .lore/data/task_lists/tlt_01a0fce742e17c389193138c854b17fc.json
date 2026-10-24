@@ -1,0 +1,11 @@
+{
+  "_table": "task_lists",
+  "_v": 1,
+  "body": "Research and design work before any code: landscape, feature catalogue, reference study, architecture brainstorm, scope decisions.",
+  "created_at": "2026-10-02T13:56:49.505782000Z",
+  "id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "status_str": "active",
+  "title": "Exploration and brainstorm",
+  "updated_at": "2026-10-02T13:56:49.505785000Z"
+}

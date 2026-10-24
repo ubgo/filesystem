@@ -1,0 +1,22 @@
+func send(h http.Handler, token, name, body string) (int, string, error) {
+	var form bytes.Buffer
+	mw := multipart.NewWriter(&form)
+	part, err := mw.CreateFormFile(upload.DefaultField, name)
+	if err != nil {
+		return 0, "", err
+	}
+	if _, err := io.WriteString(part, body); err != nil {
+		return 0, "", err
+	}
+	if err := mw.Close(); err != nil {
+		return 0, "", err
+	}
+	req := httptest.NewRequest(http.MethodPost, "/upload", &form)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	if token != "" {
+		req.Header.Set(upload.HeaderUploadSession, token)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code, rec.Body.String(), nil
+}

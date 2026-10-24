@@ -1,0 +1,22 @@
+func openDisks(ctx context.Context, cfg config, signer *signedurl.Signer) (*filesystem.Manager, error) {
+	mux := filesystem.NewMux()
+	if err := errors.Join(mux.Register(local.Scheme, local.Opener), mux.Register(memory.Scheme, memory.Opener)); err != nil {
+		return nil, err
+	}
+	dsn := cfg.StorageDSN
+	if dsn == "" {
+		dsn = "file:" + filepath.ToSlash(filepath.Join(cfg.DataDir, "files"))
+	}
+	disk, err := mux.Open(ctx, diskName, dsn, filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, errors.Join(err, disk.Close())
+	}
+	if err := disks.Check(ctx); err != nil {
+		return nil, errors.Join(err, disks.Close())
+	}
+	return disks, nil
+}

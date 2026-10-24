@@ -1,0 +1,6 @@
+func cloudEvent(_ context.Context, e records.Event) (any, error) {
+	return map[string]any{
+		"specversion": "1.0", "id": e.ID, "type": string(e.Kind), "source": "/scopes/" + e.Scope,
+		"time": e.At, "data": webhooks.DefaultPayload(e),
+	}, nil
+}

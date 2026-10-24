@@ -1,0 +1,22 @@
+func handle[In, Out any](w http.ResponseWriter, r *http.Request, fn func(ctx context.Context, scope string, in In) (Out, error)) {
+	scope, err := identify(r)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	var in In
+	if r.ContentLength != 0 && r.Method != http.MethodGet {
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxJSONBody)).Decode(&in); err != nil {
+			http.Error(w, "invalid JSON body", http.StatusBadRequest)
+			return
+		}
+	}
+	out, err := fn(r.Context(), scope, in)
+	if err != nil {
+		status := fshttp.StatusOf(err)
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(out)
+}

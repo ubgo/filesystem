@@ -1,0 +1,25 @@
+func zipDownload(ctx context.Context, a *app, out io.Writer) error {
+	for key, body := range map[string]string{"invoices/41.pdf": "%PDF-1.7 41", "invoices/42.pdf": "%PDF-1.7 42"} {
+		if _, err := a.private.WriteBytes(ctx, key, []byte(body), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	files := []fshttp.ZipFile{{Key: "invoices/41.pdf", Name: "2026/41.pdf"}, {Key: "invoices/42.pdf", Name: "2026/42.pdf"}}
+	rec := httptest.NewRecorder()
+	fshttp.ServeZip(rec, httptest.NewRequestWithContext(ctx, http.MethodGet, "/invoices.zip", nil), a.private, "invoices.zip", files, fshttp.ZipOptions{})
+	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
+	if err != nil {
+		return err
+	}
+	names := make([]string, 0, len(zr.File))
+	for _, f := range zr.File {
+		names = append(names, f.Name)
+	}
+	fmt.Fprintf(out, "zip %d %s %s\n", rec.Code, rec.Header().Get("Content-Disposition"), strings.Join(names, ","))
+
+	rec = httptest.NewRecorder()
+	evil := []fshttp.ZipFile{{Key: "invoices/41.pdf", Name: "../../etc/passwd"}}
+	fshttp.ServeZip(rec, httptest.NewRequestWithContext(ctx, http.MethodGet, "/evil.zip", nil), a.private, "evil.zip", evil, fshttp.ZipOptions{})
+	fmt.Fprintf(out, "zip with ../ in a name %d\n", rec.Code)
+	return nil
+}

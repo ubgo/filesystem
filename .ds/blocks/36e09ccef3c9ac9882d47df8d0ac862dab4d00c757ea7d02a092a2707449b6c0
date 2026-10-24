@@ -1,0 +1,23 @@
+func limit(ctx context.Context, out io.Writer) error {
+	drv := &slow{Driver: memory.New(), release: make(chan struct{})}
+	disk, err := filesystem.NewDisk("media", drv, filesystem.WithInterceptors(layer.Limit(1)))
+	if err != nil {
+		return err
+	}
+	started := make(chan struct{})
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		close(started)
+		_, _ = disk.Stat(ctx, "a.txt")
+	}()
+	<-started
+	time.Sleep(waitForSlot) // let the first Stat take the slot
+	short, cancel := context.WithTimeout(ctx, waitForSlot)
+	defer cancel()
+	_, err = disk.Stat(short, "b.txt")
+	fmt.Fprintf(out, "limit: second caller %s\n", filesystem.CodeOf(err))
+	close(drv.release)
+	<-done
+	return nil
+}

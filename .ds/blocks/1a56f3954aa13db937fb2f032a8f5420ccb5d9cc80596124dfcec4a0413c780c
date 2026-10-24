@@ -1,0 +1,5 @@
+var slots = map[string]slot{
+	slotLogo:        {limits: imaging.DimensionLimits{MinHeight: 64, MaxWidth: 4000, MaxHeight: 4000}, sizes: []string{"logo-header"}},
+	slotFavicon:     {limits: imaging.DimensionLimits{MinWidth: 180, MinHeight: 180, Aspect: 1}, sizes: []string{"favicon-32", "favicon-180"}},
+	slotEmailHeader: {limits: imaging.DimensionLimits{MinWidth: 600, MaxPixels: 4_000_000}, sizes: []string{"email-header-600"}},
+}

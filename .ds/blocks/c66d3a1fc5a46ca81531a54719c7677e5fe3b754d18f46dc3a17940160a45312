@@ -1,0 +1,18 @@
+func cloudinaryPublicIDs(ctx context.Context, out io.Writer, disk *filesystem.Disk, fake *fakes.Cloudinary) error {
+	const key = "docs/annual report (v2).pdf"
+	if _, err := disk.WriteBytes(ctx, key, []byte("%PDF-1.7"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stored as: %s\n", strings.Join(fake.PublicIDs(), ", "))
+	page, err := disk.ListPage(ctx, "docs", filesystem.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "listed as: %s\n", keysOf(page))
+	u, err := disk.PublicURL(ctx, key)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "public URL path: %s\n", strings.TrimPrefix(u, fake.URL))
+	return nil
+}

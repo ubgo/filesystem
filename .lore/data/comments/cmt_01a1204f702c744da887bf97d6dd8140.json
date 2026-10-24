@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Done by hw3-final 2026-10-09: contrib/gorm fsgorm.NewNamer (TablerWithNamer; WithLiveFile reads db.NamingStrategy), tests TestNamer* break-verified; contrib/sqlc FSWith/SchemaWith/QueriesWith/MapNames, prefixed schema/queries tests and sqlc generate from FSWith, break-verified.",
+  "created_at": "2026-10-09T10:57:19.404266000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a120438550777ab62e6a7bd4f64251",
+  "entity_table": "tasks",
+  "id": "cmt_01a1204f702c744da887bf97d6dd8140",
+  "updated_at": "2026-10-09T10:57:19.404266000Z"
+}

@@ -1,0 +1,15 @@
+func TestReadOutage(t *testing.T) {
+	down := layer.Guard(func(_ context.Context, op *filesystem.Op) error {
+		if op.Kind == filesystem.OpRead {
+			return filesystem.Errorf(filesystem.CodeUnavailable, "injected outage")
+		}
+		return nil
+	})
+	disk := filesystemtest.NewFake(t, "media", filesystem.WithInterceptors(down))
+	if _, err := disk.WriteBytes(t.Context(), "a.txt", []byte("a"), filesystem.WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := disk.ReadAll(t.Context(), "a.txt"); filesystem.CodeOf(err) != filesystem.CodeUnavailable {
+		t.Fatalf("err = %v", err)
+	}
+}

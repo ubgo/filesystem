@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim, via team-lead brief):\n  SE-06 \"Quarantine until scanned — file unusable until the scan passes (Box, regulated SaaS). Status on the record (RC-15), scanner is a plugin.\" Today there is no quarantined state for async scans. Add a quarantined/pending-scan status in records so a file uploaded while a scan is pending cannot be read, served, shared or linked until the scan passes, and is handled (deleted or kept quarantined, configurable) when it fails. Find every read/serve/share/URL path that must respect it (records Store reads, recordshttp, share, variants handler, URL signing) and test each; that enumeration is the point of the feature.\n\nContext:\n  Files: records/**, scan/\nAcceptance:\n  quarantine status enforced on every read/serve/share/URL path, each tested",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T08:17:53.790503000Z",
+  "created_at": "2026-10-08T07:56:22.336984000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a8369c07f07ac76fda847b52f8d",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T07:56:26.662531000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "SE-06 quarantine until scanned",
+  "updated_at": "2026-10-08T08:17:53.790505000Z"
+}

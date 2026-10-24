@@ -1,0 +1,19 @@
+func fakeS3(ctx context.Context) (*s3.Driver, func(), error) {
+	srv := httptest.NewServer(gofakes3.New(s3mem.New()).Server())
+	client := awss3.New(awss3.Options{
+		BaseEndpoint: aws.String(srv.URL),
+		UsePathStyle: true,
+		Region:       fakeRegion,
+		Credentials:  credentials.NewStaticCredentialsProvider("fake", "fake", ""),
+	})
+	if _, err := client.CreateBucket(ctx, &awss3.CreateBucketInput{Bucket: aws.String(fakeBucket)}); err != nil {
+		srv.Close()
+		return nil, nil, err
+	}
+	drv, err := s3.New(s3.Config{Client: client, Bucket: fakeBucket})
+	if err != nil {
+		srv.Close()
+		return nil, nil, err
+	}
+	return drv, srv.Close, nil
+}

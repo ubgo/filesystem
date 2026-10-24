@@ -1,0 +1,29 @@
+func reservedNames(ctx context.Context, out io.Writer, dir string) error {
+	for _, allow := range []bool{false, true} {
+		root := filepath.Join(dir, fmt.Sprintf("reserved-%t", allow))
+		if err := os.Mkdir(root, 0o700); err != nil {
+			return err
+		}
+		var opts []local.Option
+		if allow {
+			opts = append(opts, local.AllowReservedNames())
+		}
+		drv, err := local.New(root, opts...)
+		if err != nil {
+			return err
+		}
+		disk, err := filesystem.NewDisk("uploads", drv)
+		if err != nil {
+			_ = drv.Close()
+			return err
+		}
+		for _, key := range []string{"docs/con.txt", "notes./a.txt"} {
+			_, err := disk.WriteBytes(ctx, key, []byte("x"), filesystem.WriteOptions{})
+			fmt.Fprintf(out, "reserved allowed=%t %s: %s\n", allow, key, codeOrOK(err))
+		}
+		if err := disk.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}

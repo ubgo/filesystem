@@ -1,0 +1,15 @@
+func concurrentUploads(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	var wg sync.WaitGroup
+	errs := make([]error, 6)
+	for i := range errs {
+		wg.Go(func() {
+			_, errs[i] = disk.Write(ctx, fmt.Sprintf("inbound/batch-%d.txt", i), strings.NewReader("line\n"), filesystem.WriteOptions{})
+		})
+	}
+	wg.Wait()
+	if err := errors.Join(errs...); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "six concurrent uploads over a pool of three connections: ok")
+	return nil
+}

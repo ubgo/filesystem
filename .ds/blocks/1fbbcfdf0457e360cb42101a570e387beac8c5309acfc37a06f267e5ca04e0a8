@@ -1,0 +1,15 @@
+func (a *app) Handler() http.Handler {
+	api := http.NewServeMux()
+	api.HandleFunc("POST /photos", a.uploadPhoto)
+	api.HandleFunc("GET /photos", a.listPhotos)
+	api.HandleFunc("GET /photos/{id}", a.openPhoto)
+	api.HandleFunc("DELETE /photos/{id}", a.trashPhoto)
+	api.HandleFunc("POST /photos/{id}/restore", a.restorePhoto)
+	api.HandleFunc("GET /trash", a.listTrash)
+	api.HandleFunc("DELETE /trash/{id}", a.purgePhoto)
+
+	root := http.NewServeMux()
+	root.Handle(filesPrefix+"/", http.StripPrefix(filesPrefix, fshttp.Signed(a.disks, a.signer)))
+	root.Handle("/", requireUser(api))
+	return root
+}

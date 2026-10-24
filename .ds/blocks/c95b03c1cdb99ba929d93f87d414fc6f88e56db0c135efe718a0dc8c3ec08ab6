@@ -1,0 +1,4 @@
+var moreTransforms = map[string]imaging.Transform{
+	nameBanner: {Mode: imaging.ModeFill, Width: 120, Height: 40, Format: imaging.FormatJPEG, Gravity: imaging.GravityFocal},
+	nameAvatar: {Mode: imaging.ModeFill, Width: 48, Height: 48, Format: imaging.FormatJPEG},
+}

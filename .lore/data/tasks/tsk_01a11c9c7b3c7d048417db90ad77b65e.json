@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  the satl-no-hardwire skill\n  read this skill this skill is meant to make the code pluggable\nthen: \"yes you can but first give em a prompet to create the best docs jsut hte wya you did copy to clicpboard\"\n\nContext: satl-no-hardwire skill modes adopt, audit, fix. Proposed: adopt into CLAUDE.md and lore, then a read-only audit of the whole repo.\n\nAcceptance: rule recorded in CLAUDE.md and lore; audit report with file:line findings grouped by severity, existing seams and deliberate floors listed; nothing fixed until the owner picks.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-09T04:48:32.180343000Z",
+  "created_at": "2026-10-08T17:42:59.644851000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11c9c7b3c7d048417db90ad77b65e",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T17:43:18.295319000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "No-hardwire: adopt the rule and audit the repo for hard-wired models",
+  "updated_at": "2026-10-09T04:48:32.180345000Z"
+}

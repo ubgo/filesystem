@@ -1,0 +1,41 @@
+func perCall(ctx context.Context, out io.Writer) error {
+	svc := newBlobService()
+	srv := httptest.NewTLSServer(svc)
+	defer srv.Close()
+	client, err := azblob.NewClientWithNoCredential(srv.URL+"/", standInOptions(srv))
+	if err != nil {
+		return err
+	}
+	drv, err := azure.New(azure.Config{Client: client, Container: "legal"})
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("legal", drv)
+	if err != nil {
+		return err
+	}
+	bound, err := writeContract(ctx, disk, "%PDF-1.7 contract")
+	if err != nil {
+		return err
+	}
+	if _, err := disk.Write(bound, "thumbs/acme.png", strings.NewReader("png"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	svc.mu.Lock()
+	for _, key := range []string{contractKey, "thumbs/acme.png"} {
+		h := svc.puts["/legal/"+key]
+		fmt.Fprintf(out, "per call: %s tier=%q scope=%q tags=%q\n", key, h.Get("x-ms-access-tier"), h.Get("x-ms-encryption-scope"), h.Get("x-ms-tags"))
+	}
+	fmt.Fprintf(out, "per call: legal holds set on %s\n", strings.Join(svc.holds, ","))
+	svc.mu.Unlock()
+	bad, err := azure.WithRequestOptions(ctx, disk, "a.txt", azure.RequestOptions{AccessTier: "Lukewarm"})
+	if err != nil {
+		return err
+	}
+	_, err = disk.Write(bad, "a.txt", strings.NewReader("x"), filesystem.WriteOptions{})
+	svc.mu.Lock()
+	_, sent := svc.puts["/legal/a.txt"]
+	svc.mu.Unlock()
+	fmt.Fprintf(out, "per call: unknown tier %s, request sent %t\n", filesystem.CodeOf(err), sent)
+	return nil
+}

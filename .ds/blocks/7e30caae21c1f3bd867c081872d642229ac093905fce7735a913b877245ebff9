@@ -1,0 +1,1 @@
+type githubSigner struct{ key []byte }

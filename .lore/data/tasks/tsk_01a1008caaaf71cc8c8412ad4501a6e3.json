@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "FEATURES OB-04.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-03T07:18:20.259253000Z",
+  "created_at": "2026-10-03T06:56:21.167114000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a1008caaaf71cc8c8412ad4501a6e3",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-03T07:10:41.409556000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "records/audit plugin: append-only log of file lifecycle events with actor from context",
+  "updated_at": "2026-10-03T07:18:20.259265000Z"
+}

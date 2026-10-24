@@ -1,0 +1,5 @@
+func newDiskWithKeys(t Telemetry) (*filesystem.Disk, error) {
+	return filesystem.NewDisk(diskName, memory.New(), filesystem.WithInterceptors(
+		fsotel.Tracing(t.Tracer, fsotel.WithKeys()),
+	))
+}

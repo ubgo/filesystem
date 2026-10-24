@@ -1,0 +1,11 @@
+func galleryNames(ctx context.Context, s *records.Store, post records.Owner) ([]string, error) {
+	list, err := s.Attachments(ctx, tenant, post, roleGallery)
+	if err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(list))
+	for _, af := range list {
+		names = append(names, fmt.Sprintf("%d:%s", af.Attachment.Position, af.File.Filename))
+	}
+	return names, nil
+}

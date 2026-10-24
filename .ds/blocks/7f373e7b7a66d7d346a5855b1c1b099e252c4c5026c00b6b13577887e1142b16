@@ -1,0 +1,14 @@
+func tampered(ctx context.Context, a *app, out io.Writer) error {
+	link, err := a.private.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	resp, body, err := fetch(http.MethodGet, strings.Replace(link.URL, "42.pdf", "43.pdf", 1), nil, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "tampered %d %q\n", resp.StatusCode, strings.TrimSpace(body))
+	_, err = a.private.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: 8 * 24 * time.Hour})
+	fmt.Fprintf(out, "eight-day link: %s\n", filesystem.CodeOf(err))
+	return nil
+}

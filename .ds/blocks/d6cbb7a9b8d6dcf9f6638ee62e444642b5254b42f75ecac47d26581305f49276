@@ -1,0 +1,18 @@
+func (r *mutationResolver) SetAvatar(ctx context.Context, file graphql.Upload) (*records.File, error) {
+	owner, err := signedIn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var f records.File
+	err = r.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if f, err = fsgql.ReceiveRecord(ctx, r.Store, Tenant, r.DiskName, file, r.Policy); err != nil {
+			return err
+		}
+		_, err = r.Store.SetAttachment(ctx, Tenant, f.ID, owner, RoleAvatar, records.PreviousPurge)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &f, nil
+}

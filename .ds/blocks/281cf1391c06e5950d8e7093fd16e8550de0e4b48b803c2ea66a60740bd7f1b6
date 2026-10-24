@@ -1,0 +1,8 @@
+func streamedDigest(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	e, err := disk.Write(ctx, reportKey, strings.NewReader(report), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "write: %d bytes, sha256 matches an independent hash: %t\n", e.Size, e.SHA256 == digest(report))
+	return nil
+}

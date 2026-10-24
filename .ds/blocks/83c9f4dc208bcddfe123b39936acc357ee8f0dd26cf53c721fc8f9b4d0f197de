@@ -1,0 +1,20 @@
+func bucketLifecycle(ctx context.Context, out io.Writer, client *s3.Client, _ *fakeS3) error {
+	err := fss3.SetLifecycle(ctx, client, bucketName,
+		fss3.LifecycleRule{ID: "tmp", Prefix: "tmp/", ExpireAfterDays: 1},
+		fss3.LifecycleRule{ID: "uploads", AbortIncompleteUploadsAfterDays: 7},
+		fss3.LifecycleRule{ID: "logs", Prefix: "logs/", Transitions: []fss3.LifecycleTransition{{AfterDays: 90, StorageClass: "GLACIER"}}},
+	)
+	if err != nil {
+		return err
+	}
+	rules, err := fss3.Lifecycle(ctx, client, bucketName)
+	if err != nil {
+		return err
+	}
+	ids := make([]string, len(rules))
+	for i, r := range rules {
+		ids[i] = r.ID
+	}
+	fmt.Fprintf(out, "lifecycle: %s; logs move to %s after %d days\n", strings.Join(ids, ","), rules[2].Transitions[0].StorageClass, rules[2].Transitions[0].AfterDays)
+	return nil
+}

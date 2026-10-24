@@ -1,0 +1,21 @@
+func newStore(ctx context.Context, db *sql.DB, clock *Clock, failed *[]string) (*records.Store, error) {
+	disks, err := newDisks()
+	if err != nil {
+		return nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithOwnerTypes(ownerUser),
+		records.WithClock(clock.Now),
+		records.WithObjectErrorHandler(func(_ context.Context, f records.File, err error) {
+			*failed = append(*failed, f.Disk+"/"+f.Key+": "+string(filesystem.CodeOf(err)))
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	_, err = db.ExecContext(ctx, usersDDL)
+	return s, err
+}

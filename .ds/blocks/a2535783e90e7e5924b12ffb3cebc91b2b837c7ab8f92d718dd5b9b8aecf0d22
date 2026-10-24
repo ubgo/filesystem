@@ -1,0 +1,11 @@
+func newOEmbedCache(disk *filesystem.Disk, allow func(netip.Addr) bool, providerBase string) (*remote.Cache, error) {
+	return remote.New(disk, remote.Options{
+		Dir:        "oembed",
+		Policy:     upload.Policy{MaxSize: 5 << 20, Allowed: []string{"image/*"}},
+		Fetch:      upload.FetchOptions{Timeout: 10 * time.Second, AllowAddr: allow},
+		PreviewTTL: 24 * time.Hour,
+		OEmbed: []remote.OEmbedProvider{
+			{Schemes: []string{providerBase + "/watch*"}, Endpoint: providerBase + "/oembed"},
+		},
+	})
+}

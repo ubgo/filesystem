@@ -1,0 +1,9 @@
+func photoLimits() (upload.Policy, http.Handler, error) {
+	dims, err := imaging.CheckDimensions(imaging.DimensionLimits{MaxWidth: maxPhotoSide, MaxHeight: maxPhotoSide})
+	if err != nil {
+		return upload.Policy{}, nil, err
+	}
+	p := photoPolicy
+	p.Inspect = dims
+	return p, upload.LimitsHandler(p, upload.LimitsOptions{MaxWidth: maxPhotoSide, MaxHeight: maxPhotoSide}), nil
+}

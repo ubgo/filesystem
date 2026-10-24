@@ -1,0 +1,15 @@
+func newOrgStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, *quota.Plugin, error) {
+	unlimited := func(context.Context, string) (quota.Limit, error) { return quota.Limit{}, nil }
+	q, err := quota.New(unlimited, quota.WithDimensions(orgDimensions))
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(q))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, q, nil
+}

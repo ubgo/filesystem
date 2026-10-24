@@ -1,0 +1,14 @@
+func deleteUserRow(ctx context.Context, tx *sql.Tx, userID string) error {
+	res, err := tx.ExecContext(ctx, "DELETE FROM users WHERE id = ?", userID)
+	var se *sqlite.Error
+	if errors.As(err, &se) && se.Code() == sqlite3.SQLITE_CONSTRAINT_FOREIGNKEY {
+		return errHasInvoices
+	}
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return filesystem.Errorf(filesystem.CodeNotFound, "no user %q", userID)
+	}
+	return nil
+}

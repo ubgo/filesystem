@@ -1,0 +1,6 @@
+func userFrom(ctx context.Context) (string, error) {
+	if u, ok := ctx.Value(userKey{}).(string); ok {
+		return u, nil
+	}
+	return "", filesystem.Errorf(filesystem.CodePermission, "sign in first")
+}

@@ -1,0 +1,13 @@
+func tagFiles(ctx context.Context, s *records.Store, tp *tags.Plugin, a, b, c records.File) error {
+	if _, err := tp.Set(ctx, s, tenant, a.ID, "Invoice", " 2026 ", "invoice"); err != nil {
+		return err
+	}
+	if _, err := tp.Add(ctx, s, tenant, b.ID, "invoice", "Paid", "draft"); err != nil {
+		return err
+	}
+	if _, err := tp.Remove(ctx, s, tenant, b.ID, "DRAFT", "never-there"); err != nil {
+		return err
+	}
+	_, err := tp.Set(ctx, s, tenant, c.ID, "paid", "receipt")
+	return err
+}

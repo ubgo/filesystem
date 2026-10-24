@@ -1,0 +1,30 @@
+func post(ctx context.Context, h http.Handler, header http.Header, parts ...part) (*httptest.ResponseRecorder, error) {
+	var buf bytes.Buffer
+	mw := multipart.NewWriter(&buf)
+	for _, p := range parts {
+		var w io.Writer
+		var err error
+		if p.file == "" {
+			w, err = mw.CreateFormField(p.field)
+		} else {
+			w, err = mw.CreateFormFile(p.field, p.file)
+		}
+		if err != nil {
+			return nil, err
+		}
+		if _, err := io.WriteString(w, p.value); err != nil {
+			return nil, err
+		}
+	}
+	if err := mw.Close(); err != nil {
+		return nil, err
+	}
+	req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/upload", &buf)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	for k, v := range header {
+		req.Header[k] = v
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec, nil
+}

@@ -1,0 +1,16 @@
+func declaredDigest(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	next := "region,revenue\neu,125\nus,340\n"
+	corrupted := strings.Replace(next, "125", "12\x00", 1)
+	_, err := disk.Write(ctx, reportKey, strings.NewReader(corrupted), filesystem.WriteOptions{SHA256: digest(next)})
+	fmt.Fprintf(out, "corrupted body with a declared sha256: %s\n", filesystem.CodeOf(err))
+	b, err := disk.ReadAll(ctx, reportKey)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stored version is still the first: %t\n", string(b) == report)
+	if _, err := disk.Write(ctx, reportKey, strings.NewReader(next), filesystem.WriteOptions{SHA256: digest(next)}); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "good body with a declared sha256: stored")
+	return nil
+}

@@ -1,0 +1,27 @@
+func separateStores(ctx context.Context, out io.Writer) error {
+	mux := filesystem.NewMux()
+	if err := mux.Register(memory.Scheme, memory.Opener); err != nil {
+		return err
+	}
+	a, err := mux.Open(ctx, "a", cacheDSN)
+	if err != nil {
+		return err
+	}
+	b, err := mux.Open(ctx, "b", cacheDSN)
+	if err != nil {
+		return err
+	}
+	if _, err := a.WriteBytes(ctx, "k", []byte("v"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	inA, err := a.Exists(ctx, "k")
+	if err != nil {
+		return err
+	}
+	inB, err := b.Exists(ctx, "k")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "same DSN opened twice: in a=%t, in b=%t\n", inA, inB)
+	return nil
+}

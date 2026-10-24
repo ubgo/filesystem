@@ -1,0 +1,20 @@
+func privateByDefault(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", memory.New())
+	if err != nil {
+		return err
+	}
+	e, err := disk.WriteBytes(ctx, "report.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "default: %s\n", e.Visibility)
+	if err := disk.SetVisibility(ctx, "report.pdf", filesystem.VisibilityPublic); err != nil {
+		return err
+	}
+	e, err = disk.Stat(ctx, "report.pdf")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after SetVisibility: %s\n", e.Visibility)
+	return nil
+}

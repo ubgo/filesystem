@@ -1,0 +1,31 @@
+func TestKeyRotation(t *testing.T) {
+	before, err := newSigner(env(map[string]string{envFilesURL: "https://f.example/files", envSigningKeys: "k1:" + oldSecret}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	link, err := before.SignURL(t.Context(), "media", "a.png", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Hour})
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := url.Parse(link.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	during, err := newSigner(env(map[string]string{envFilesURL: "https://f.example/files", envSigningKeys: "k2:" + newSecret + ",k1:" + oldSecret}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := during.Verify("media", "a.png", filesystem.MethodGet, u.Query()); err != nil {
+		t.Errorf("old link during rotation: %v", err)
+	}
+	after, err := newSigner(env(map[string]string{envFilesURL: "https://f.example/files", envSigningKeys: "k2:" + newSecret}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := after.Verify("media", "a.png", filesystem.MethodGet, u.Query()); !errors.Is(err, filesystem.ErrPermission) {
+		t.Errorf("old link after rotation: %v", err)
+	}
+	if _, err := parseSigningKeys("no-separator"); err == nil {
+		t.Error("malformed key list accepted")
+	}
+}

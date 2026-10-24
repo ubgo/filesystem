@@ -1,0 +1,16 @@
+func newPlugins(key, endpoint string) (*tags.Plugin, *vision.Plugin, error) {
+	labeler, err := google.New(google.Config{APIKey: vision.NewSecret(key), Endpoint: endpoint})
+	if err != nil {
+		return nil, nil, err
+	}
+	t := tags.New()
+	v := vision.NewPlugin(labeler, t,
+		func(scope string) bool { return scope == labelled },
+		vision.WithPrefix("auto:"),
+		vision.WithMinScore(0.8),
+		vision.WithErrorHandler(func(_ context.Context, f records.File, err error) {
+			log.Printf("labelling %s failed: %v", f.Filename, err)
+		}),
+	)
+	return t, v, nil
+}

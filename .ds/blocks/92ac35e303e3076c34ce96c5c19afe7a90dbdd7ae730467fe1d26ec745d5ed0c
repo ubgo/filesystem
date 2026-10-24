@@ -1,0 +1,17 @@
+func run(ctx context.Context, out io.Writer) error {
+	t := newTelemetry()
+	d, err := newDisk(t)
+	if err != nil {
+		return err
+	}
+	if err := work(ctx, d); err != nil {
+		return err
+	}
+	printSpans(out, t.Spans.Ended())
+	var rm metricdata.ResourceMetrics
+	if err := t.Reader.Collect(ctx, &rm); err != nil {
+		return err
+	}
+	printMetrics(out, rm)
+	return nil
+}

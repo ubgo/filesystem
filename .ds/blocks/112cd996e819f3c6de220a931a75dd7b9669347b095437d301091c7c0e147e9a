@@ -1,0 +1,17 @@
+func publicURLs(ctx context.Context, out io.Writer, dir string) error {
+	mux := filesystem.NewMux()
+	if err := mux.Register(local.Scheme, local.Opener); err != nil {
+		return err
+	}
+	q := url.Values{}
+	q.Set(filesystem.ParamPublicURL, cdnBase)
+	q.Set(filesystem.ParamVisibility, string(filesystem.VisibilityPublic))
+	disk, err := mux.Open(ctx, "public", local.Scheme+"://"+filepath.ToSlash(dir)+"?"+q.Encode())
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	u, err := disk.PublicURL(ctx, "img/a b.png")
+	fmt.Fprintf(out, "public URL: %s\n", u)
+	return err
+}

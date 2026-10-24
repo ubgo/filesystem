@@ -1,0 +1,10 @@
+func needsCopy(ctx context.Context, dst *filesystem.Disk, e filesystem.Entry) (bool, error) {
+	got, err := dst.Stat(ctx, e.Key)
+	switch {
+	case filesystem.CodeOf(err) == filesystem.CodeNotFound:
+		return true, nil
+	case err != nil:
+		return false, err
+	}
+	return got.Size != e.Size, nil
+}

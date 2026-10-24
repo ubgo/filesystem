@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  (none — found by the satl pre-commit audit on 2026-10-08, task tsk_01a119f16d7d70a4a74deb5448af1c84)\n\nContext:\n  Duplicates found: ctxReader in local, memory, ftp, sftp, sqlblob; https-or-loopback URL check in 6 HTTP adapters; redactURLError in 4; retryAfter in 6; the external-program env allowlist in pdf, ocr, office, ffmpeg; vision.Secret vs videoplatform.Secret; CustomerKey in s3, gcs, azure.\n\nAcceptance:\n  Owner decides whether a shared helper (exported core helper or a shared internal module) is worth the new surface; then one copy each.\n\nImplementation notes (only if explicitly agreed):\n  None agreed.",
+  "commitment": "proposed",
+  "completed_at": null,
+  "created_at": "2026-10-08T05:34:32.970929000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a01920a7e38bf3fc94f8eee1d7d",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "low",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "todo",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Fold duplicated adapter helpers into a shared internal package",
+  "updated_at": "2026-10-08T05:34:32.970929000Z"
+}

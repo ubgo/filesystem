@@ -1,0 +1,17 @@
+func publicFiles(ctx context.Context, a *app, out io.Writer) error {
+	headers := filesystem.HTTPHeaders{CacheControl: "public, max-age=31536000, immutable"}
+	if _, err := a.public.WriteBytes(ctx, "logo.png", []byte("\x89PNG\r\n\x1a\n"), filesystem.WriteOptions{Headers: headers}); err != nil {
+		return err
+	}
+	if _, err := a.public.WriteBytes(ctx, "draft.png", []byte("\x89PNG\r\n\x1a\n"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPrivate}); err != nil {
+		return err
+	}
+	for _, key := range []string{"logo.png", "draft.png", "missing.png"} {
+		resp, _, err := fetch(http.MethodGet, a.srv.URL+publicPrefix+"/"+key, nil, nil)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "public %s %d %s\n", key, resp.StatusCode, resp.Header.Get("Cache-Control"))
+	}
+	return nil
+}

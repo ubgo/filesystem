@@ -1,0 +1,143 @@
+<svg viewBox="0 0 869 1133" width="869" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#a855f7"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="869" height="1133" fill="#ffffff"/>
+  <text x="434.5" y="34" font-size="16" fill="#1e293b" text-anchor="middle">How ubgo/filesystem fits together</text>
+  <rect x="22" y="56" width="600" height="186" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="32" y="70" font-size="11" fill="#64748b">your app</text>
+  <rect x="647" y="88" width="200" height="122" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="657" y="102" font-size="11" fill="#64748b">integrations</text>
+  <rect x="22" y="262" width="600" height="120" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="32" y="276" font-size="11" fill="#64748b">records · layer 5 (optional)</text>
+  <rect x="22" y="402" width="600" height="104" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="32" y="416" font-size="11" fill="#64748b">upload &amp; serve · layer 4</text>
+  <rect x="22" y="526" width="600" height="350" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="32" y="540" font-size="11" fill="#64748b">core · layers 3–1 · standard library only</text>
+  <rect x="647" y="291" width="200" height="186" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="657" y="305" font-size="11" fill="#64748b">processing · hooks into records</text>
+  <rect x="647" y="567" width="200" height="268" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="657" y="581" font-size="11" fill="#64748b">operations</text>
+  <rect x="22" y="896" width="825" height="186" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="6,4"/>
+  <text x="32" y="910" font-size="11" fill="#64748b">adapters · layer 0</text>
+  <path d="M307,145 L 307,157" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,227 L 307,281" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,351 L 307,421" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,491 L 307,545" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,615 L 307,627" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,697 L 307,709" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,779 L 307,791" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M307,861 L 307,885" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M212,319 L 198,319" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <path d="M212,459 L 198,459" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M517,891 L 517,867" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M517,797 L 517,785" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M517,715 L 517,703" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M517,633 L 517,621" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M517,551 L 517,497" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M517,427 L 517,233" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M517,163 L 517,151" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <path d="M642,319 L 633,319" fill="none" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  <path d="M657,788 C 637,788 638,747 618,747" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="37" y="86" width="570" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="322" y="108" font-size="12" fill="#1e40af" text-anchor="middle">Client</text>
+  <text x="322" y="126" font-size="10" fill="#1e40af" text-anchor="middle">browser · mobile · CLI</text>
+  <rect x="37" y="168" width="570" height="54" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="322" y="190" font-size="12" fill="#1e40af" text-anchor="middle">HTTP handler</text>
+  <text x="322" y="208" font-size="10" fill="#1e40af" text-anchor="middle">net/http · chi · gin · echo · fiber</text>
+  <rect x="662" y="118" width="170" height="72" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="747" y="141" font-size="12" fill="#1e40af" text-anchor="middle">contrib modules</text>
+  <text x="747" y="159" font-size="10" fill="#1e40af" text-anchor="middle">tus · cloud file pickers</text>
+  <text x="747" y="174" font-size="10" fill="#1e40af" text-anchor="middle">ent · gorm · sqlc · gqlgen</text>
+  <rect x="37" y="292" width="150" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="112" y="314" font-size="12" fill="#166534" text-anchor="middle">SQL database</text>
+  <text x="112" y="332" font-size="10" fill="#166534" text-anchor="middle">SQLite · Postgres · MySQL</text>
+  <rect x="217" y="292" width="180" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="307" y="314" font-size="12" fill="#166534" text-anchor="middle">records.Store</text>
+  <text x="307" y="332" font-size="10" fill="#166534" text-anchor="middle">folders · versions · share …</text>
+  <rect x="37" y="432" width="150" height="54" rx="6" fill="#fce7f3" stroke="#ec4899"/>
+  <text x="112" y="454" font-size="12" fill="#9d174d" text-anchor="middle">scan</text>
+  <text x="112" y="472" font-size="10" fill="#9d174d" text-anchor="middle">virus scan → quarantine</text>
+  <rect x="217" y="432" width="180" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="307" y="454" font-size="12" fill="#b45309" text-anchor="middle">upload</text>
+  <text x="307" y="472" font-size="10" fill="#b45309" text-anchor="middle">type from bytes · size limits</text>
+  <rect x="427" y="432" width="180" height="54" rx="6" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="517" y="454" font-size="12" fill="#b45309" text-anchor="middle">fshttp · signed URLs</text>
+  <text x="517" y="472" font-size="10" fill="#b45309" text-anchor="middle">ranges · expiring links</text>
+  <rect x="37" y="556" width="570" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="322" y="578" font-size="12" fill="#1e293b" text-anchor="middle">Manager</text>
+  <text x="322" y="596" font-size="10" fill="#1e293b" text-anchor="middle">named, scoped and mirrored disks</text>
+  <rect x="37" y="638" width="570" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="322" y="660" font-size="12" fill="#1e293b" text-anchor="middle">Disk</text>
+  <text x="322" y="678" font-size="10" fill="#1e293b" text-anchor="middle">clean keys · sniff type · hash · size caps · URLs</text>
+  <rect x="37" y="720" width="570" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="322" y="742" font-size="12" fill="#1e293b" text-anchor="middle">Interceptors</text>
+  <text x="322" y="760" font-size="10" fill="#1e293b" text-anchor="middle">retry · timeout · log · otel …</text>
+  <rect x="37" y="802" width="570" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="322" y="824" font-size="12" fill="#1e293b" text-anchor="middle">Driver interface</text>
+  <text x="322" y="842" font-size="10" fill="#1e293b" text-anchor="middle">Stat · Read · Write · Delete · List · Capabilities</text>
+  <rect x="662" y="321" width="170" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7"/>
+  <text x="747" y="343" font-size="12" fill="#6b21a8" text-anchor="middle">imaging · video</text>
+  <text x="747" y="361" font-size="10" fill="#6b21a8" text-anchor="middle">variants · posters · durations</text>
+  <rect x="662" y="403" width="170" height="54" rx="6" fill="#f3e8ff" stroke="#a855f7"/>
+  <text x="747" y="425" font-size="12" fill="#6b21a8" text-anchor="middle">pdf · ocr · vision</text>
+  <text x="747" y="443" font-size="10" fill="#6b21a8" text-anchor="middle">previews · text · labels</text>
+  <rect x="662" y="597" width="170" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="747" y="619" font-size="12" fill="#1e293b" text-anchor="middle">jobs</text>
+  <text x="747" y="637" font-size="10" fill="#1e293b" text-anchor="middle">river · asynq · sweeps</text>
+  <rect x="662" y="679" width="170" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="747" y="701" font-size="12" fill="#1e293b" text-anchor="middle">notify</text>
+  <text x="747" y="719" font-size="10" fill="#1e293b" text-anchor="middle">backend object events</text>
+  <rect x="662" y="761" width="170" height="54" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="747" y="783" font-size="12" fill="#1e293b" text-anchor="middle">otel</text>
+  <text x="747" y="801" font-size="10" fill="#1e293b" text-anchor="middle">Tracing interceptor</text>
+  <rect x="37" y="926" width="245" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="159.5" y="948" font-size="12" fill="#166534" text-anchor="middle">local · memory</text>
+  <text x="159.5" y="966" font-size="10" fill="#166534" text-anchor="middle">a folder, or RAM for tests</text>
+  <rect x="312" y="926" width="245" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="434.5" y="948" font-size="12" fill="#166534" text-anchor="middle">S3 and compatibles</text>
+  <text x="434.5" y="966" font-size="10" fill="#166534" text-anchor="middle">R2 · B2 · MinIO · Wasabi</text>
+  <rect x="587" y="926" width="245" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="709.5" y="948" font-size="12" fill="#166534" text-anchor="middle">GCS · Azure</text>
+  <text x="709.5" y="966" font-size="10" fill="#166534" text-anchor="middle">Google Cloud Storage · Azure Blob</text>
+  <rect x="37" y="1008" width="245" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="159.5" y="1030" font-size="12" fill="#166534" text-anchor="middle">SFTP · FTP · WebDAV</text>
+  <text x="159.5" y="1048" font-size="10" fill="#166534" text-anchor="middle">servers you already run</text>
+  <rect x="312" y="1008" width="245" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="434.5" y="1030" font-size="12" fill="#166534" text-anchor="middle">SQL blob</text>
+  <text x="434.5" y="1048" font-size="10" fill="#166534" text-anchor="middle">bytes in a database table</text>
+  <rect x="587" y="1008" width="245" height="54" rx="6" fill="#d1fae5" stroke="#22c55e"/>
+  <text x="709.5" y="1030" font-size="12" fill="#166534" text-anchor="middle">Drive · Dropbox · OneDrive</text>
+  <text x="709.5" y="1048" font-size="10" fill="#166534" text-anchor="middle">Vercel Blob · Cloudinary</text>
+  <text x="295" y="158" font-size="10" fill="#64748b" text-anchor="end">① send a file</text>
+  <text x="295" y="256" font-size="10" fill="#64748b" text-anchor="end">② Store.Upload</text>
+  <text x="295" y="396" font-size="10" fill="#64748b" text-anchor="end">③ policy and checks</text>
+  <text x="295" y="520" font-size="10" fill="#64748b" text-anchor="end">④ Disk.Write</text>
+  <text x="295" y="890" font-size="10" fill="#64748b" text-anchor="end">⑤ object stored</text>
+  <text x="202" y="366" font-size="10" fill="#64748b" text-anchor="middle">⑥ row saved after the object</text>
+  <text x="529" y="158" font-size="10" fill="#64748b" text-anchor="start">response</text>
+  <text x="529" y="396" font-size="10" fill="#64748b" text-anchor="start">stream or redirect</text>
+  <text x="529" y="890" font-size="10" fill="#64748b" text-anchor="start">bytes back</text>
+  <path d="M182.5,1106 L 200.5,1106" fill="none" stroke="#3b82f6" stroke-width="3"/>
+  <text x="212.5" y="1110" font-size="10" fill="#64748b">upload, steps ① to ⑥</text>
+  <path d="M362.5,1106 L 380.5,1106" fill="none" stroke="#22c55e" stroke-width="3"/>
+  <text x="392.5" y="1110" font-size="10" fill="#64748b">download</text>
+  <path d="M476.5,1106 L 494.5,1106" fill="none" stroke="#a855f7" stroke-width="3"/>
+  <text x="506.5" y="1110" font-size="10" fill="#64748b">plugin hook</text>
+  <path d="M607.0,1106 L 625.0,1106" fill="none" stroke="#64748b" stroke-width="3"/>
+  <text x="637.0" y="1110" font-size="10" fill="#64748b">side call</text>
+</svg>

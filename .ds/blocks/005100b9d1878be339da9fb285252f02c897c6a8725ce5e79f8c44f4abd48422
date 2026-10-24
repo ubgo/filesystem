@@ -1,0 +1,13 @@
+func runSweeper(ctx context.Context, dir string) {
+	tick := time.NewTicker(time.Hour)
+	defer tick.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case now := <-tick.C:
+			n, err := sweepSessions(dir, now.Add(-sessionMaxAge))
+			fmt.Fprintf(os.Stderr, "sweep: removed %d abandoned session files (err: %v)\n", n, err)
+		}
+	}
+}

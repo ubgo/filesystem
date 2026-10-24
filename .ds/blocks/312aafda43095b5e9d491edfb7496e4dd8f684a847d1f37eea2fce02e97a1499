@@ -1,0 +1,15 @@
+func pruneChanged(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (int, error) {
+	changed := map[string]imaging.Transform{
+		nameThumb: transforms[nameThumb],
+		nameCard:  {Mode: imaging.ModeFit, Width: 600, Height: 600, Format: imaging.FormatJPEG},
+	}
+	p, err := newPlugin(changed, logEager)
+	if err != nil {
+		return 0, err
+	}
+	s, err := newStore(ctx, db, disks, p)
+	if err != nil {
+		return 0, err
+	}
+	return p.Prune(ctx, s)
+}

@@ -1,0 +1,6 @@
+func customerOf(r *http.Request) (string, error) {
+	if c := r.Header.Get(headerCustomer); c != "" {
+		return c, nil
+	}
+	return "", filesystem.Errorf(filesystem.CodePermission, "not signed in")
+}

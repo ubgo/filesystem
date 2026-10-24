@@ -1,0 +1,23 @@
+func directories(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	if err := disk.MakeDir(ctx, "inbox/2026"); err != nil {
+		return err
+	}
+	made, err := disk.DirExists(ctx, "inbox/2026")
+	if err != nil {
+		return err
+	}
+	page, err := disk.ListPage(ctx, "inbox", filesystem.ListOptions{Recursive: true})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "made inbox/2026: exists=%t, listed entries=%d\n", made, len(page.Entries))
+	if err := disk.Delete(ctx, "shared/latest.csv"); err != nil {
+		return err
+	}
+	kept, err := disk.DirExists(ctx, "shared")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after deleting its last file, shared exists=%t\n", kept)
+	return disk.DeletePrefix(ctx, "shared")
+}

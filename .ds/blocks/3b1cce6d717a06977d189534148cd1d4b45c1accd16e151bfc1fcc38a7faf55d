@@ -1,0 +1,3 @@
+func trashSeen(ctx context.Context, s *records.Store, seen records.File) error {
+	return s.Trash(ctx, tenant, seen.ID, records.IfUnchanged(seen.SHA256))
+}

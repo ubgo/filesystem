@@ -1,0 +1,12 @@
+func imageHeader(ctx context.Context, disk *filesystem.Disk, r upload.Result) error {
+	if !strings.HasPrefix(r.ContentType, "image/") {
+		return nil
+	}
+	rc, err := disk.Read(ctx, r.Key)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	_, err = imaging.Probe(rc)
+	return err
+}

@@ -1,0 +1,12 @@
+func newFolderStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, *folders.Plugin, *share.Plugin, error) {
+	fp := folders.New()
+	sp := share.New(share.WithCollections(fp.Collection(), share.Owners{}))
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(fp, sp))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, nil, err
+	}
+	return s, fp, sp, nil
+}

@@ -1,0 +1,8 @@
+func purgeThenFail(ctx context.Context, s *records.Store, f records.File) error {
+	return s.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if err := s.Purge(ctx, tenant, f.ID); err != nil {
+			return err
+		}
+		return errAbort
+	})
+}

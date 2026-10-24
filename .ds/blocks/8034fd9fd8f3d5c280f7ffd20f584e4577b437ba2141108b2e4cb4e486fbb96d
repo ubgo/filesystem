@@ -1,0 +1,15 @@
+func cloudinaryErrors(ctx context.Context, out io.Writer, disk *filesystem.Disk, fake *fakes.Cloudinary) error {
+	wrong, err := openCloudinary("not-the-secret", cloudinary.TypeAuthenticated, fake.URL)
+	if err != nil {
+		return err
+	}
+	_, err = wrong.WriteBytes(ctx, "a.txt", []byte("a"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "wrong secret: %s\n", outcome(err))
+	fake.FailNext(fakes.Failure{Status: statusRateLimited, Code: "Rate Limit Exceeded", RetryAfter: int(retryHint.Seconds())})
+	_, err = disk.Stat(ctx, "brand/terms.txt")
+	fmt.Fprintf(out, "Admin API limit: %s\n", outcome(err))
+	fake.MaxBytes = cloudUploadSize
+	_, err = disk.WriteBytes(ctx, "big.bin", make([]byte, cloudUploadSize+1), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "over the raw-upload limit: %s\n", outcome(err))
+	return nil
+}

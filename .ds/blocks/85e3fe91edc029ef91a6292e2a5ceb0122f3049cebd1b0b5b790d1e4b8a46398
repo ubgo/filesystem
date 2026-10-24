@@ -1,0 +1,25 @@
+func send(ctx context.Context, addr string, disk *filesystem.Disk, msg Message) error {
+	c, err := smtp.Dial(addr)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = c.Close() }()
+	if err := c.Mail(sender); err != nil {
+		return err
+	}
+	if err := c.Rcpt(msg.To); err != nil {
+		return err
+	}
+	data, err := c.Data()
+	if err != nil {
+		return err
+	}
+	if err := compose(ctx, data, disk, msg); err != nil {
+		_ = data.Close()
+		return err
+	}
+	if err := data.Close(); err != nil {
+		return err
+	}
+	return c.Quit()
+}

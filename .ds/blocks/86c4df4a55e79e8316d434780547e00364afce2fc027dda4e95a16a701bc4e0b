@@ -1,0 +1,14 @@
+func newBillingStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager, consumer records.Plugin) (*records.Store, *quota.Plugin, error) {
+	q, err := quota.New(limits, quota.WithUsageEvents())
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(q, consumer))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, q, nil
+}

@@ -1,0 +1,13 @@
+func issueTicket(w http.ResponseWriter, r *http.Request, disk *filesystem.Disk) {
+	var req upload.TicketRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, 4<<10)).Decode(&req); err != nil {
+		http.Error(w, "bad ticket request", http.StatusBadRequest)
+		return
+	}
+	ticket, err := upload.Presign(r.Context(), disk, req, avatarPolicy(), ticketLifetime)
+	if err != nil {
+		http.Error(w, err.Error(), fshttp.StatusOf(err))
+		return
+	}
+	writeJSON(w, ticket)
+}

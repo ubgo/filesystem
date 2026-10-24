@@ -1,0 +1,13 @@
+func testServer(t *testing.T) (*httptest.Server, string) {
+	t.Helper()
+	srv := httptest.NewServer(nil)
+	t.Cleanup(srv.Close)
+	dir := t.TempDir()
+	a, err := newApp(t.Context(), config{BaseURL: srv.URL, DataDir: dir, Secret: bytes.Repeat([]byte("s"), signedurl.MinKeyBytes)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = a.Close() })
+	srv.Config.Handler = a.Handler()
+	return srv, dir
+}

@@ -1,0 +1,4 @@
+var appSchema = []string{
+	`CREATE TABLE IF NOT EXISTS conversation_members (conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, PRIMARY KEY (conversation_id, user_id))`,
+	`CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL, author_id TEXT NOT NULL, body TEXT NOT NULL)`,
+}

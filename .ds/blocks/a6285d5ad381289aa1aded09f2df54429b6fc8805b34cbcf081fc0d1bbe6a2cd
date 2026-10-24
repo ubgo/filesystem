@@ -1,0 +1,21 @@
+func serverMultipart(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	const key = "exports/big.csv"
+	id, err := disk.CreateMultipart(ctx, key, filesystem.WriteOptions{ContentType: "text/csv"})
+	if err != nil {
+		return err
+	}
+	var parts []filesystem.Part
+	for i, chunk := range []string{"id,total\n", "1,42\n"} {
+		p, err := disk.UploadPart(ctx, key, id, i+1, strings.NewReader(chunk), int64(len(chunk)))
+		if err != nil {
+			return err
+		}
+		parts = append(parts, p)
+	}
+	e, err := disk.CompleteMultipart(ctx, key, id, parts)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "multipart: %s is %d bytes, %s\n", e.Key, e.Size, e.ContentType)
+	return nil
+}

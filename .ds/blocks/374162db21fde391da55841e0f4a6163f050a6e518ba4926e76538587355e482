@@ -1,0 +1,21 @@
+func gifThumbs(src []byte) (animated, still int, err error) {
+	t := imaging.Transform{Mode: imaging.ModeFit, Width: 30, Height: 30, Format: imaging.FormatGIF}
+	moving, err := imaging.Process(bytes.NewReader(src), t, imaging.Options{})
+	if err != nil {
+		return 0, 0, err
+	}
+	t.FirstFrame = true
+	first, err := imaging.Process(bytes.NewReader(src), t, imaging.Options{})
+	if err != nil {
+		return 0, 0, err
+	}
+	a, err := gif.DecodeAll(bytes.NewReader(moving.Data))
+	if err != nil {
+		return 0, 0, err
+	}
+	s, err := gif.DecodeAll(bytes.NewReader(first.Data))
+	if err != nil {
+		return 0, 0, err
+	}
+	return len(a.Image), len(s.Image), nil
+}

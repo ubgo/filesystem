@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "Quarantine (StatusQuarantined) is checked once in Store.Served by reading the row's status from the database, so URL/DownloadURL and every handler built on them (recordshttp, share, imaging variants, app ServeStream) are refused even with a stale or plugin-built File value. Viewed refuses with ErrQuarantined; a quarantined file is never public (CreateFile/SetVisibility/SetStatus guards, rechecked under the row lock). SetStatus cannot leave quarantine so processing plugins cannot release a file; only PassScan/Scan do. FailScan default keeps the file quarantined (WithScanFailure purge is opt-in). Consequence: plugins that SetStatus(processing) on file.created (variants eager, ocr, pdf) fail a quarantined upload until they skip quarantined files.",
+  "confidence": null,
+  "created_at": "2026-10-08T08:17:26.864418000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11a96b550766890b5e57b6f014624",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "SE-06 quarantine is a status enforced at Store.Served, Viewed and visibility, not at each handler",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:17:26.864418000Z"
+}

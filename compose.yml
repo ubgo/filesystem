@@ -1,0 +1,74 @@
+# The throwaway services this repository's integration tests run against.
+# They are the project's own, never the shared local dev stack: each test
+# task starts the profile it needs, runs, and then removes the containers
+# and their volumes, pass or fail (`docker compose down -v` in a Taskfile
+# `defer` registered before the start, so a failed start is cleaned up
+# too). Nothing here keeps data, no volume is named, and every port binds
+# to 127.0.0.1 on a number the shared stack does not use. The project name
+# and ports are fixed, so run one integration task at a time per machine.
+#
+# Two S3 servers on purpose: RustFS (the MinIO replacement) behaves like
+# most S3 providers, and SeaweedFS keeps empty "directories" after their
+# last object, the case prune_prefixes exists for. Both verify signatures.
+name: ubgo-filesystem
+
+services:
+  seaweedfs:
+    profiles: [s3]
+    image: chrislusf/seaweedfs
+    # The identity file makes SeaweedFS verify SigV4 signatures; without it
+    # any request is accepted, and TestPresignHeadersAgainstARealStore
+    # would pass vacuously.
+    command: server -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    volumes:
+      - ./adapters/s3/testdata/seaweedfs-s3.json:/etc/seaweedfs/s3.json:ro
+    ports: ["127.0.0.1:8333:8333"]
+
+  rustfs:
+    profiles: [rustfs]
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: filesystem
+      RUSTFS_SECRET_KEY: filesystem-secret
+    # 19333, not 9000 or 7010 (ClickHouse and the shared stack's RustFS)
+    # nor 9333 (Chrome holds it on the owner's machine).
+    ports: ["127.0.0.1:19333:9000"]
+
+  azurite:
+    profiles: [azure]
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite-blob --blobHost 0.0.0.0 --loose --skipApiVersionCheck
+    ports: ["127.0.0.1:10000:10000"]
+
+  clamav:
+    profiles: [clamav]
+    # The Debian image is the one ClamAV publishes for arm64 as well as
+    # amd64. The first start downloads signatures, which takes minutes.
+    image: clamav/clamav-debian:stable
+    ports: ["127.0.0.1:3310:3310"]
+
+  mysql:
+    profiles: [mysql]
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: filesystem
+    # 33071, not 33070: that port belongs to ubgo/auth's scratch MySQL.
+    ports: ["127.0.0.1:33071:3306"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pfilesystem"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+  redis:
+    profiles: [redis]
+    image: redis:7-alpine
+    # No persistence: the Asynq tests need a queue for the run only.
+    command: redis-server --save "" --appendonly no
+    # 63790, not 6379 or the shared stack's port.
+    ports: ["127.0.0.1:63790:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30

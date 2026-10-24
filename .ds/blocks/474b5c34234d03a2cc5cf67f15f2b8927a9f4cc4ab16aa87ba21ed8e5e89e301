@@ -1,0 +1,27 @@
+func listTree(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	for _, k := range []string{"docs/a.txt", "docs/b.txt", "docs/img/logo.png"} {
+		if _, err := disk.WriteBytes(ctx, k, []byte(k), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	var all []string
+	for e, err := range disk.List(ctx, "docs", filesystem.ListOptions{Recursive: true, Limit: pageSize}) {
+		if err != nil {
+			return err
+		}
+		all = append(all, e.Key)
+	}
+	fmt.Fprintf(out, "recursive: %s\n", strings.Join(all, " "))
+	opts := filesystem.ListOptions{Limit: pageSize}
+	for page := 1; ; page++ {
+		p, err := disk.ListPage(ctx, "docs", opts)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "page %d: %s next=%q\n", page, describe(p.Entries), p.NextCursor)
+		if p.NextCursor == "" {
+			return nil
+		}
+		opts.Cursor = p.NextCursor
+	}
+}

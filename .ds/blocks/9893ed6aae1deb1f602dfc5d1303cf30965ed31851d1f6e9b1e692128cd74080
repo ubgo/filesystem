@@ -1,0 +1,18 @@
+func (a *App) ticket(w http.ResponseWriter, r *http.Request) {
+	user, err := userOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	var req upload.TicketRequest
+	if err := decodeJSON(w, r, &req); err != nil {
+		writeError(w, err)
+		return
+	}
+	t, err := upload.Presign(r.Context(), a.Disk, req, policyFor(user), ticketLifetime)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, t)
+}

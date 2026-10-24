@@ -1,0 +1,30 @@
+func (a *App) openStore(ctx context.Context, dataDir, base string, secret []byte) (*filesystem.Manager, *signedurl.Signer, error) {
+	signer, err := signedurl.New(base+signedPrefix, []signedurl.Key{{ID: "k1", Secret: secret}})
+	if err != nil {
+		return nil, nil, err
+	}
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, drv, filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "drive.db")+"?_pragma=busy_timeout(5000)")
+	if err != nil {
+		return nil, nil, err
+	}
+	db.SetMaxOpenConns(1)
+	a.Store, err = records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithPlugins(a.Quota, a.Versions, a.Folders, a.Shares, a.Audit))
+	if err != nil {
+		return nil, nil, err
+	}
+	_, err = a.Store.Migrate(ctx)
+	return disks, signer, err
+}

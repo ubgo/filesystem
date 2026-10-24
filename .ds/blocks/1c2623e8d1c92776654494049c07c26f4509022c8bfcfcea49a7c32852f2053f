@@ -1,0 +1,3 @@
+func managedPipeline() *imaging.Pipeline {
+	return imaging.NewPipeline(imaging.WithColourManagement(icc.ToSRGB))
+}

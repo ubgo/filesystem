@@ -1,0 +1,5 @@
+var sizes = map[string]imaging.Transform{
+	sizeThumb: {Mode: imaging.ModeFill, Width: 200, Height: 200, Format: imaging.FormatJPEG},
+	sizeCard:  {Mode: imaging.ModePad, Width: 600, Height: 600, Format: imaging.FormatJPEG},
+	sizeZoom:  {Mode: imaging.ModeFit, Width: 1600, Height: 1600, Format: imaging.FormatJPEG, Quality: 90},
+}

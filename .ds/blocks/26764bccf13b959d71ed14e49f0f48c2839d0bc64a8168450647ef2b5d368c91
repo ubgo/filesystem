@@ -1,0 +1,6 @@
+func keyTypes(w io.Writer) {
+	for _, engine := range []string{records.EngineSQLite, records.EnginePostgres, records.EngineMySQL} {
+		t := records.TypesFor(engine)
+		fmt.Fprintf(w, "%-8s Key=%s Short=%s Timestamp=%s Doc=%s\n", engine, t.Key, t.Short, t.Timestamp, t.Doc)
+	}
+}

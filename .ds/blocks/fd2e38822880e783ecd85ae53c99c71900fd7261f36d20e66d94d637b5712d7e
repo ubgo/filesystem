@@ -1,0 +1,13 @@
+func logOps(ctx context.Context, out io.Writer) error {
+	logger := slog.New(slog.NewTextHandler(out, &slog.HandlerOptions{Level: slog.LevelDebug, ReplaceAttr: dropVolatile}))
+	disk, err := filesystem.NewDisk("media", memory.New(), filesystem.WithInterceptors(layer.Log(logger)))
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "a.txt", []byte("hello"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	_, _ = disk.Exists(ctx, "missing.txt")
+	_ = disk.SetVisibility(ctx, "missing.txt", filesystem.VisibilityPublic)
+	return nil
+}

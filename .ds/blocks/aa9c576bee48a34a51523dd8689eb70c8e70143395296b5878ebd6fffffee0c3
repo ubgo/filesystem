@@ -1,0 +1,3 @@
+var widths = map[string]imaging.Transform{
+	"cover": {Mode: imaging.ModeFill, Width: 600, Height: 200, Gravity: imaging.GravitySmart, Format: imaging.FormatJPEG},
+}

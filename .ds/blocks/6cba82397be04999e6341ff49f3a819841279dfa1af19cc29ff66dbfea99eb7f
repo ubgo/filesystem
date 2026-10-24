@@ -1,0 +1,21 @@
+func delegatePrefix(ctx context.Context, out io.Writer, _ *s3.Client, _ *fakeS3) error {
+	stsClient := &fakeSTS{} // sts.NewFromConfig(cfg) in production
+	creds, err := fss3.DelegatePrefix(ctx, stsClient, fss3.DelegateOptions{
+		Role:        uploaderRole,
+		SessionName: "user-42",
+		Bucket:      bucketName,
+		Prefix:      "users/42",
+		Write:       true,
+		Duration:    time.Hour,
+	})
+	if err != nil {
+		return err
+	}
+	var policy struct{ Statement []struct{ Resource []string } }
+	if err := json.Unmarshal([]byte(aws.ToString(stsClient.last.Policy)), &policy); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "delegated: %s\n", policy.Statement[0].Resource[0])
+	fmt.Fprintf(out, "credentials print as: %v\n", redactExpiry(creds.String()))
+	return nil
+}

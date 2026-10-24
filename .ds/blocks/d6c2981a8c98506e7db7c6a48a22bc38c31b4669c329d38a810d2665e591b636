@@ -1,0 +1,27 @@
+func run(ctx context.Context, out io.Writer, body []byte, filename string) error {
+	rep, err := svg.Sanitize(bytes.NewReader(body), io.Discard, svg.Options{AllowDataImages: true})
+	if err != nil {
+		return err
+	}
+	for _, r := range rep.Removed {
+		fmt.Fprintf(out, "removed   %s\n", r)
+	}
+	p, err := newPolicy()
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("media", memory.New())
+	if err != nil {
+		return err
+	}
+	res, err := upload.Receive(ctx, disk, bytes.NewReader(body), filename, p)
+	if err != nil {
+		return err
+	}
+	stored, err := disk.ReadAll(ctx, res.Key)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stored    %s (%s, %d bytes)\n%s\n", res.Key, res.ContentType, res.Size, stored)
+	return nil
+}

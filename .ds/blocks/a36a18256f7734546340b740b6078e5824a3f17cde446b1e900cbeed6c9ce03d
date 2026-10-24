@@ -1,0 +1,8 @@
+func usage(ctx context.Context, s *records.Store, eg *egress.Plugin, from, to time.Time) ([]egress.Bucket, egress.Bucket, error) {
+	days, err := eg.Days(ctx, s, tenant, from, to)
+	if err != nil {
+		return nil, egress.Bucket{}, err
+	}
+	total, err := eg.Total(ctx, s, tenant, from, to)
+	return days, total, err
+}

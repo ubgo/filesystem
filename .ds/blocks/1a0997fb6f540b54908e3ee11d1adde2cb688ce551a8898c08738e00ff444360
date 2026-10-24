@@ -1,0 +1,27 @@
+func newApp() (*app, error) {
+	routes := http.NewServeMux()
+	srv := httptest.NewServer(routes)
+	signer, err := signedurl.New(srv.URL+signedPrefix, []signedurl.Key{newKey, oldKey})
+	if err != nil {
+		srv.Close()
+		return nil, err
+	}
+	private, err := filesystem.NewDisk("private", memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		srv.Close()
+		return nil, err
+	}
+	public, err := filesystem.NewDisk("public", memory.New(), filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	if err != nil {
+		srv.Close()
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(private, public)
+	if err != nil {
+		srv.Close()
+		return nil, err
+	}
+	routes.Handle(signedPrefix+"/", http.StripPrefix(signedPrefix, fshttp.Signed(disks, signer)))
+	routes.Handle(publicPrefix+"/", http.StripPrefix(publicPrefix, fshttp.Public(public)))
+	return &app{srv: srv, private: private, public: public}, nil
+}

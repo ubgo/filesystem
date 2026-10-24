@@ -1,0 +1,14 @@
+func (a *App) Export(ctx context.Context, scope, role string) ([]fshttp.ZipFile, error) {
+	attached, err := a.Store.Attachments(ctx, scope, records.Owner{Type: ownerUser, ID: a.Store.Actor(ctx)}, role)
+	if err != nil {
+		return nil, err
+	}
+	if len(attached) == 0 {
+		return nil, filesystem.Errorf(filesystem.CodeNotFound, "no %s files", role)
+	}
+	files := make([]fshttp.ZipFile, 0, len(attached))
+	for _, af := range attached {
+		files = append(files, fshttp.ZipFile{Key: af.File.Key, Name: fmt.Sprintf("%d-%s", af.Attachment.Position, upload.SafeFilename(af.File.Filename))})
+	}
+	return files, nil
+}

@@ -1,0 +1,40 @@
+func envelope(ctx context.Context, out io.Writer) error {
+	db, err := sql.Open("sqlite", "file::memory:")
+	if err != nil {
+		return err
+	}
+	db.SetMaxOpenConns(1)
+	defer func() { _ = db.Close() }()
+	disk, s, fp, sp, err := newEnvelopeStore(ctx, db)
+	if err != nil {
+		return err
+	}
+	folder, err := fp.Create(ctx, s, envelopeScope, folders.RootID, "Press kit")
+	if err != nil {
+		return err
+	}
+	f, err := s.Upload(ctx, envelopeScope, disk.Name(), strings.NewReader(pdfFile), "kit.pdf", policy)
+	if err != nil {
+		return err
+	}
+	if err := fp.Put(ctx, s, envelopeScope, f.ID, folder.ID); err != nil {
+		return err
+	}
+	link, err := sp.CreateFor(ctx, s, envelopeScope, share.Target{Kind: folders.KindFolder, Ref: folder.ID}, share.Options{TTL: envelopeLink})
+	if err != nil {
+		return err
+	}
+	for _, respond := range []bool{false, true} {
+		uploads, media, links, err := envelopeHandlers(disk, s, sp, respond)
+		if err != nil {
+			return err
+		}
+		upStatus, upBody := sendForm(ctx, uploads, "/upload", formFile{"a.png", pngFile})
+		mediaStatus, mediaBody := sendForm(ctx, media, "/owners/"+envelopeOwner+"/u1/docs", formFile{"b.pdf", pdfFile})
+		rec := httptest.NewRecorder()
+		links.ServeHTTP(rec, httptest.NewRequestWithContext(ctx, http.MethodGet, "/"+link.Token, nil))
+		fmt.Fprintf(out, "envelope respond=%t: upload %d %s, records %d %s, share listing %d %s\n",
+			respond, upStatus, shape(upBody), mediaStatus, shape(mediaBody), rec.Code, shape(rec.Body.Bytes()))
+	}
+	return nil
+}

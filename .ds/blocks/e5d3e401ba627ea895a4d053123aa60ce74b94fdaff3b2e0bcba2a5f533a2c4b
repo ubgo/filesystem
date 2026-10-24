@@ -1,0 +1,28 @@
+func fixedTypes(ctx context.Context, out io.Writer, dir string) error {
+	drv, err := local.New(dir, local.WithContentType(appContentType))
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("scans", drv)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	for _, k := range []string{"studies/chest.dcm", "notes/readme.md", "notes/data.unknownext"} {
+		if _, err := disk.WriteBytes(ctx, k, []byte("x"), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+		e, err := disk.Stat(ctx, k)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "fixed types: Stat %s -> %q\n", k, e.ContentType)
+	}
+	for e, err := range disk.List(ctx, "studies", filesystem.ListOptions{}) {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "fixed types: List %s -> %q\n", e.Key, e.ContentType)
+	}
+	return nil
+}

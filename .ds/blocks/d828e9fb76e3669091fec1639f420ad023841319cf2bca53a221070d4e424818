@@ -1,0 +1,3 @@
+func can(ctx context.Context, s *records.Store, ap *acl.Plugin, who []string, fileID string, level acl.Level) (bool, error) {
+	return ap.Can(ctx, s, tenant, who, fileID, level)
+}

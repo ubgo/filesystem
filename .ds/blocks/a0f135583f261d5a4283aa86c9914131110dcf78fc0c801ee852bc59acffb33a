@@ -1,0 +1,4 @@
+func thumbnail(doc []byte, side int) (imaging.Result, error) {
+	t := imaging.Transform{Mode: imaging.ModeFit, Width: side, Height: side, Format: imaging.FormatPNG}
+	return svgPipeline().Process(bytes.NewReader(doc), t, imaging.Options{})
+}

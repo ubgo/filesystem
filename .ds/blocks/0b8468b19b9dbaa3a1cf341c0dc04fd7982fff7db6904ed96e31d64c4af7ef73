@@ -1,0 +1,19 @@
+func (a *App) redirect(w http.ResponseWriter, r *http.Request, sign func(context.Context, records.File) (string, error)) {
+	customer, err := customerOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	f, err := a.owned(r.Context(), customer, r.PathValue("id"))
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	link, err := sign(r.Context(), f)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	w.Header().Set("Cache-Control", "private, no-store")
+	http.Redirect(w, r, link, http.StatusFound)
+}

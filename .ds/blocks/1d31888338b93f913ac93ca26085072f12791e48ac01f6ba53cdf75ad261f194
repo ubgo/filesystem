@@ -1,0 +1,3 @@
+func acceptNow(ctx context.Context, s *records.Store, name, body string) (records.File, error) {
+	return s.Upload(ctx, tenant, diskName, strings.NewReader(body), name, inbox, records.Quarantine())
+}

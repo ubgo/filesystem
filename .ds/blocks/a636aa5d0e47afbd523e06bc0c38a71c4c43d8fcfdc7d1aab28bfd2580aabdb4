@@ -1,0 +1,25 @@
+func (a *App) authorize(r *http.Request, action recordshttp.Action, t recordshttp.Target) error {
+	user, err := userOf(r)
+	if err != nil {
+		return err
+	}
+	switch action {
+	case recordshttp.ActionRead:
+		ok, err := a.canReadFile(r.Context(), t.Scope, user, t.FileID)
+		return allow(ok, err)
+	case recordshttp.ActionReplace, recordshttp.ActionTrash:
+		return errForbidden
+	}
+	if t.Owner.Type != ownerMessage || t.Role != roleAttachments {
+		return errForbidden
+	}
+	m, err := a.message(r.Context(), t.Owner.ID)
+	if err != nil {
+		return err
+	}
+	if action == recordshttp.ActionList {
+		ok, err := a.isMember(r.Context(), m.Conversation, user)
+		return allow(ok, err)
+	}
+	return allow(m.Author == user, nil)
+}

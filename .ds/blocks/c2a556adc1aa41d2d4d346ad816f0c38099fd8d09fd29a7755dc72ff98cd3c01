@@ -1,0 +1,13 @@
+func (a *App) publish(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if err := a.Store.SetVisibility(r.Context(), "", id, filesystem.VisibilityPublic); err != nil {
+		writeError(w, err)
+		return
+	}
+	f, err := a.Store.File(r.Context(), "", id)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	a.respond(w, r, f)
+}

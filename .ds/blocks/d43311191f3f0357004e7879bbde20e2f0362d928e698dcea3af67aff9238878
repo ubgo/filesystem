@@ -1,0 +1,20 @@
+func fromEnvironment(ctx context.Context, mux *filesystem.Mux, dir string, out io.Writer) (*filesystem.Manager, error) {
+	env := map[string]string{
+		"STORAGE_DISKS":        "media, backups",
+		"STORAGE_MEDIA_DSN":    "mem://media?visibility=public",
+		"STORAGE_BACKUPS_DSN":  "file://" + filepath.ToSlash(filepath.Join(dir, "backups")),
+		"STORAGE_DEFAULT_DISK": "media",
+	}
+	lookup := func(k string) (string, bool) { v, ok := env[k]; return v, ok }
+	mgr, err := mux.OpenManager(ctx, envPrefix, lookup)
+	if err != nil {
+		return nil, err
+	}
+	def, err := mgr.Default()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Fprintf(out, "disks %s, default %s\n", strings.Join(mgr.Names(), ","), def.Name())
+	fmt.Fprintf(out, "variable for media-cdn: %s\n", filesystem.EnvName(envPrefix, "media-cdn"))
+	return mgr, nil
+}

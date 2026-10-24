@@ -1,0 +1,3 @@
+func deposit(ctx context.Context, s *records.Store, p *share.Plugin, token, name, body string) (records.File, error) {
+	return p.Deposit(ctx, s, token, diskName, strings.NewReader(body), name, docPolicy)
+}

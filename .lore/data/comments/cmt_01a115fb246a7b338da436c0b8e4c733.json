@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Built contrib/remote (own module, x/net/html): Cache (Get/Open/Purge/Sweep, LRU touch via SetModTime, per-instance single flight), LinkPreview (bounded page read, og:image through the SSRF guard, JSON stored with PreviewTTL), Proxy (signedurl HMAC, re-sniff, nosniff+CSP+cache headers). Keys are SHA-256 of the canonical URL. 27 tests, 15 guards break-verified. Guide docs/plugins/remote.md, README, examples/remote-media (own module). Sweep is scheduled via jobs.Func, no jobs/ change.",
+  "created_at": "2026-10-07T10:49:02.826717000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a1151fbfa07e34bfc2bf2b3ace6162",
+  "entity_table": "tasks",
+  "id": "cmt_01a115fb246a7b338da436c0b8e4c733",
+  "updated_at": "2026-10-07T10:49:02.826717000Z"
+}

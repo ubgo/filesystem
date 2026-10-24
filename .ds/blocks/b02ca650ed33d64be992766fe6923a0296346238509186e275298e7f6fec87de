@@ -1,0 +1,23 @@
+func newRetentionStore(ctx context.Context, db *sql.DB, clock *Clock) (*records.Store, *versions.Plugin, error) {
+	disks, err := newDisks()
+	if err != nil {
+		return nil, nil, err
+	}
+	vp, err := versions.New()
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithOwnerTypes(ownerUser, ownerChat),
+		records.WithClock(clock.Now),
+		records.WithRetention(records.Retention{OwnerType: ownerChat, MaxAge: chatRetention}),
+		records.WithPlugins(vp),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, vp, nil
+}

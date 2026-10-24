@@ -1,0 +1,16 @@
+func nativeCause(ctx context.Context, out io.Writer, dir string) error {
+	drv, err := local.New(dir)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("uploads", drv)
+	if err != nil {
+		_ = drv.Close()
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	_, err = disk.Stat(ctx, missingKey)
+	var pe *fs.PathError
+	fmt.Fprintf(out, "local: %s, native *fs.PathError: %t\n", filesystem.CodeOf(err), errors.As(err, &pe))
+	return nil
+}

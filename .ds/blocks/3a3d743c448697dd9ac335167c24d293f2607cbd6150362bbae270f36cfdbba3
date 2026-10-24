@@ -1,0 +1,35 @@
+func New(ctx context.Context, dataDir, baseURL string, secret []byte) (*App, error) {
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, err
+	}
+	signer, err := signedurl.New(baseURL+"/files", []signedurl.Key{{ID: "k1", Secret: secret}})
+	if err != nil {
+		return nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, drv, filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, err
+	}
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "app.db"))
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithOwnerTypes(ownerUser), records.WithSingleRoles(roleAvatar))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := store.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	app := &App{Store: store, Disks: disks, Mux: http.NewServeMux()}
+	app.Mux.HandleFunc("POST /users/{id}/avatar", app.uploadAvatar)
+	app.Mux.HandleFunc("GET /users/{id}/avatar", app.avatar)
+	app.Mux.Handle("/files/", http.StripPrefix("/files", fshttp.Signed(disks, signer)))
+	return app, nil
+}

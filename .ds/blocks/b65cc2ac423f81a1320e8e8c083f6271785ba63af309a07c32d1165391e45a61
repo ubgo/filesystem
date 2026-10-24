@@ -1,0 +1,25 @@
+func managerOps(ctx context.Context, mgr *filesystem.Manager, out io.Writer) error {
+	if err := mgr.Check(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "check: every disk works")
+	media, err := mgr.Disk("media")
+	if err != nil {
+		return err
+	}
+	backups, err := mgr.Disk("backups")
+	if err != nil {
+		return err
+	}
+	if _, err := media.WriteBytes(ctx, "report.csv", []byte("a,b\n1,2\n"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	e, err := filesystem.CopyAcross(ctx, media, "report.csv", backups, "2026/report.csv")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "copied to backups:%s (%s)\n", e.Key, e.ContentType)
+	_, err = mgr.Disk("nope")
+	fmt.Fprintf(out, "unknown disk: %s\n", filesystem.CodeOf(err))
+	return nil
+}

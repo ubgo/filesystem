@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  continue the remaingi task sfirst\n\nContext:\n  the internal audit notes lists these 7 as partial. Same turn also covers: SweepAbandoned dry run (tsk_01a115fba3bf78319e00dc3998121dc7), new-module coverage (tsk_01a11a7aab78774790ef65ebe50b3db7), per-tenant SSE-KMS (tsk_01a11a81604074f5a9516e8d3b1dd6a1), river/asynq re-measure (tsk_01a11a7aabc6744d9f62621c5df536bc). Owner decisions, real-account checks, Windows and tagging are excluded (need the owner, accounts or a machine).\n\nAcceptance:\n  Each feature built with tests and docs, or reported with why it should not be.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T09:39:33.431005000Z",
+  "created_at": "2026-10-08T07:55:18.964940000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a8272347e63acf56f277a00a94e",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Finish the 7 partial features: CO-15, CO-16, UP-15, IM-27, SE-06, IN-10, SA-02",
+  "updated_at": "2026-10-08T09:39:33.431007000Z"
+}

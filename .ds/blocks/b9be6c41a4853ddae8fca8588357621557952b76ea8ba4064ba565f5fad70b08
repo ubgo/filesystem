@@ -1,0 +1,14 @@
+func describe(w io.Writer, f records.File) error {
+	m, ok := audio.Of(f)
+	if !ok {
+		return fmt.Errorf("no audio metadata recorded for %s", f.ID)
+	}
+	peaks, ok := audio.WaveformOf(f)
+	if !ok {
+		return fmt.Errorf("no waveform recorded for %s", f.ID)
+	}
+	fmt.Fprintf(w, "stored   %s (%s)\n", f.Filename, f.ContentType)
+	fmt.Fprintf(w, "audio    %s, %s, %d Hz, %d channel(s)\n", m.Duration.Round(100*time.Millisecond), m.Codec, m.SampleRate, m.Channels)
+	fmt.Fprintf(w, "waveform %d peaks, loudest %.1f\n", len(peaks), maxOf(peaks))
+	return nil
+}

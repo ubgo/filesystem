@@ -1,0 +1,18 @@
+func writeAndRead(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	e, err := disk.Write(ctx, greetingKey, strings.NewReader(greeting), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "wrote %s: %d bytes, %s, sha256 %s…\n", e.Key, e.Size, e.ContentType, e.SHA256[:12])
+	rc, err := disk.Read(ctx, greetingKey)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	b, err := io.ReadAll(rc)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "read %q\n", b)
+	return nil
+}

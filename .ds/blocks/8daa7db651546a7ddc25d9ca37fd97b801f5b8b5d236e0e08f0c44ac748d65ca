@@ -1,0 +1,6 @@
+func dicom(head []byte, _ string) string {
+	if len(head) >= dicomPreamble+len(dicomMagic) && string(head[dicomPreamble:dicomPreamble+len(dicomMagic)]) == dicomMagic {
+		return dicomType
+	}
+	return ""
+}

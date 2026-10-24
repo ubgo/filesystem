@@ -1,0 +1,23 @@
+func (a *App) postMessage(w http.ResponseWriter, r *http.Request) {
+	user, err := userOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	conv := r.PathValue("id")
+	if err := allow(a.isMember(r.Context(), conv, user)); err != nil {
+		writeError(w, err)
+		return
+	}
+	var in messageRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxJSONBody)).Decode(&in); err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "invalid JSON body"))
+		return
+	}
+	id := newID()
+	if _, err := a.DB.ExecContext(r.Context(), `INSERT INTO messages (id, conversation_id, author_id, body) VALUES (?, ?, ?, ?)`, id, conv, user, in.Body); err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, messageResponse{ID: id})
+}

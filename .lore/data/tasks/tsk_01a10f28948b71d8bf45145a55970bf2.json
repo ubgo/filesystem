@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": null,
+  "commitment": "accepted",
+  "completed_at": "2026-10-06T05:41:27.340253000Z",
+  "created_at": "2026-10-06T03:01:20.139120000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a10f28948b71d8bf45145a55970bf2",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-06T05:33:06.814171000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "P2 records query and bulk (per-user quota needs design): RC-18/SR-02 owner filter combined with FileQuery and paginated Attachments, facets, RC-19 bulk ops, VA-08 max N per role, RC-21 SweepOrphans dry-run and rows-without-object check, QU-01/QU-03 per-uploader limits",
+  "updated_at": "2026-10-06T05:41:27.340268000Z"
+}

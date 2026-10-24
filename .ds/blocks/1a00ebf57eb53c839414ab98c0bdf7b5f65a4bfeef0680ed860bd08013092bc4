@@ -1,0 +1,11 @@
+func cloud(ctx context.Context, s *records.Store, tp *tags.Plugin) (string, error) {
+	counts, err := tp.Counts(ctx, s, tenant)
+	if err != nil {
+		return "", err
+	}
+	parts := make([]string, 0, len(counts))
+	for _, c := range counts {
+		parts = append(parts, fmt.Sprintf("%s(%d)", c.Tag, c.Files))
+	}
+	return strings.Join(parts, " "), nil
+}

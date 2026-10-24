@@ -1,0 +1,4 @@
+var planLimits = map[Plan]quota.Limit{
+	PlanFree: {Bytes: 1 << 20, Files: 3},
+	PlanPro:  {Bytes: 1 << 30},
+}

@@ -1,0 +1,11 @@
+func breadcrumbs(ctx context.Context, s *records.Store, fp *folders.Plugin, id string) (string, error) {
+	path, err := fp.Path(ctx, s, tenant, id)
+	if err != nil {
+		return "", err
+	}
+	names := []string{"My Drive"}
+	for _, f := range path {
+		names = append(names, f.Name)
+	}
+	return strings.Join(names, " / "), nil
+}

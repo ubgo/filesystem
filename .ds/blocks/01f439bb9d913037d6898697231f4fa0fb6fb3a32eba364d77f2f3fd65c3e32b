@@ -1,0 +1,3 @@
+func newSessions(s *records.Store, p *uploadsessions.Plugin, now func() time.Time) (*upload.Sessions, error) {
+	return upload.NewSessions(p.Store(s), upload.SessionsOptions{Now: now})
+}

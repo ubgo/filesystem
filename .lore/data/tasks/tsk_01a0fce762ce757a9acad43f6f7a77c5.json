@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Requested 2026-10-02: 'lets first build a claude.md and mission.md file'. Both kept in the internal notes like ubgo/auth's CLAUDE.md.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-02T14:08:48.358261000Z",
+  "created_at": "2026-10-02T13:56:57.678357000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a0fce762ce757a9acad43f6f7a77c5",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-02T13:57:09.304401000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "title": "Write CLAUDE.md and MISSION.md for the project",
+  "updated_at": "2026-10-02T14:08:48.358416000Z"
+}

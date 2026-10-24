@@ -1,0 +1,6 @@
+func scannerFrom(lookup filesystem.LookupFunc) scan.Scanner {
+	if addr, ok := lookup(envClamd); ok && addr != "" {
+		return scan.Clamd{Network: "tcp", Address: addr}
+	}
+	return nil
+}

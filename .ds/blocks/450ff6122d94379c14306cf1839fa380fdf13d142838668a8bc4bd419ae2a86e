@@ -1,0 +1,30 @@
+func kmsKeyPerTenant(ctx context.Context, out io.Writer, client *s3.Client, fake *fakeS3) error {
+	keys := map[string]string{"acme": acmeKMSKey, "globex": globexKMSKey} // loaded at start-up
+	disk, err := newBucketDisk(ctx, client, "app-files", fss3.Config{
+		SSEKMSKeyID: defaultKMSKey, // the disk's key, for keys outside any tenant
+		SSEKMSKeyFor: func(key string) string { // the key as the driver sees it, under the scope's prefix
+			tenant, _, _ := strings.Cut(strings.TrimPrefix(key, "tenants/"), "/")
+			return keys[tenant] // "" falls back to SSEKMSKeyID
+		},
+	})
+	if err != nil {
+		return err
+	}
+	for _, tenant := range []string{"acme", "globex"} {
+		scoped, err := disk.Scope(tenant, "tenants/"+tenant)
+		if err != nil {
+			return err
+		}
+		if _, err := scoped.WriteBytes(ctx, "logo.txt", []byte(tenant), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	if _, err := disk.WriteBytes(ctx, "shared/terms.txt", []byte("terms"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	for _, path := range []string{"/app-files/tenants/acme/logo.txt", "/app-files/tenants/globex/logo.txt", "/app-files/shared/terms.txt"} {
+		h := fake.lastSent(http.MethodPut, path, "PutObject")
+		fmt.Fprintf(out, "kms: %s -> %s %s\n", strings.TrimPrefix(path, "/app-files/"), h.Get("X-Amz-Server-Side-Encryption"), h.Get("X-Amz-Server-Side-Encryption-Aws-Kms-Key-Id"))
+	}
+	return nil
+}

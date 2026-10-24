@@ -1,0 +1,19 @@
+func openStore(ctx context.Context, dataDir string, d Disks) (*records.Store, error) {
+	mgr, err := filesystem.NewManager(d.CDN, d.Vault)
+	if err != nil {
+		return nil, err
+	}
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "site.db")+"?_pragma=busy_timeout(5000)")
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+	store, err := records.New(db, sqlb.SQLiteDialect{}, mgr,
+		records.WithOwnerTypes(ownerSite),
+		records.WithVisibilityDisks(diskCDN, diskVault))
+	if err != nil {
+		return nil, err
+	}
+	_, err = store.Migrate(ctx)
+	return store, err
+}

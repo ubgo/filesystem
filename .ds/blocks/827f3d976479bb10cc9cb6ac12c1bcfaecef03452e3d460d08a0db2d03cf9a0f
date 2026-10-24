@@ -1,0 +1,13 @@
+func newRouter(a *adapterapp.App) *gin.Engine {
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.POST(adapterapp.PathUpload, gin.WrapH(a.Upload))
+	fsgin.Mount(r, adapterapp.PathFiles, a.Files)
+	me := r.Group(adapterapp.GroupMe,
+		fsgin.Actor(func(c *gin.Context) (string, error) { return adapterapp.User(c.Request) }),
+		fsgin.Scope(func(c *gin.Context) (string, error) { return adapterapp.Tenant(c.Request) }),
+	)
+	fsgin.Mount(me, adapterapp.MountMedia, a.Records)
+	me.GET(adapterapp.PathExport+"/:"+adapterapp.ParamRole, func(c *gin.Context) { export(c, a) })
+	return r
+}

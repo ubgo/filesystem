@@ -1,0 +1,13 @@
+func runSweeper(ctx context.Context, disk *filesystem.Disk) {
+	tick := time.NewTicker(time.Hour)
+	defer tick.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case now := <-tick.C:
+			n, err := sweepPending(ctx, disk, now)
+			fmt.Fprintf(os.Stderr, "sweep: deleted %d unconfirmed uploads (err: %v)\n", n, err)
+		}
+	}
+}

@@ -1,0 +1,4 @@
+func history(ctx context.Context, s *records.Store, au *audit.Plugin, fileID string) ([]audit.Entry, error) {
+	page, err := au.Entries(ctx, s, audit.Query{Scope: tenant, FileID: fileID})
+	return page.Entries, err
+}

@@ -1,0 +1,23 @@
+func sweep(ctx context.Context, out io.Writer) error {
+	now := time.Now()
+	clock := now.Add(-2 * abandonedAfter)
+	disk, err := filesystem.NewDisk("uploads", memory.New(memory.WithClock(func() time.Time { return clock })))
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "incoming/old.png", []byte(pngFile), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	clock = now
+	if _, err := disk.WriteBytes(ctx, "incoming/new.png", []byte(pngFile), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	n, err := upload.Sweep(ctx, disk, "incoming", now.Add(-abandonedAfter))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "swept %d, left %d\n", n, count(ctx, disk))
+	_, err = upload.Sweep(ctx, disk, "", now)
+	fmt.Fprintf(out, "sweep the root: %s\n", filesystem.CodeOf(err))
+	return nil
+}

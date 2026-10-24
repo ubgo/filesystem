@@ -1,0 +1,22 @@
+func storageClasses(ctx context.Context, out io.Writer, client *s3.Client, _ *fakeS3) error {
+	disk, err := newBucketDisk(ctx, client, "cold-store", fss3.Config{StorageClasses: true, StorageClass: types.StorageClassStandardIa})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "logs/2026-09.log", []byte("september"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	first, err := disk.Stat(ctx, "logs/2026-09.log")
+	if err != nil {
+		return err
+	}
+	if err := disk.SetStorageClass(ctx, "logs/2026-09.log", string(types.StorageClassGlacierIr)); err != nil {
+		return err
+	}
+	now, err := disk.Stat(ctx, "logs/2026-09.log")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "storage class: %s, then %s\n", first.StorageClass, now.StorageClass)
+	return nil
+}

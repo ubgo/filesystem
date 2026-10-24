@@ -1,0 +1,15 @@
+func scanWaiting(ctx context.Context, s *records.Store, sc scan.Scanner) ([]records.File, error) {
+	page, err := s.Files(ctx, records.FileQuery{Scope: tenant, Filters: []sqlb.Predicate{sqlb.Eq(records.FileStatus, records.StatusQuarantined)}})
+	if err != nil {
+		return nil, err
+	}
+	var out []records.File
+	for _, f := range page.Files {
+		scanned, err := s.Scan(ctx, f.Scope, f.ID, sc)
+		if err != nil {
+			return out, err // the file stays quarantined; retry on the next run
+		}
+		out = append(out, scanned)
+	}
+	return out, nil
+}

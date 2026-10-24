@@ -1,0 +1,16 @@
+{
+  "_table": "commit_links",
+  "_v": 1,
+  "author": "khanakia <khanakia@gmail.com>",
+  "committed_at": "2026-10-08T20:08:06+05:30",
+  "created_at": "2026-10-08T14:38:10.997334000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "entity_id": "tsk_01a11bdf6f0877b0be98adff2c6dae47",
+  "entity_table": "tasks",
+  "id": "cml_c188d155ae15737e8900c8a69dfd5f02",
+  "message": "Keep keys off spans, keep the old file on a failed replace, decode echo keys once",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_path": null,
+  "sha": "2664764afe37e61d9b690c9f2dc442405717bb3f",
+  "updated_at": "2026-10-08T14:38:10.997334000Z"
+}

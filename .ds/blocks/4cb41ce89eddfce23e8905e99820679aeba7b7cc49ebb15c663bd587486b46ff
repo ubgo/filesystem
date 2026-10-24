@@ -1,0 +1,3 @@
+func mountWebhook(mx *http.ServeMux, s *records.Store, p *videoplatform.Plugin) {
+	mx.Handle("POST /hooks/mux", p.Webhook(s, nil))
+}

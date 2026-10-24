@@ -1,0 +1,24 @@
+func (a *App) download(w http.ResponseWriter, r *http.Request) {
+	user, err := userOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	id := r.PathValue("id")
+	if err := allow(a.canReadFile(r.Context(), workspace, user, id)); err != nil {
+		writeError(w, err)
+		return
+	}
+	f, err := a.Store.File(r.Context(), workspace, id)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	link, err := a.Store.DownloadURL(r.Context(), f, linkLifetime)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	w.Header().Set("Cache-Control", "private, no-store")
+	http.Redirect(w, r, link, http.StatusFound)
+}

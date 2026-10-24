@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Paused 2026-10-08 (owner went to sleep). Audit done: the internal audit notes, 87 findings (17 blocks-a-class, 56 inconvenient, 14 cosmetic, 35 need a product decision). Waiting for the owner to pick what to fix. Recommended: B1 (WithURLSigner ignored on presigning drivers, disk_url.go:66) and B2 (media plugins wipe each other's width/height/duration_ms) first as real bugs; then B3, B4, B6/B7, B10, B12, B13/B14, I1/I2. Uncommitted: 3 .lore/data files here; the audit report and the agent rule in the internal notes.",
+  "created_at": "2026-10-08T17:55:35.643019000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a11c9c7b3c7d048417db90ad77b65e",
+  "entity_table": "tasks",
+  "id": "cmt_01a11ca8045b7090b188806cf93ca386",
+  "updated_at": "2026-10-08T17:55:35.643020000Z"
+}

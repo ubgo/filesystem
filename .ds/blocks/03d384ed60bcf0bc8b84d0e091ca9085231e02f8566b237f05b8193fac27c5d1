@@ -1,0 +1,16 @@
+func signedDownload(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	req, err := disk.SignedURL(ctx, "reports/q3.csv", filesystem.PresignOptions{
+		Method:             filesystem.MethodGet,
+		Expires:            linkLifetime,
+		ContentDisposition: "attachment",
+	})
+	if err != nil {
+		return err
+	}
+	status, body, err := send(ctx, http.MethodGet, req.URL, nil, req.Header)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "signed GET: %d %q\n", status, firstLine(body))
+	return nil
+}

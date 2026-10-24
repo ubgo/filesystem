@@ -1,0 +1,6 @@
+func TestNewDiskRefusesAnOverclaimingDriver(t *testing.T) {
+	_, err := filesystem.NewDisk("kv", overclaiming{New(NewMapBackend())})
+	if filesystem.CodeOf(err) != filesystem.CodeInvalidArgument || !strings.Contains(err.Error(), "declares capability Copy") {
+		t.Errorf("err = %v", err)
+	}
+}

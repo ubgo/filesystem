@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  continue\n\nContext:\n  Conversation thread: after all 19 P3/P4 packages were built and every gate went green, I asked: 'Should I do that pre-commit work and then prepare a commit for your review?' The owner replied 'continue'. Pre-commit work = task cover + cover:records, COVERAGE.md rows for new modules, the satl-code-standards optimize pass on the diff.\n\nAcceptance:\n  satl audit findings fixed across the uncommitted diff; all gates green; coverage run; COVERAGE.md has rows for every new module; then ask the owner before any commit.\n\nImplementation notes (only if explicitly agreed):\n  Do not commit. Do not delete contrib/pdf/-.jpg (owner decision pending).",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T07:33:15.790794000Z",
+  "created_at": "2026-10-08T05:16:55.037040000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a119f16d7d70a4a74deb5448af1c84",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T05:16:58.224619000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Pre-commit pass for P3/P4 batch: satl audit, coverage, COVERAGE.md",
+  "updated_at": "2026-10-08T07:33:15.790797000Z"
+}

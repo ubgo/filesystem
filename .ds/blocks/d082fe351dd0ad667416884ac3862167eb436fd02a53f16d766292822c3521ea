@@ -1,0 +1,8 @@
+func sqlcGallery(ctx context.Context, q *fsdb.Queries, scope, owner string) ([]fsdb.ListOwnerAttachmentsRow, error) {
+	return q.ListOwnerAttachments(ctx, fsdb.ListOwnerAttachmentsParams{
+		Scope:     scope,
+		OwnerType: ownerPost,
+		OwnerID:   owner,
+		Role:      roleGallery,
+	})
+}

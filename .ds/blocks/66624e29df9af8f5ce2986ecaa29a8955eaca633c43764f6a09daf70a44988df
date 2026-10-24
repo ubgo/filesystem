@@ -1,0 +1,4 @@
+func publicTicket(ctx context.Context, disk *filesystem.Disk, p upload.Policy) (upload.Ticket, error) {
+	req := upload.TicketRequest{Filename: "me.png", ContentType: "image/png", Size: avatarSize, Visibility: filesystem.VisibilityPublic}
+	return upload.Presign(ctx, disk, req, p, ticketLifetime)
+}

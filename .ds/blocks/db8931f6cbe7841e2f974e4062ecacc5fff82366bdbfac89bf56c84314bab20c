@@ -1,0 +1,6 @@
+func (a *App) diskFor(tenant string) string {
+	if _, err := a.Disks.Disk(dedicatedPrefix + tenant); err == nil {
+		return dedicatedPrefix + tenant
+	}
+	return sharedDisk
+}

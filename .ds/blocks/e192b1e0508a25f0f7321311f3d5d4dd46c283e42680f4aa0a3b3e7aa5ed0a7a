@@ -1,0 +1,11 @@
+func newRouter(h app.Handlers) chi.Router {
+	r := chi.NewRouter()
+	r.Method(http.MethodPost, app.PathUpload, h.Upload)
+	r.Method(http.MethodPost, app.PathTicket, h.Ticket)
+	r.Handle(app.PathUppy+"/*", http.StripPrefix(app.PathUppy, h.Uppy))
+	r.Handle(app.PathTus+"*", http.StripPrefix(app.PathTus, h.Tus))
+	r.Handle(app.PathFiles+"/*", http.StripPrefix(app.PathFiles, h.Files))
+	r.Handle(app.PathPublic+"/*", http.StripPrefix(app.PathPublic, h.Public))
+	r.Handle(app.PathRecords+"/*", http.StripPrefix(app.PathRecords, h.Records))
+	return r
+}

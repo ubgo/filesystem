@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Open owner decision from the architecture brainstorm Q19. Leaning: package filesystem, main type Disk. Layout sketch is in the doc.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-03T03:26:40.781931000Z",
+  "created_at": "2026-10-02T15:40:28.169026000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a0fd462689706d807f7a16e56e0b16",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "title": "Decide Q19: package name (filesystem, storage, disk or fs) and the module layout",
+  "updated_at": "2026-10-03T03:26:40.781933000Z"
+}

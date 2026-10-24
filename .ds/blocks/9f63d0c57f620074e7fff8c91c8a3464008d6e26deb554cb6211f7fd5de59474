@@ -1,0 +1,5 @@
+const (
+	maxFormFiles   = 5
+	formOverhead   = 64 << 10
+	fiberBodyLimit = maxFormFiles*app.MaxUploadBytes + formOverhead
+)

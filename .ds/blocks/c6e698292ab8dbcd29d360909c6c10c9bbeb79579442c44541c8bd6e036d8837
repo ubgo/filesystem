@@ -1,0 +1,6 @@
+func Opener(_ context.Context, u *url.URL) (filesystem.Driver, error) {
+	if err := filesystem.RejectParams(u); err != nil {
+		return nil, err
+	}
+	return New(NewMapBackend()), nil
+}

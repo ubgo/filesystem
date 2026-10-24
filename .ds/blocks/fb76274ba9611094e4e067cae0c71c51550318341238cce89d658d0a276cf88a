@@ -1,0 +1,5 @@
+func tooLongActor(ctx context.Context, s *records.Store) error {
+	ctx = audit.WithActor(ctx, "user:"+strings.Repeat("x", audit.MaxActorBytes))
+	_, err := s.Upload(ctx, tenant, diskName, bytes.NewReader([]byte("hi")), "hi.txt", textPolicy)
+	return err
+}

@@ -1,0 +1,7 @@
+type photo struct {
+	ID          string    `json:"id"`
+	Filename    string    `json:"filename"`
+	ContentType string    `json:"content_type"`
+	Size        int64     `json:"size"`
+	CreatedAt   time.Time `json:"created_at"`
+}

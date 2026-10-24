@@ -1,0 +1,10 @@
+func newDisk(report func(SlowOp)) (*filesystem.Disk, *atomic.Int64, error) {
+	budget, used := Budget(budgetBytes)
+	d, err := filesystem.NewDisk(diskName, memory.New(), filesystem.WithInterceptors(
+		ReportSlow(slowThreshold, time.Now, report),
+		Freeze(frozenDir),
+		budget,
+		layer.Retry(layer.RetryOptions{}),
+	))
+	return d, used, err
+}

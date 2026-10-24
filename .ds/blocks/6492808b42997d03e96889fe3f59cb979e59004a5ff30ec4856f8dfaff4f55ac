@@ -1,0 +1,12 @@
+func (a *App) setCover(ctx context.Context, channel string, body io.Reader, filename string) (records.File, error) {
+	var stored records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if stored, err = a.Store.Upload(ctx, "", diskName, body, filename, a.policy); err != nil {
+			return err
+		}
+		_, err = a.Store.SetAttachment(ctx, "", stored.ID, records.Owner{Type: ownerChannel, ID: channel}, roleCover, records.PreviousPurge)
+		return err
+	})
+	return stored, err
+}

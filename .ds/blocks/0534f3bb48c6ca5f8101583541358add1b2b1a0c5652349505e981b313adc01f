@@ -1,0 +1,22 @@
+func seed(ctx context.Context, store *records.Store) error {
+	policy := upload.Policy{MaxSize: 1 << 10, Allowed: []string{"text/plain"}}
+	post := records.Owner{Type: ownerPost, ID: postID}
+	for _, name := range galleryFiles {
+		f, err := store.Upload(ctx, tenant, diskName, strings.NewReader(name), name, policy)
+		if err != nil {
+			return err
+		}
+		if _, err := store.Attach(ctx, tenant, f.ID, post, roleGallery); err != nil {
+			return err
+		}
+		if name == trashedName {
+			if err := store.Trash(ctx, tenant, f.ID); err != nil {
+				return err
+			}
+		}
+		// SQLite stores timestamps to the microsecond; a pause keeps the
+		// newest-first order of the listings deterministic.
+		time.Sleep(time.Millisecond)
+	}
+	return nil
+}

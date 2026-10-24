@@ -1,0 +1,7 @@
+var importPolicy = upload.Policy{
+	MaxSize:    maxImportBytes,
+	MinSize:    1,
+	Allowed:    []string{"text/csv"},
+	Extensions: []string{".csv"},
+	Key:        upload.RandomKey("incoming"),
+}

@@ -1,0 +1,61 @@
+package fsfiber_test
+
+import (
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gofiber/fiber/v3"
+
+	"github.com/ubgo/filesystem"
+	fsfiber "github.com/ubgo/filesystem/contrib/fiber"
+	"github.com/ubgo/filesystem/fshttp"
+	"github.com/ubgo/filesystem/memory"
+)
+
+// escapedKey holds a space, a literal "%20" and a non-ASCII character, the
+// three things a handler reading a still percent-encoded path gets wrong.
+const escapedKey = "notes/read me %20 é.txt"
+
+// TestMount_DecodesEscapedKeys pins that a library handler behind Mount
+// sees the decoded key, however the client escaped it. fiber's own
+// c.Params hands a wildcard over raw unless the whole app sets
+// Config.UnescapePath, so Mount must not route keys through it; the
+// net/http request the adaptor builds carries the decoded path, which
+// Mount strips. An encoded traversal still reaches the Disk only as a
+// key, which refuses it.
+func TestMount_DecodesEscapedKeys(t *testing.T) {
+	disk, err := filesystem.NewDisk("media", memory.New(), filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := disk.WriteBytes(t.Context(), escapedKey, []byte("hello"), filesystem.WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := disk.WriteBytes(t.Context(), "secret.txt", []byte("no"), filesystem.WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	f := fiber.New()
+	fsfiber.Mount(f.Group("/files"), "/public", fshttp.Public(disk))
+	for _, c := range []struct {
+		name, path string
+		status     int
+	}{
+		{"canonical escapes", "/files/public/notes/read%20me%20%2520%20%C3%A9.txt", http.StatusOK},
+		{"escaped slash", "/files/public/notes%2Fread%20me%20%2520%20%C3%A9.txt", http.StatusOK},
+		{"encoded traversal", "/files/public/notes/%2E%2E%2F%2E%2E%2Fsecret.txt", http.StatusBadRequest},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			resp, err := f.Test(httptest.NewRequest(http.MethodGet, c.path, nil))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = resp.Body.Close() }()
+			body, _ := io.ReadAll(resp.Body)
+			if resp.StatusCode != c.status || (c.status == http.StatusOK && string(body) != "hello") {
+				t.Fatalf("GET %s = %d %q, want %d", c.path, resp.StatusCode, body, c.status)
+			}
+		})
+	}
+}

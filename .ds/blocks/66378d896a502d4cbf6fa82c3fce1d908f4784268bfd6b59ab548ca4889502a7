@@ -1,0 +1,30 @@
+func envelope(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", memory.New())
+	if err != nil {
+		return err
+	}
+	policy := upload.Policy{MaxSize: 1 << 20, Allowed: []string{"text/plain"}, Key: upload.RandomKey("docs"), Inspect: overPlan}
+	for _, c := range []struct {
+		label string
+		opts  upload.HandlerOptions
+	}{{"default", upload.HandlerOptions{}}, {"problem", upload.HandlerOptions{Errors: problem}}} {
+		rec, err := postFile(ctx, upload.Handler(disk, policy, c.opts))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "upload over the plan, %s: %d %s %s", c.label, rec.Code, rec.Header().Get("Content-Type"), rec.Body.String())
+	}
+	signer, err := signedurl.New("https://app.example.com/files", []signedurl.Key{{ID: "k1", Secret: []byte("0123456789abcdef0123456789abcdef")}})
+	if err != nil {
+		return err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return err
+	}
+	files := fshttp.Signed(disks, signer, fshttp.SignedOptions{Errors: problem})
+	rec := httptest.NewRecorder()
+	files.ServeHTTP(rec, httptest.NewRequestWithContext(ctx, http.MethodGet, "/media/docs/report.txt", nil))
+	fmt.Fprintf(out, "unsigned download, problem: %d %s %s", rec.Code, rec.Header().Get("Content-Type"), rec.Body.String())
+	return nil
+}

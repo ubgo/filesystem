@@ -1,0 +1,22 @@
+func (a *App) setSlot(ctx context.Context, tenant, name string, body io.Reader, filename string) (records.File, error) {
+	p, ok := a.policies[name]
+	if !ok {
+		return records.File{}, filesystem.Errorf(filesystem.CodeNotFound, "no branding slot %q", name)
+	}
+	var f records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if f, err = a.Store.Upload(ctx, tenant, diskName, body, filename, p); err != nil {
+			return err
+		}
+		_, err = a.Store.SetAttachment(ctx, tenant, f.ID, records.Owner{Type: ownerTenant, ID: tenant}, name, records.PreviousPurge)
+		return err
+	})
+	if err != nil {
+		return records.File{}, err
+	}
+	if err := a.Variants.Generate(ctx, a.Store, tenant, f.ID, slots[name].sizes...); err != nil {
+		fmt.Fprintf(os.Stderr, "branding %s/%s: %v\n", tenant, name, err)
+	}
+	return f, nil
+}

@@ -1,0 +1,18 @@
+func openStore(ctx context.Context, dataDir string, disks *filesystem.Manager) (*sql.DB, *records.Store, error) {
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "chat.db")+"?_pragma=busy_timeout(5000)")
+	if err != nil {
+		return nil, nil, err
+	}
+	db.SetMaxOpenConns(1)
+	for _, stmt := range appSchema {
+		if _, err := db.ExecContext(ctx, stmt); err != nil {
+			return nil, nil, err
+		}
+	}
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithOwnerTypes(ownerMessage))
+	if err != nil {
+		return nil, nil, err
+	}
+	_, err = store.Migrate(ctx)
+	return db, store, err
+}

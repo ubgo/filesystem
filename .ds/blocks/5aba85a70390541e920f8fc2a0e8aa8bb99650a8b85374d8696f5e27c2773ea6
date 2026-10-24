@@ -1,0 +1,13 @@
+func writeContract(ctx context.Context, disk *filesystem.Disk, pdf string) (context.Context, error) {
+	ctx, err := azure.WithRequestOptions(ctx, disk, contractKey, azure.RequestOptions{
+		EncryptionScope: tenantScope, // this tenant's customer-managed key
+		AccessTier:      blob.AccessTierCool,
+		Tags:            map[string]string{"tenant": "acme"}, // stored with the blob, in the same request
+		LegalHold:       true,                                // set right after it is stored
+	})
+	if err != nil {
+		return ctx, err // an invalid key
+	}
+	_, err = disk.Write(ctx, contractKey, strings.NewReader(pdf), filesystem.WriteOptions{})
+	return ctx, err
+}

@@ -1,0 +1,7 @@
+var basePolicy = upload.Policy{
+	MaxSize:    maxBrandingBytes,
+	Allowed:    []string{"image/png", "image/jpeg", "image/webp"},
+	Key:        upload.RandomKey("branding"),
+	Visibility: filesystem.VisibilityPublic,
+	Process:    imaging.Sanitize(imaging.Options{MaxBytes: maxBrandingBytes}),
+}

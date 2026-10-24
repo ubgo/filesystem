@@ -1,0 +1,9 @@
+func newQuota(dir Directory) (*quota.Plugin, error) {
+	return quota.New(func(_ context.Context, scope string) (quota.Limit, error) {
+		t, ok := dir.Tenants[scope]
+		if !ok {
+			return quota.Limit{}, filesystem.Errorf(filesystem.CodePermission, "unknown tenant %q", scope)
+		}
+		return planLimits[t.Plan], nil
+	})
+}

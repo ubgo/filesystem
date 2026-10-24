@@ -1,0 +1,12 @@
+func importZip(ctx context.Context, disk *filesystem.Disk, body io.Reader, name string) ([]archive.Entry, error) {
+	res, err := upload.Receive(ctx, disk, body, name, newPolicy())
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = disk.Delete(context.WithoutCancel(ctx), res.Key) }()
+	src, err := archive.OpenReaderAt(ctx, disk, res.Key)
+	if err != nil {
+		return nil, err
+	}
+	return archive.Extract(ctx, disk, importPrefix, src, src.Size(), archive.ExtractOptions{Limits: limits})
+}

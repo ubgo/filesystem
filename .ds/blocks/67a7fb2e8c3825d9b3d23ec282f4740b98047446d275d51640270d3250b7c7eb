@@ -1,0 +1,10 @@
+func (a *App) shareFile(w http.ResponseWriter, r *http.Request) {
+	handle(w, r, func(ctx context.Context, ws string, in shareRequest) (shareResponse, error) {
+		ttl := time.Duration(in.TTLSeconds) * time.Second
+		if ttl <= 0 || ttl > maxShareTTL {
+			return shareResponse{}, filesystem.Errorf(filesystem.CodeInvalidArgument, "ttl_seconds must be in (0, %d]", int64(maxShareTTL/time.Second))
+		}
+		sh, err := a.Shares.Create(ctx, a.Store, ws, r.PathValue("id"), share.Options{TTL: ttl, MaxDownloads: in.MaxDownloads})
+		return shareResponse{URL: baseURL + "/s/" + sh.Token, ExpiresAt: sh.ExpiresAt}, err
+	})
+}

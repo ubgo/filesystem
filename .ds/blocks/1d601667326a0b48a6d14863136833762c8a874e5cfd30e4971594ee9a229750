@@ -1,0 +1,7 @@
+var policy = upload.Policy{
+	MaxSize: 200 << 20,
+	Allowed: []string{"video/*"},
+	Key:     upload.RandomKey("videos"),
+	Process: tool.Sanitize(),
+	Inspect: tool.Inspect(video.Limits{MaxDuration: maxDuration, MaxWidth: 3840, MaxHeight: 2160}),
+}

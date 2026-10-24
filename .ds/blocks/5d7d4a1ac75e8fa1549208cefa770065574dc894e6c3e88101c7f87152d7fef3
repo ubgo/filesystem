@@ -1,0 +1,15 @@
+func fallbacks(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	if _, err := disk.WriteBytes(ctx, "a.txt", []byte("public file"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPublic}); err != nil {
+		return err
+	}
+	e, err := disk.Copy(ctx, "a.txt", "b.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "streamed copy: %s %d bytes, %s\n", e.Key, e.Size, e.Visibility)
+	if err := disk.DeleteKeys(ctx, []string{"a.txt", "b.txt"}); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "deleted two keys one by one: ok")
+	return nil
+}

@@ -1,0 +1,10 @@
+func eicarOnly(_ context.Context, r io.Reader) (scan.Verdict, error) {
+	data, err := io.ReadAll(io.LimitReader(r, maxUploadBytes+1))
+	if err != nil {
+		return scan.Verdict{}, err
+	}
+	if bytes.Contains(data, []byte(eicarSignature)) {
+		return scan.Verdict{Clean: false, Signature: eicarName}, nil
+	}
+	return scan.Verdict{Clean: true}, nil
+}

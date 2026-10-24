@@ -1,0 +1,12 @@
+func (a *app) addPhoto(ctx context.Context, user string, body io.Reader, filename string) (records.File, error) {
+	var f records.File
+	err := a.store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if f, err = a.store.Upload(ctx, user, diskName, body, filename, photoPolicy()); err != nil {
+			return err
+		}
+		_, err = a.store.Attach(ctx, user, f.ID, records.Owner{Type: ownerUser, ID: user}, rolePhotos)
+		return err
+	})
+	return f, err
+}

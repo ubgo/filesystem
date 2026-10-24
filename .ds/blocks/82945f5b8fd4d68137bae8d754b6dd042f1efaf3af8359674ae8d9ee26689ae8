@@ -1,0 +1,17 @@
+func conditionalAndMove(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	once := filesystem.WriteOptions{IfNotExists: true}
+	if _, err := disk.WriteBytes(ctx, "locks/job-7", []byte("worker-a"), once); err != nil {
+		return err
+	}
+	_, err := disk.WriteBytes(ctx, "locks/job-7", []byte("worker-b"), once)
+	fmt.Fprintf(out, "second conditional write: %s\n", filesystem.CodeOf(err))
+	if _, err := disk.Move(ctx, "locks/job-7", "done/job-7"); err != nil {
+		return err
+	}
+	got, err := disk.ReadAll(ctx, "done/job-7")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "moved: done/job-7 holds %q\n", got)
+	return nil
+}

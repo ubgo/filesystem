@@ -1,0 +1,20 @@
+func openFromEnv(ctx context.Context) (src, dst *filesystem.Disk, ok bool, err error) {
+	srcDSN, dstDSN := os.Getenv(envSource), os.Getenv(envTarget)
+	if srcDSN == "" && dstDSN == "" {
+		return nil, nil, false, nil
+	}
+	if srcDSN == "" || dstDSN == "" {
+		return nil, nil, true, fmt.Errorf("set both %s and %s", envSource, envTarget)
+	}
+	mux := filesystem.NewMux()
+	if err := errors.Join(mux.Register(local.Scheme, local.Opener), mux.Register(fss3.Scheme, fss3.Opener)); err != nil {
+		return nil, nil, true, err
+	}
+	if src, err = mux.Open(ctx, diskName, srcDSN, filesystem.WithInterceptors(filesystem.ReadOnly())); err != nil {
+		return nil, nil, true, fmt.Errorf("%s: %w", envSource, err)
+	}
+	if dst, err = mux.Open(ctx, diskName, dstDSN); err != nil {
+		return nil, nil, true, fmt.Errorf("%s: %w", envTarget, err)
+	}
+	return src, dst, true, nil
+}

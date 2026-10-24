@@ -1,0 +1,19 @@
+func (a *App) putSettings(w http.ResponseWriter, r *http.Request) {
+	tenant, err := tenantOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	disk, err := a.tenantDisk(tenant)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	body := http.MaxBytesReader(w, r.Body, maxSettingsSize)
+	e, err := disk.Write(r.Context(), settingsKey(r.PathValue("name")), body, filesystem.WriteOptions{ContentType: "application/json", MaxSize: maxSettingsSize})
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"key": e.Key})
+}

@@ -1,0 +1,15 @@
+func problem(w http.ResponseWriter, r *http.Request, status int, err error) {
+	if filesystem.CodeOf(err) == filesystem.CodeQuotaExceeded {
+		status = http.StatusPaymentRequired // a plan limit, not a full disk
+	}
+	if status >= http.StatusInternalServerError {
+		slog.ErrorContext(r.Context(), "storage failed", "err", err) // the full error, for logs only
+	}
+	w.Header().Set("Content-Type", problemType)
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"status": status,
+		"title":  fshttp.ClientMessage(err), // never err.Error(): it names the disk and the key
+		"code":   filesystem.CodeOf(err),
+	})
+}

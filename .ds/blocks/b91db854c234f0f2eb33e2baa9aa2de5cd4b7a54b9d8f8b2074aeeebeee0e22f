@@ -1,0 +1,10 @@
+func replaceWithObject(ctx context.Context, s *records.Store, f records.File, key, text string) (records.File, error) {
+	disk, err := s.Disks().Disk(f.Disk)
+	if err != nil {
+		return records.File{}, err
+	}
+	if _, err := disk.Write(ctx, key, bytes.NewReader([]byte(text)), filesystem.WriteOptions{}); err != nil {
+		return records.File{}, err
+	}
+	return s.ReplaceObject(ctx, tenant, f.ID, records.NewContent{Key: key, Filename: "notes-v3.txt"})
+}

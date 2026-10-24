@@ -1,0 +1,9 @@
+func coEdit(ctx context.Context, s *records.Store, lp *locks.Plugin, fileID string) (aliceLock, bobLock locks.Lock, err error) {
+	if aliceLock, err = lp.LockShared(ctx, s, tenant, fileID, alice, editWindow); err != nil {
+		return locks.Lock{}, locks.Lock{}, err
+	}
+	if bobLock, err = lp.LockShared(ctx, s, tenant, fileID, bob, editWindow); err != nil {
+		return locks.Lock{}, locks.Lock{}, err
+	}
+	return aliceLock, bobLock, nil
+}

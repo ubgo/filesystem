@@ -1,0 +1,14 @@
+func uppy(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	h := upload.Uppy(disk, policy, upload.UppyOptions{
+		Authorize: func(*http.Request, string) error { return nil }, // check the key belongs to the user
+	})
+	req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/multipart", bytes.NewReader([]byte(`{"filename":"a.png","type":"image/png"}`)))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	fmt.Fprintf(out, "uppy on memory: %d %s", rec.Code, rec.Body.String())
+	return nil
+}

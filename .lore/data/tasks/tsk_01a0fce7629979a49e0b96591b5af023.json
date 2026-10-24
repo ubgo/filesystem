@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Output: the internal notes, including which ubgo/auth patterns (plugins, Define[In,Out] operations, effects, module split, deps guards) transfer.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-02T14:03:06.804562000Z",
+  "created_at": "2026-10-02T13:56:57.625630000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a0fce7629979a49e0b96591b5af023",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-02T13:57:09.265024000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "title": "Study local references: internal reference code, ubgo/auth architecture, ubgo/sqlb",
+  "updated_at": "2026-10-02T14:03:06.804577000Z"
+}

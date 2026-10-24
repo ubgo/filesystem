@@ -1,0 +1,17 @@
+func toAAC(ctx context.Context, s *records.Store, f records.File) (audio.Info, error) {
+	disk, err := s.Disks().Disk(f.Disk)
+	if err != nil {
+		return audio.Info{}, err
+	}
+	src, err := disk.Read(ctx, f.Key)
+	if err != nil {
+		return audio.Info{}, err
+	}
+	defer func() { _ = src.Close() }()
+	out, err := tool.Transcode(ctx, src, audio.Transcode{Format: audio.AAC})
+	if err != nil {
+		return audio.Info{}, err
+	}
+	defer func() { _ = out.Close() }()
+	return tool.Probe(ctx, out)
+}

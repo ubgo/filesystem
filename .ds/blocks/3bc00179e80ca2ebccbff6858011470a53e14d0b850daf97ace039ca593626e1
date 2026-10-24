@@ -1,0 +1,16 @@
+func newLayout() (*filesystem.Manager, error) {
+	signer, err := signedurl.New(appBase, []signedurl.Key{{ID: "k1", Secret: demoSecret}})
+	if err != nil {
+		return nil, err
+	}
+	cdn, err := filesystem.NewDisk(publicDisk, bucketWide{memory.New()},
+		filesystem.WithDefaultVisibility(filesystem.VisibilityPublic), filesystem.WithPublicURL(cdnBase))
+	if err != nil {
+		return nil, err
+	}
+	vault, err := filesystem.NewDisk(privateDisk, bucketWide{memory.New()}, filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewManager(cdn, vault)
+}

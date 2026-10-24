@@ -1,0 +1,14 @@
+{
+  "_table": "missions",
+  "_v": 1,
+  "body": "Exploration + brainstorm phase only, no code. Original request (2026-10-02, Aman Bansal): build a flexible, pluggable, extensible filesystem package in Go with adapters and contrib modules, so it is the only filesystem package any Go app needs. Research what web/mobile/SaaS/social apps need from storage, so the package ships batteries-included. References: ubgo/auth (architecture template). Metadata store uses github.com/ubgo/sqlb.",
+  "completed_at": null,
+  "created_at": "2026-10-02T13:56:49.469960000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "status": "active",
+  "target_date": null,
+  "title": "Explore and design ubgo/filesystem: the one storage package every Go app needs",
+  "updated_at": "2026-10-02T13:56:49.469960000Z"
+}

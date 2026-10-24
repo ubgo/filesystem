@@ -1,0 +1,14 @@
+func allowList(raw string) (func(netip.Addr) bool, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	allowed := map[netip.Addr]bool{}
+	for _, s := range strings.Split(raw, ",") {
+		a, err := netip.ParseAddr(strings.TrimSpace(s))
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", envAllowAddrs, err)
+		}
+		allowed[a] = true
+	}
+	return func(a netip.Addr) bool { return allowed[a] }, nil
+}

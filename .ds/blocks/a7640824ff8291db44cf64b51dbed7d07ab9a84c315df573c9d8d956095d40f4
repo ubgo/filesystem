@@ -1,0 +1,6 @@
+type Options struct {
+	// Workers is the number of concurrent copies; values below 1 mean 1.
+	Workers int
+	// DryRun lists what would be copied and copies nothing.
+	DryRun bool
+}

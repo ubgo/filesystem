@@ -1,0 +1,8 @@
+func mimeHelpers(out io.Writer) {
+	fmt.Fprintf(out, "TypeByExtension(report.PDF) = %s\n", sniff.TypeByExtension("report.PDF"))
+	fmt.Fprintf(out, "Extension(image/jpeg) = %s\n", sniff.Extension("image/jpeg"))
+	fmt.Fprintf(out, "Matches(image/png, image/*) = %t\n", sniff.Matches("image/png", "image/*"))
+	fmt.Fprintf(out, "MatchesAny(application/pdf, [image/* text/*]) = %t\n",
+		sniff.MatchesAny("application/pdf", []string{"image/*", "text/*"}))
+	fmt.Fprintf(out, "IsActive(application/xhtml+xml) = %t\n", sniff.IsActive("application/xhtml+xml"))
+}

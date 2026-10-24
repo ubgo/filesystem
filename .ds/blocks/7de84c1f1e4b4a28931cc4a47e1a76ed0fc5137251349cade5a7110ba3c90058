@@ -1,0 +1,3 @@
+func repair(ctx context.Context, s *records.Store, q *quota.Plugin, scope string) (quota.Usage, error) {
+	return q.Recount(ctx, s, scope)
+}

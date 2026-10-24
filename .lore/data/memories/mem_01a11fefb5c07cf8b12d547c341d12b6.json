@@ -1,0 +1,23 @@
+{
+  "_table": "memories",
+  "_v": 1,
+  "archived_at": null,
+  "body": "During the 2026-10-09 no-hardwire round 2, an agent rewrote root checksum_test.go for its new feature and silently deleted the existing SHA-256 TestWriteChecksum; it was found only because core coverage dropped from 100%. After a multi-agent round, diff every modified _test.go for deleted test functions (git diff --numstat on *_test.go, then grep removed 'func Test') before trusting the gates.",
+  "confidence": null,
+  "created_at": "2026-10-09T09:12:45.760848000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "mem_01a11fefb5c07cf8b12d547c341d12b6",
+  "kind": "retrieved",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "superseded_by_id": null,
+  "trust_score": 0.5,
+  "tx_at": "2026-10-09T09:12:45.760870000Z",
+  "updated_at": "2026-10-09T09:12:45.760848000Z",
+  "valid_at": null,
+  "valid_until": null,
+  "validated_by_actor_id": null
+}

@@ -1,0 +1,12 @@
+func newRouter(h app.Handlers) *echo.Echo {
+	e := echo.New()
+	e.HideBanner = true
+	e.POST(app.PathUpload, echo.WrapHandler(h.Upload))
+	e.POST(app.PathTicket, echo.WrapHandler(h.Ticket))
+	e.Any(app.PathUppy+"/*", echo.WrapHandler(http.StripPrefix(app.PathUppy, h.Uppy)))
+	e.Any(app.PathTus+"*", echo.WrapHandler(http.StripPrefix(app.PathTus, h.Tus)))
+	e.Any(app.PathFiles+"/*", echo.WrapHandler(http.StripPrefix(app.PathFiles, h.Files)))
+	e.Any(app.PathPublic+"/*", echo.WrapHandler(http.StripPrefix(app.PathPublic, h.Public)))
+	e.Any(app.PathRecords+"/*", echo.WrapHandler(http.StripPrefix(app.PathRecords, h.Records)))
+	return e
+}

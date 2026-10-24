@@ -1,0 +1,14 @@
+func export(c *gin.Context, a *app.App) {
+	scope, err := fsgin.ScopeOf(c.Request)
+	if err != nil {
+		fsgin.Error(c, err)
+		return
+	}
+	role := c.Param(app.ParamRole)
+	files, err := a.Export(c.Request.Context(), scope, role)
+	if err != nil {
+		fsgin.Error(c, err)
+		return
+	}
+	fsgin.Zip(c, a.Media, app.ExportName(role), files, fshttp.ZipOptions{})
+}

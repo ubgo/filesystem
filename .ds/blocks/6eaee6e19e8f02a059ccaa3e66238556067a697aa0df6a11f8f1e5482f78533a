@@ -1,0 +1,3 @@
+func shareFolder(ctx context.Context, s *records.Store, p *share.Plugin, folderID string) (share.Share, error) {
+	return p.CreateFor(ctx, s, tenant, share.Target{Kind: folders.KindFolder, Ref: folderID}, share.Options{TTL: linkTTL})
+}

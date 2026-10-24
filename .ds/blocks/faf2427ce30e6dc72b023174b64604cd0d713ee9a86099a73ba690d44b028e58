@@ -1,0 +1,14 @@
+func authorize(r *http.Request, action recordshttp.Action, t recordshttp.Target) error {
+	if t.Owner.Type != "" && (t.Owner.Type != ownerProduct || t.Role != roleGallery) {
+		return filesystem.Errorf(filesystem.CodePermission, "only product galleries")
+	}
+	switch action {
+	case recordshttp.ActionList, recordshttp.ActionRead:
+		return nil
+	case recordshttp.ActionUpload, recordshttp.ActionReorder:
+		if isMerchant(r) {
+			return nil
+		}
+	}
+	return filesystem.Errorf(filesystem.CodePermission, "not allowed")
+}

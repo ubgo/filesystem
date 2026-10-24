@@ -1,0 +1,25 @@
+func (a *App) offboard(w http.ResponseWriter, r *http.Request) {
+	if p, _ := r.Context().Value(principalKey{}).(Principal); !p.Admin {
+		writeError(w, filesystem.Errorf(filesystem.CodePermission, "operator key required"))
+		return
+	}
+	tenant := r.PathValue("id")
+	if _, ok := a.Dir.Tenants[tenant]; !ok {
+		writeError(w, filesystem.Errorf(filesystem.CodeNotFound, "unknown tenant %q", tenant))
+		return
+	}
+	n, err := a.purgeFiles(r.Context(), tenant)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	disk, err := a.Disks.Disk(a.diskFor(tenant))
+	if err == nil {
+		err = disk.DeletePrefix(r.Context(), prefixOf(tenant))
+	}
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, offboardResponse{Tenant: tenant, Purged: n})
+}

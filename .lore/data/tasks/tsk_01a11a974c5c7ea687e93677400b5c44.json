@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim, via coordinator brief): \"for sftp, ftp and webdav do NOT implement (another agent is testing those packages) — list them in your report for a follow-up\" and \"Leave sftp, ftp, webdav and contrib/crypt for the follow-up and list them.\"\n\nContext:\n  Files: adapters/sftp, adapters/ftp, adapters/webdav, contrib/crypt/crypt.go (forwarded())\n  Conversation thread: CO-15/16 (Disk.MakeDir/DirExists, Capabilities.Dirs, DirMaker) and the SweepAbandoned dry run (Disk.FindAbandoned, AbandonedFinder, Capabilities.FindAbandoned) shipped 2026-10-08 in core, local, memory, s3, azure and jobs.\n\nAcceptance:\n  sftp/ftp/webdav implement AbandonedFinder from the same scan as SweepAbandoned (staging files, Kind staging) and DirMaker (real directories), declare FindAbandoned and Dirs, conformance cases FindAbandonedKeepsObjects/MakeDir pass; contrib/crypt forwards FindAbandoned and Dirs.\n\nImplementation notes:\n  Without Dirs, the Disk's portable DeletePrefix leaves empty directories on these servers; with Dirs, decide whether their Delete prunes like local.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T08:28:20.633797000Z",
+  "created_at": "2026-10-08T08:18:05.532958000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a974c5c7ea687e93677400b5c44",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "low",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T08:18:44.616718000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "FindAbandoned and Dirs for sftp, ftp, webdav; forward both in contrib/crypt",
+  "updated_at": "2026-10-08T08:28:20.633811000Z"
+}

@@ -1,0 +1,9 @@
+func newDenyStore(ctx context.Context, db *sql.DB) (*records.Store, *folders.Plugin, *acl.Plugin, error) {
+	fp := folders.New()
+	ap := acl.New(acl.WithHierarchy(fp), acl.WithDeny())
+	s, err := storeWith(ctx, db, fp, ap)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return s, fp, ap, nil
+}

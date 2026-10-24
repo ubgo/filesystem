@@ -1,0 +1,33 @@
+func submit(ctx context.Context, post filesystem.PresignedPost, key, filename string, file []byte) (int, error) {
+	var body bytes.Buffer
+	w := multipart.NewWriter(&body)
+	for name, value := range post.Fields {
+		if name == filesystem.PostFieldKey {
+			value = key
+		}
+		if err := w.WriteField(name, value); err != nil {
+			return 0, err
+		}
+	}
+	fw, err := w.CreateFormFile(filesystem.PostFileField, filename)
+	if err != nil {
+		return 0, err
+	}
+	if _, err := fw.Write(file); err != nil {
+		return 0, err
+	}
+	if err := w.Close(); err != nil {
+		return 0, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, post.URL, &body)
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	_ = resp.Body.Close()
+	return resp.StatusCode, nil
+}

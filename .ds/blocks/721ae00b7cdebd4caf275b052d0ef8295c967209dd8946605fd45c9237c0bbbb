@@ -1,0 +1,12 @@
+func copyAndList(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	if _, err := disk.Copy(ctx, "users/42.png", "users/42-backup.png"); err != nil {
+		return err
+	}
+	for entry, err := range disk.List(ctx, "users", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "listed: %s\n", entry.Key)
+	}
+	return nil
+}

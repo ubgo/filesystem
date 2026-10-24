@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": null,
+  "commitment": "accepted",
+  "completed_at": "2026-10-06T03:24:30.311230000Z",
+  "created_at": "2026-10-06T03:01:19.233034000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a10f2891017090af190e115d5e0c2b",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-06T03:18:07.141928000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "P2 upload policy: VA-05 min size/zero-byte, VA-13 request total, VA-14/QU-04 per-request policy resolver, UP-20 pre-read hook, IN-03/IN-11 declared SHA-256 and size checked by Confirm, Disk.Write honours SizeHint",
+  "updated_at": "2026-10-06T03:24:30.311242000Z"
+}

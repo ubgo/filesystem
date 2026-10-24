@@ -1,0 +1,23 @@
+func storeAvatar(ctx context.Context, out io.Writer, disk *filesystem.Disk) (filesystem.Entry, error) {
+	e, err := disk.Write(ctx, "users/42.png", strings.NewReader("\x89PNG\r\n\x1a\nfake-image-bytes"), filesystem.WriteOptions{
+		Metadata: map[string]string{"uploaded-by": "42"},
+		Headers:  filesystem.HTTPHeaders{CacheControl: "public, max-age=86400"},
+	})
+	if err != nil {
+		return filesystem.Entry{}, err
+	}
+	fmt.Fprintf(out, "stored: %s %d bytes %s metadata=%v cache=%q\n", e.Key, e.Size, e.ContentType, e.Metadata, e.Headers.CacheControl)
+	fmt.Fprintf(out, "etag is the sha256: %t\n", e.ETag == e.SHA256)
+
+	rc, err := disk.ReadRange(ctx, "users/42.png", filesystem.ByteRange{Offset: 8, Length: 4})
+	if err != nil {
+		return filesystem.Entry{}, err
+	}
+	part, err := io.ReadAll(rc)
+	_ = rc.Close()
+	if err != nil {
+		return filesystem.Entry{}, err
+	}
+	fmt.Fprintf(out, "range 8+4: %q\n", part)
+	return e, nil
+}

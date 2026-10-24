@@ -1,0 +1,16 @@
+func (a *App) importFrom(ctx context.Context, user, rawURL string) (records.File, error) {
+	remote, err := upload.Fetch(ctx, rawURL, a.Fetch)
+	if err != nil {
+		return records.File{}, err
+	}
+	defer func() { _ = remote.Body.Close() }()
+	var f records.File
+	err = a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if f, err = a.Store.Upload(ctx, "", diskName, remote.Body, remote.Filename, importPolicy); err != nil {
+			return err
+		}
+		_, err = a.Store.Attach(ctx, "", f.ID, records.Owner{Type: ownerUser, ID: user}, roleImports)
+		return err
+	})
+	return f, err
+}

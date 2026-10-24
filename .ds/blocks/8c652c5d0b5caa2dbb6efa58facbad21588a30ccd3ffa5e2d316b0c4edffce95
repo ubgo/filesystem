@@ -1,0 +1,19 @@
+func usage(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	db, ok := filesystem.As[*sql.DB](disk)
+	if !ok {
+		return fmt.Errorf("disk %s has no *sql.DB", disk.Name())
+	}
+	var rows int
+	if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM avatars").Scan(&rows); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "rows in the avatars table: %d\n", rows)
+
+	var n, total int64
+	q := `SELECT COUNT(*), COALESCE(SUM(size), 0) FROM avatars WHERE key >= ? AND key < ?`
+	if err := db.QueryRowContext(ctx, q, "users/", "users0").Scan(&n, &total); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "under users/: %d objects, %d bytes\n", n, total)
+	return nil
+}

@@ -1,0 +1,26 @@
+func compose(ctx context.Context, w io.Writer, disk *filesystem.Disk, msg Message) error {
+	to, err := mail.ParseAddress(msg.To) // refuses CR, LF and anything else that is not one address
+	if err != nil {
+		return filesystem.NewError(filesystem.CodeInvalidArgument, err)
+	}
+	attach, body, err := plan(ctx, disk, msg)
+	if err != nil {
+		return err
+	}
+	mw := multipart.NewWriter(w)
+	fmt.Fprintf(w, "From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=%s\r\n\r\n",
+		sender, to.Address, mime.QEncoding.Encode("utf-8", msg.Subject), mw.Boundary())
+	text, err := mw.CreatePart(textproto.MIMEHeader{"Content-Type": {"text/plain; charset=utf-8"}})
+	if err != nil {
+		return err
+	}
+	if _, err := io.WriteString(text, body+"\r\n"); err != nil {
+		return err
+	}
+	for _, a := range attach {
+		if err := attachFile(ctx, mw, disk, a); err != nil {
+			return err
+		}
+	}
+	return mw.Close()
+}

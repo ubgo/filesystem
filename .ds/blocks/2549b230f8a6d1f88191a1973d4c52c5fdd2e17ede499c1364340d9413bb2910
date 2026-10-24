@@ -1,0 +1,4 @@
+func refuseLiar(out io.Writer) {
+	_, err := filesystem.NewDisk("liar", liarDriver{inner: memory.New()})
+	fmt.Fprintf(out, "NewDisk(liar): %v\n", err)
+}

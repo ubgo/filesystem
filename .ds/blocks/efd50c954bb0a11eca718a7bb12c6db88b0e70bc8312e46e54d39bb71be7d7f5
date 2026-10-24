@@ -1,0 +1,7 @@
+func newPolicy() upload.Policy {
+	return upload.Policy{
+		MaxSize: maxUploadSize,
+		Allowed: []string{sniff.Zip},
+		Inspect: archive.Inspect(limits, archive.DenyExecutables),
+	}
+}

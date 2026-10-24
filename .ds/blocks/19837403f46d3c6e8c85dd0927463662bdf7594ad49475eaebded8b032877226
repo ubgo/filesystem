@@ -1,0 +1,7 @@
+func refusedOptions(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	_, err := disk.WriteBytes(ctx, "public.txt", []byte("x"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPublic})
+	fmt.Fprintf(out, "public write: %s\n", filesystem.CodeOf(err))
+	_, err = disk.PresignPart(ctx, "k", "id", 1, linkLifetime)
+	fmt.Fprintf(out, "presigned part: %s\n", filesystem.CodeOf(err))
+	return nil
+}

@@ -1,0 +1,9 @@
+func writeError(w http.ResponseWriter, err error) {
+	status := fshttp.StatusOf(err)
+	if status >= http.StatusInternalServerError {
+		log.Printf("request failed: %v", err)
+		writeJSON(w, status, upload.ErrorResponse{Error: http.StatusText(status), Code: filesystem.CodeOf(err)})
+		return
+	}
+	writeJSON(w, status, upload.ErrorResponse{Error: clientMessage(err), Code: filesystem.CodeOf(err)})
+}

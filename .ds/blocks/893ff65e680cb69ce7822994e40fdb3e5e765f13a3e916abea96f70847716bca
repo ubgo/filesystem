@@ -1,0 +1,12 @@
+func (a *App) owned(ctx context.Context, customer, fileID string) (records.File, error) {
+	list, err := a.Store.Attachments(ctx, "", records.Owner{Type: ownerCustomer, ID: customer}, roleInvoices)
+	if err != nil {
+		return records.File{}, err
+	}
+	for _, af := range list {
+		if af.File.ID == fileID {
+			return af.File, nil
+		}
+	}
+	return records.File{}, filesystem.Errorf(filesystem.CodeNotFound, "no document %s", fileID)
+}

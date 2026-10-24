@@ -1,0 +1,12 @@
+func newDisk(t Telemetry) (*filesystem.Disk, error) {
+	metrics, err := fsotel.Metrics(t.Meter)
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk(diskName, memory.New(), filesystem.WithInterceptors(
+		metrics,
+		fsotel.Tracing(t.Tracer),
+		layer.Retry(layer.RetryOptions{}),
+		layer.Timeout(opTimeout),
+	))
+}

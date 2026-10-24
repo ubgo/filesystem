@@ -1,0 +1,6 @@
+func (f *flaky) Stat(ctx context.Context, key string) (filesystem.Entry, error) {
+	if f.failed.CompareAndSwap(false, true) {
+		return filesystem.Entry{}, filesystem.Errorf(filesystem.CodeUnavailable, "throttled")
+	}
+	return f.Driver.Stat(ctx, key)
+}

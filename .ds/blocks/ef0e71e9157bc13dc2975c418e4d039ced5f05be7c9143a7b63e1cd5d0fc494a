@@ -1,0 +1,3 @@
+func catchUp(ctx context.Context, s *records.Store, vp *variants.Plugin, maxFiles int) (variants.MissingResult, error) {
+	return vp.GenerateMissing(ctx, s, variants.MissingOptions{Scope: tenant, MaxFiles: maxFiles})
+}

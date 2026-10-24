@@ -1,0 +1,1 @@
+func owner(*http.Request) (string, error) { return demoUser, nil }

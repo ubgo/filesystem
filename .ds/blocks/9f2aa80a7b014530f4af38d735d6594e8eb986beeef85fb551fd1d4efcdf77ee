@@ -1,0 +1,5 @@
+var importPolicy = upload.Policy{
+	MaxSize: maxImportBytes,
+	Allowed: []string{"image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"},
+	Key:     upload.RandomKey("imports"),
+}

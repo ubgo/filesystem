@@ -1,0 +1,6 @@
+func saveWithToken(ctx context.Context, s *records.Store, fileID, user, token, body string) error {
+	ctx = records.WithActor(ctx, user)
+	ctx = locks.WithLockToken(ctx, token)
+	_, err := s.Replace(ctx, tenant, fileID, strings.NewReader(body), "", docs)
+	return err
+}

@@ -1,0 +1,27 @@
+func multipartUpload(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	key, body := clipKey, clip
+	id, err := disk.CreateMultipart(ctx, key, filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	var parts []filesystem.Part
+	for n, off := filesystem.MinPartNumber, 0; off < len(body); n, off = n+1, off+partSize {
+		chunk := body[off:min(off+partSize, len(body))]
+		p, err := disk.UploadPart(ctx, key, id, n, strings.NewReader(chunk), int64(len(chunk)))
+		if err != nil {
+			_ = disk.AbortMultipart(ctx, key, id)
+			return err
+		}
+		parts = append(parts, p)
+	}
+	listed, err := disk.ListParts(ctx, key, id)
+	if err != nil {
+		return err
+	}
+	e, err := disk.CompleteMultipart(ctx, key, id, parts)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "multipart: %d parts listed, %s is %d bytes\n", len(listed), e.Key, e.Size)
+	return nil
+}

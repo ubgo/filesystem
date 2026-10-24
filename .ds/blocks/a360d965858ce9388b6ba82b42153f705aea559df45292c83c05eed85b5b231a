@@ -1,0 +1,11 @@
+func newVault(backend filesystem.Driver, kms crypt.KMS, keys *tenantKeys) (*filesystem.Disk, *crypt.Driver, error) {
+	drv, err := crypt.New(backend, crypt.NewKMSKeyring(kms, keys.keyID))
+	if err != nil {
+		return nil, nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, drv)
+	if err != nil {
+		return nil, nil, err
+	}
+	return disk, drv, nil
+}

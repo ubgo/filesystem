@@ -1,0 +1,8 @@
+func publish(ctx context.Context, s *records.Store, p *videoplatform.Plugin, body io.Reader) (records.File, videoplatform.Published, error) {
+	f, err := s.Upload(ctx, scope, diskMedia, body, "clip.mp4", videos)
+	if err != nil {
+		return records.File{}, videoplatform.Published{}, err
+	}
+	v, err := p.Publish(ctx, s, scope, f.ID)
+	return f, v, err
+}

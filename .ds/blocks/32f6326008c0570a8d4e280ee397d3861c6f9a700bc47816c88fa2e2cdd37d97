@@ -1,0 +1,14 @@
+func cleanKeys(out io.Writer) {
+	for _, raw := range rawKeys {
+		key, err := filesystem.CleanKey(raw)
+		label := fmt.Sprintf("%q", raw)
+		if len(raw) > filesystem.MaxKeyLength {
+			label = fmt.Sprintf("<%d bytes>", len(raw))
+		}
+		if err != nil {
+			fmt.Fprintf(out, "CleanKey(%s) -> %s\n", label, filesystem.CodeOf(err))
+			continue
+		}
+		fmt.Fprintf(out, "CleanKey(%s) -> %q\n", label, key)
+	}
+}

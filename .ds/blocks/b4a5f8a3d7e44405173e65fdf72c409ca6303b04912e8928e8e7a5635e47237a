@@ -1,0 +1,12 @@
+func scrub(ctx context.Context, out io.Writer, d deployment, now time.Time) error {
+	job := jobs.Scrub(d.store, jobs.ScrubOptions{
+		Disk:       "hot",
+		Cursor:     jobs.ObjectCursor(d.cold, "_jobs/scrub-hot"),
+		Interval:   10 * time.Millisecond, // at most 100 objects a second
+		OnMissing:  func(f records.File) { fmt.Fprintf(out, "scrub: %s is missing\n", f.Filename) },
+		OnMismatch: func(f records.File, _ int64, _ string) { fmt.Fprintf(out, "scrub: %s changed\n", f.Filename) },
+	})
+	res, err := job.Run(ctx, now)
+	fmt.Fprintf(out, "scrub: checked %d file(s)\n", res.Count)
+	return err
+}

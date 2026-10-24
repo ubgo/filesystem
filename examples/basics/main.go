@@ -1,0 +1,135 @@
+// Command basics walks through the storage layer: one disk opened from a
+// DSN, writes and reads, listing, a scoped disk, server-side features, and
+// a signed download link served by fshttp, all on a local directory.
+//
+//	go run ./basics            (from the examples directory)
+package main
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/ubgo/filesystem"
+	"github.com/ubgo/filesystem/fshttp"
+	"github.com/ubgo/filesystem/layer"
+	"github.com/ubgo/filesystem/local"
+	"github.com/ubgo/filesystem/memory"
+	"github.com/ubgo/filesystem/signedurl"
+)
+
+func main() {
+	dir, err := os.MkdirTemp("", "filesystem-basics-")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	defer func() { _ = os.RemoveAll(dir) }()
+	if err := run(context.Background(), os.Stdout, dir); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+// run is main without the process: it writes what it does to out.
+// ds:def id=run-sk7bhtyn
+func run(ctx context.Context, out io.Writer, dir string) error {
+	// 1. Open disks from DSNs. The Mux holds the drivers this program
+	// imports; nothing registers itself globally.
+	mux := filesystem.NewMux()
+	_ = mux.Register(local.Scheme, local.Opener)
+	_ = mux.Register(memory.Scheme, memory.Opener)
+
+	// Signed URLs for a local disk are served by the application itself.
+	srv := httptest.NewServer(nil)
+	defer srv.Close()
+	signer, err := signedurl.New(srv.URL+"/files", []signedurl.Key{{ID: "k1", Secret: bytes.Repeat([]byte("s"), signedurl.MinKeyBytes)}})
+	if err != nil {
+		return err
+	}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	uploads, err := mux.Open(ctx, "uploads", "file://"+dir,
+		filesystem.WithURLSigner(signer),
+		filesystem.WithInterceptors(layer.Log(logger), layer.Retry(layer.RetryOptions{})),
+	)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = uploads.Close() }()
+	cache, err := mux.Open(ctx, "cache", "mem://")
+	if err != nil {
+		return err
+	}
+	mgr, err := filesystem.NewManager(uploads, cache)
+	if err != nil {
+		return err
+	}
+	if err := mgr.Check(ctx); err != nil {
+		return fmt.Errorf("start-up check: %w", err)
+	}
+
+	// 2. Write and read. The Disk detects the content type and hashes the
+	// bytes while streaming.
+	e, err := uploads.Write(ctx, "docs/hello.txt", strings.NewReader("hello, storage"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "wrote %s: %d bytes, %s, sha256 %s…\n", e.Key, e.Size, e.ContentType, e.SHA256[:12])
+	data, err := uploads.ReadAll(ctx, "docs/hello.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "read back %q\n", data)
+
+	// 3. Keys are normalised and traversal is refused before any driver
+	// sees them.
+	if _, err := uploads.Stat(ctx, "../../etc/passwd"); filesystem.CodeOf(err) == filesystem.CodeInvalidKey {
+		fmt.Fprintln(out, "refused a traversal key")
+	}
+
+	// 4. A scoped disk sees only one tenant's keys.
+	tenant, err := uploads.Scope("tenant-42", "tenants/42")
+	if err != nil {
+		return err
+	}
+	if _, err := tenant.WriteBytes(ctx, "logo.png", []byte("\x89PNG\r\n\x1a\n"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	for entry, err := range uploads.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "listed %s\n", entry.Key)
+	}
+
+	// 5. Copy across disks streams the bytes.
+	if _, err := filesystem.CopyAcross(ctx, uploads, "docs/hello.txt", cache, "hello-copy.txt"); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "copied to the memory disk")
+
+	// 6. A signed link to a private file, served by fshttp.
+	srv.Config.Handler = http.StripPrefix("/files", fshttp.Signed(mgr, signer))
+	link, err := uploads.SignedURL(ctx, "docs/hello.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Minute})
+	if err != nil {
+		return err
+	}
+	resp, err := http.Get(link.URL)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "downloaded %q through a signed URL (status %d)\n", body, resp.StatusCode)
+	return nil
+}

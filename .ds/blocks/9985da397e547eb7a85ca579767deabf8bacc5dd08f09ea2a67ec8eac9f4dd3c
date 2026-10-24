@@ -1,0 +1,20 @@
+func customerKey(ctx context.Context, out io.Writer, f fixture) error {
+	raw := []byte("0123456789abcdef0123456789abcdef") // 32 bytes from the secret manager, never from code
+	key, err := gcs.NewCustomerKey(raw)
+	if err != nil {
+		return err
+	}
+	_, disk, err := newBucketDisk(f, "sealed", false, gcs.Config{CustomerKey: key, Signing: f.signing})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "secret.txt", []byte("for your eyes only"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	got, err := disk.ReadAll(ctx, "secret.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "csek: read %q, key printed as %v, presign declared: %t\n", got, key, disk.Capabilities().Presign)
+	return nil
+}

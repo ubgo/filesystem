@@ -1,0 +1,7 @@
+func links(ctx context.Context, s *records.Store, f records.File) (view, download string, err error) {
+	if view, err = s.URL(ctx, f, linkTTL); err != nil {
+		return "", "", err
+	}
+	download, err = s.DownloadURL(ctx, f, linkTTL)
+	return view, download, err
+}

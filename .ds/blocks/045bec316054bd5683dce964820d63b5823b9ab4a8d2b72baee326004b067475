@@ -1,0 +1,7 @@
+func gormGallery(db *gorm.DB, scope, owner string) ([]fsgorm.Attachment, error) {
+	var out []fsgorm.Attachment
+	err := db.Scopes(fsgorm.InScope(scope), fsgorm.WithLiveFile, fsgorm.ByPosition).
+		Where(&fsgorm.Attachment{OwnerType: ownerPost, OwnerID: owner, Role: roleGallery}).
+		Preload("File").Find(&out).Error
+	return out, err
+}

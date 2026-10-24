@@ -1,0 +1,13 @@
+func refusedDSNs(ctx context.Context, out io.Writer, host string) {
+	mux := filesystem.NewMux()
+	_ = mux.Register(webdav.Scheme, webdav.Opener)
+	_ = mux.Register(webdav.SchemeSecure, webdav.Opener)
+	for _, c := range []struct{ why, dsn string }{
+		{"password in the URL", "webdavs://alice:secret@cloud.example.com/remote.php/dav/files/alice"},
+		{"plain http off loopback", "webdav://alice@nas.internal/dav?password_env=" + passwordEnv},
+		{"password_env without a user", "webdav://" + host + davPrefix + "?password_env=" + passwordEnv},
+	} {
+		_, err := mux.Open(ctx, "refused", c.dsn)
+		fmt.Fprintf(out, "refused DSN (%s): %s\n", c.why, filesystem.CodeOf(err))
+	}
+}

@@ -1,0 +1,16 @@
+func openStore(ctx context.Context, dataDir string, disks *filesystem.Manager, v *variants.Plugin) (*records.Store, error) {
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dataDir, "app.db")+"?_pragma=busy_timeout(5000)")
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithOwnerTypes(ownerUser),
+		records.WithSingleRoles(roleAvatar),
+		records.WithPlugins(v))
+	if err != nil {
+		return nil, err
+	}
+	_, err = store.Migrate(ctx)
+	return store, err
+}

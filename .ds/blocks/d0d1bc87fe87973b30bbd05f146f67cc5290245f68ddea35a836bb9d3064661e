@@ -1,0 +1,15 @@
+func linkCard(ctx context.Context, cache *remote.Cache, proxy *remote.Proxy, postURL string) (card, error) {
+	p, err := cache.LinkPreview(ctx, postURL)
+	if err != nil {
+		return card{}, err
+	}
+	c := card{Title: p.Title, Description: p.Description}
+	if p.ImageURL == "" || p.ImageError != "" {
+		return c, nil
+	}
+	c.ImageSrc, err = proxy.URL(ctx, p.ImageURL, proxyLifetime)
+	if err != nil {
+		return card{}, err
+	}
+	return c, nil
+}

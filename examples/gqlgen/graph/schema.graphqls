@@ -1,0 +1,25 @@
+# The example's schema. upload.graphqls is a verbatim copy of
+# github.com/ubgo/filesystem/contrib/gqlgen's Schema.
+
+"A stored file as a records row."
+type FileRecord {
+  id: ID!
+  filename: String!
+  contentType: String!
+  size: Int!
+  uploadedBy: String!
+}
+
+type Query {
+  "The signed-in user's avatar, if any."
+  avatar: FileRecord
+}
+
+type Mutation {
+  "Stores one file on the media disk."
+  uploadFile(file: Upload!): StoredUpload!
+  "Stores every file or none."
+  uploadFiles(files: [Upload!]!): [StoredUpload!]!
+  "Stores a file as a record and makes it the signed-in user's avatar."
+  setAvatar(file: Upload!): FileRecord!
+}

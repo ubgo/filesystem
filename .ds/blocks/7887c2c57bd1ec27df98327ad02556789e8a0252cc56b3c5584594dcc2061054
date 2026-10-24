@@ -1,0 +1,16 @@
+func formFile(r *http.Request) (*multipart.Part, error) {
+	mr, err := r.MultipartReader()
+	if err != nil {
+		return nil, filesystem.Errorf(filesystem.CodeInvalidArgument, "send a multipart form with the photo in the field %q", formField)
+	}
+	for {
+		part, err := mr.NextPart()
+		if err != nil {
+			return nil, filesystem.Errorf(filesystem.CodeInvalidArgument, "no form field %q", formField)
+		}
+		if part.FormName() == formField {
+			return part, nil
+		}
+		_ = part.Close()
+	}
+}

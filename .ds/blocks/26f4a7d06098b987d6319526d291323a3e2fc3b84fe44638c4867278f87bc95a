@@ -1,0 +1,3 @@
+func checkOut(ctx context.Context, s *records.Store, lp *locks.Plugin, fileID, user string) (locks.Lock, error) {
+	return lp.Lock(ctx, s, tenant, fileID, user, editWindow)
+}

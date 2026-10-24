@@ -1,0 +1,7 @@
+func policyFor(tenant string) upload.Policy {
+	return upload.Policy{
+		MaxSize: maxFileSize,
+		Allowed: []string{"image/*", "application/pdf", "text/plain", "text/csv"},
+		Key:     upload.RandomKey(prefixOf(tenant) + "/files"),
+	}
+}

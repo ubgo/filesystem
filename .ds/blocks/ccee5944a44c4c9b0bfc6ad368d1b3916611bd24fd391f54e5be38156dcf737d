@@ -1,0 +1,11 @@
+func newDisks() (*filesystem.Manager, error) {
+	pub, err := filesystem.NewDisk(publicDisk, memory.New(), filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	if err != nil {
+		return nil, err
+	}
+	priv, err := filesystem.NewDisk(privateDisk, memory.New())
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewManager(priv, pub)
+}

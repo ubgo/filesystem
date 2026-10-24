@@ -1,0 +1,14 @@
+func New(dataDir string, s scan.Scanner) (http.Handler, *filesystem.Disk, error) {
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, nil, err
+	}
+	disk, err := filesystem.NewDisk("uploads", drv)
+	if err != nil {
+		return nil, nil, err
+	}
+	mux := http.NewServeMux()
+	mux.Handle("POST /uploads", upload.Handler(disk, newPolicy(s), upload.HandlerOptions{MaxFiles: maxFilesPerRequest}))
+	mux.HandleFunc("GET /readyz", ready(s))
+	return mux, disk, nil
+}

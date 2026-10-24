@@ -1,0 +1,8 @@
+func moderatedPolicy(malware scan.Scanner, removed *scan.HashSet) upload.Policy {
+	p := policyWith(malware)
+	p.Inspect = upload.Inspectors(
+		scan.Inspect(malware),
+		scan.Inspect(scan.HashScanner(scan.SHA256, removed)),
+	)
+	return p
+}

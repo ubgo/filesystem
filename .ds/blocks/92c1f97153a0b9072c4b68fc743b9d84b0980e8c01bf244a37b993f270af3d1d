@@ -1,0 +1,9 @@
+func newPlatform(baseURL string) (*mux.Client, error) {
+	return mux.New(mux.Config{
+		TokenID:       "mux-token-id",
+		TokenSecret:   tokenSecret,
+		WebhookSecret: webhookSecret,
+		Policy:        mux.PolicyPublic,
+		BaseURL:       baseURL,
+	})
+}

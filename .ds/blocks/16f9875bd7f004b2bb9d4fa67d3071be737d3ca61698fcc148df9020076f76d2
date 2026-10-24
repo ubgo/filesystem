@@ -1,0 +1,13 @@
+func serveFakeS3(ctx context.Context, addr string) error {
+	backend := s3mem.New()
+	if err := backend.CreateBucket(demoBucket); err != nil {
+		return err
+	}
+	fmt.Printf("fake S3 on http://%s, bucket %q (any credentials)\n", addr, demoBucket)
+	srv := &http.Server{Addr: addr, Handler: gofakes3.New(backend).Server(), ReadHeaderTimeout: readHeaderTimeout}
+	go func() {
+		<-ctx.Done()
+		_ = srv.Close()
+	}()
+	return srv.ListenAndServe()
+}

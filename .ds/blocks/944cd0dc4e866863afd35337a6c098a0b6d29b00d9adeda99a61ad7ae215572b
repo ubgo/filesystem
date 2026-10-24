@@ -1,0 +1,24 @@
+func run(ctx context.Context, src, dst *filesystem.Disk, o Options) error {
+	start := time.Now()
+	r, err := Copy(ctx, src, dst, o)
+	verb := "copied"
+	if o.DryRun {
+		verb = "to copy"
+	}
+	fmt.Printf("%s %d, skipped %d, failed %d, %d bytes in %s\n", verb, r.Copied, r.Skipped, len(r.Failed), r.Bytes, time.Since(start).Round(time.Millisecond))
+	for key, ferr := range r.Failed {
+		fmt.Printf("  failed %s: %v\n", key, ferr)
+	}
+	if err != nil || len(r.Failed) > 0 || o.DryRun {
+		return errors.Join(err, failedErr(len(r.Failed)))
+	}
+	bad, err := Verify(ctx, src, dst)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("verified: %d objects differ\n", len(bad))
+	if len(bad) > 0 {
+		return fmt.Errorf("objects differ: %v", bad)
+	}
+	return nil
+}

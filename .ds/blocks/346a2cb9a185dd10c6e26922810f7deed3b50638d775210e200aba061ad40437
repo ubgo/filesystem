@@ -1,0 +1,16 @@
+func bucketReplication(ctx context.Context, out io.Writer, _ fixture) error {
+	client, stop, err := bucketConfigClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer stop()
+	if err := gcs.SetReplication(ctx, client, bucketName, gcs.ReplicationTurbo); err != nil {
+		return err
+	}
+	mode, err := gcs.Replication(ctx, client, bucketName)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "replication: %s\n", mode)
+	return nil
+}

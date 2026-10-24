@@ -1,0 +1,18 @@
+func jsonContract(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	h := upload.Handler(disk, policy, upload.HandlerOptions{})
+	ok, err := post(ctx, h, nil, file("photo.png", photo))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "success %d: %s\n", ok.Code, stable(ok.Body.String()))
+	bad, err := post(ctx, h, nil, file("page.png", "<!DOCTYPE html><p>hi</p>"))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "failure %d: %s\n", bad.Code, strings.TrimSpace(bad.Body.String()))
+	return nil
+}

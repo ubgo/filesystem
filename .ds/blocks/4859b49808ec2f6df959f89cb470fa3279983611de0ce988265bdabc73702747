@@ -1,0 +1,3 @@
+func streamed(ctx context.Context, s *records.Store, f records.File, n int64) error {
+	return s.Served(ctx, records.Served{Kind: records.ServeStream, Scope: f.Scope, FileID: f.ID, Bytes: n})
+}

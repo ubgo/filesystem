@@ -1,0 +1,12 @@
+func newRouter(a *app.App) chi.Router {
+	r := chi.NewRouter()
+	r.Use(middleware.Recoverer)
+	r.Method(http.MethodPost, app.PathUpload, a.Upload)
+	fschi.Mount(r, app.PathFiles, a.Files)
+	r.Route(app.GroupMe, func(me chi.Router) {
+		me.Use(fschi.Actor(app.User), fschi.Scope(app.Tenant))
+		fschi.Mount(me, app.MountMedia, a.Records)
+		me.Get(app.PathExport+"/{"+app.ParamRole+"}", func(w http.ResponseWriter, r *http.Request) { export(w, r, a) })
+	})
+	return r
+}

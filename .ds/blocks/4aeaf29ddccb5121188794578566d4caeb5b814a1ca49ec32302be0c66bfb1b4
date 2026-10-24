@@ -1,0 +1,27 @@
+func declared(ctx context.Context, out io.Writer) error {
+	b, err := newBucket()
+	if err != nil {
+		return err
+	}
+	defer b.srv.Close()
+	sum := sha256.Sum256([]byte(pngFile))
+	req := upload.TicketRequest{Filename: "photo.png", ContentType: "image/png", Size: int64(len(pngFile)), SHA256: hex.EncodeToString(sum[:])}
+	want := upload.Expected{Size: req.Size, SHA256: req.SHA256}
+	for _, sent := range []string{pngFile, pngFile[:len(pngFile)-1] + "!"} {
+		t, err := upload.Presign(ctx, b.disk, req, policy, ticketLifetime)
+		if err != nil {
+			return err
+		}
+		if _, err := put(ctx, t, sent); err != nil {
+			return err
+		}
+		_, err = upload.ConfirmExpected(ctx, b.disk, t.Key, req.Filename, policy, want)
+		kept, _ := b.disk.Exists(ctx, t.Key)
+		fmt.Fprintf(out, "declared sha256, sent %d bytes: confirm %q, kept %t\n", len(sent), filesystem.CodeOf(err), kept)
+	}
+	_, err = upload.Presign(ctx, b.disk, req, policy, slowMobileLink)
+	fmt.Fprintf(out, "ticket for %s: %v\n", slowMobileLink, err)
+	_, err = upload.Presign(ctx, b.disk, req, policy, filesystem.MaxPresignExpiry+time.Hour)
+	fmt.Fprintf(out, "ticket past MaxPresignExpiry: %s\n", filesystem.CodeOf(err))
+	return nil
+}

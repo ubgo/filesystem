@@ -1,0 +1,13 @@
+func refusedDSNs(ctx context.Context, out io.Writer, addr string) {
+	mux := filesystem.NewMux()
+	_ = mux.Register(ftp.Scheme, ftp.Opener)
+	_ = mux.Register(ftp.SchemeSecure, ftp.Opener)
+	for _, c := range []struct{ why, dsn string }{
+		{"password in the URL", "ftp://" + ftpUser + ":secret@" + addr + "/exchange"},
+		{"max_conns=0", "ftp://" + ftpUser + "@" + addr + "/exchange?max_conns=0&password_env=" + passwordEnv},
+		{"no root directory", "ftp://" + ftpUser + "@" + addr + "?password_env=" + passwordEnv},
+	} {
+		_, err := mux.Open(ctx, "refused", c.dsn)
+		fmt.Fprintf(out, "refused DSN (%s): %s\n", c.why, filesystem.CodeOf(err))
+	}
+}

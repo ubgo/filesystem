@@ -1,0 +1,25 @@
+func (a *App) putAvatar(w http.ResponseWriter, r *http.Request) {
+	p, err := policyFor(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxAvatarBytes+formOverhead)
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "send the photo in the form field \"file\""))
+		return
+	}
+	defer func() { _ = file.Close() }()
+	f, err := a.setAvatar(r.Context(), r.PathValue("id"), file, header.Filename, p)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	urls, err := a.urls(r.Context(), f)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, avatarResponse{FileID: f.ID, Type: f.ContentType, Size: f.Size, URLs: urls})
+}

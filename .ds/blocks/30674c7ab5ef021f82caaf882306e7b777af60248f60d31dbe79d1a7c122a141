@@ -1,0 +1,21 @@
+func cacheThenPromote(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	cached := policy
+	cached.Key = upload.RandomKey(cacheDir)
+	res, err := upload.Receive(ctx, disk, strings.NewReader(pngFile), "avatar.png", cached)
+	if err != nil {
+		return err
+	}
+	e, err := upload.Promote(ctx, disk, cacheDir, res.Key, disk, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	stillCached, _ := disk.Exists(ctx, res.Key)
+	fmt.Fprintf(out, "promoted to %s, still in cache: %t\n", e.Key, stillCached)
+	_, err = upload.Promote(ctx, disk, cacheDir, "avatars/u1.png", disk, "avatars/u2.png")
+	fmt.Fprintf(out, "promote a key outside the cache: %s\n", filesystem.CodeOf(err))
+	return nil
+}

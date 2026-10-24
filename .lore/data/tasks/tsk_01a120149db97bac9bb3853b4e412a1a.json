@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  - Deferred I44: a visibility setting on presigned uploads, which is a core security design decision.\n  - Partial or kept items: 17, each with its reason in the internal audit notes.\n  do all and also floowl up too   Docs follow-up: 31 newer features have a guide but no runnable example yet.\n\nDecisions: security floors stay (C6 link lifetime cap, I7 token entropy, C13 SVG allowlist, I12 trash counts toward quota, GPS never kept in I50). Everything else implemented opt-in with today as default. Nothing is tagged yet, so a breaking change is allowed where needed (I21, I26) and is tagged [breaking] in CHANGELOG.\n\nAcceptance: I44, I32, I31 per-call, I21, I6 deny, B5 success shapes, I18, I19, I13, I26, I50 EXIF copyright, I51 HLS, C12 oEmbed, I49 ranges done or reported with a hard blocker; 31 features get runnable examples; gates green; ask before commit.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-09T14:20:45.909277000Z",
+  "created_at": "2026-10-09T09:53:04.441761000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a120149db97bac9bb3853b4e412a1a",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "No-hardwire round 3: I44 and the deferred items, plus runnable examples for 31 features",
+  "updated_at": "2026-10-09T14:20:45.909357000Z"
+}

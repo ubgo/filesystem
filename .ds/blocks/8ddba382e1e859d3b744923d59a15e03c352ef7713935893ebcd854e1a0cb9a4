@@ -1,0 +1,13 @@
+func sameTenant(ctx context.Context, op *filesystem.Op) error {
+	tenant, _ := ctx.Value(tenantKey{}).(string)
+	if tenant == "" {
+		return errors.New("no tenant in context")
+	}
+	dir := filesystem.JoinKey(tenantsDir, tenant)
+	for _, k := range append([]string{op.Key, op.Target}, op.Keys...) {
+		if k != "" && !filesystem.KeyInDir(k, dir) {
+			return fmt.Errorf("key %q is not in %s", k, dir)
+		}
+	}
+	return nil
+}

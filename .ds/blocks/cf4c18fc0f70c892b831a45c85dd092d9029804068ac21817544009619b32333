@@ -1,0 +1,17 @@
+func expired(ctx context.Context, a *app, out io.Writer) error {
+	past := func() time.Time { return time.Now().Add(-time.Hour) }
+	old, err := signedurl.New(a.srv.URL+signedPrefix, []signedurl.Key{newKey}, signedurl.WithClock(past))
+	if err != nil {
+		return err
+	}
+	link, err := old.SignURL(ctx, "private", "invoices/42.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	resp, _, err := fetch(http.MethodGet, link.URL, nil, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "expired %d\n", resp.StatusCode)
+	return nil
+}

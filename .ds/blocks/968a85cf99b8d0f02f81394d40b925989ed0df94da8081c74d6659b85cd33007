@@ -1,0 +1,6 @@
+var documentPolicy = upload.Policy{
+	MaxSize:    maxDocumentBytes,
+	Allowed:    []string{"application/pdf"},
+	Key:        upload.RandomKey("invoices"),
+	Visibility: filesystem.VisibilityPrivate,
+}

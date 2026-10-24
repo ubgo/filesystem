@@ -1,0 +1,6 @@
+func identify(r *http.Request) (string, error) {
+	if ws := r.Header.Get(headerSpace); ws != "" {
+		return ws, nil
+	}
+	return "", errNoSession
+}

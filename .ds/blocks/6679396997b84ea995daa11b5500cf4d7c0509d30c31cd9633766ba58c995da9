@@ -1,0 +1,13 @@
+func exportUser(ctx context.Context, out io.Writer, d deployment, user string, now time.Time) error {
+	exp, err := jobs.ExportSubject(ctx, d.store, d.exports, jobs.Subject{Scope: "acme", UploadedBy: user}, jobs.ExportOptions{
+		Dir: exportDir, TTL: exportTTL, Filename: user + "-export.zip",
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "export: %d file(s), %d bytes, link valid until %s\n", exp.Files, exp.Bytes, exp.ExpiresAt.Format(time.Kitchen))
+	// Scheduled in production; here run once, after the link expired.
+	swept, err := jobs.UploadSweep(d.exports, exportDir, exportTTL).Run(ctx, now.Add(exportTTL+time.Minute))
+	fmt.Fprintf(out, "export sweep: deleted %d expired export(s)\n", swept.Count)
+	return err
+}

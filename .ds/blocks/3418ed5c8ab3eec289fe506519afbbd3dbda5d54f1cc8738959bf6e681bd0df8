@@ -1,0 +1,3 @@
+func confirm(ctx context.Context, s *records.Store, r quota.Reservation, key string) (records.File, error) {
+	return s.CreateFile(quota.WithReservation(ctx, r.ID), records.NewFile{Scope: r.Scope, Disk: diskName, Key: key})
+}

@@ -1,0 +1,7 @@
+func declaredSize(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	truncated := report[:len(report)-5]
+	_, err := disk.Write(ctx, "reports/q4.csv", strings.NewReader(truncated), filesystem.WriteOptions{SizeHint: int64(len(report))})
+	ok, _ := disk.Exists(ctx, "reports/q4.csv")
+	fmt.Fprintf(out, "truncated body with a size hint: %s, stored: %t\n", filesystem.CodeOf(err), ok)
+	return nil
+}

@@ -1,0 +1,7 @@
+func firstDisk(dir string) (*filesystem.Disk, error) {
+	drv, err := local.New(dir)
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk(diskName, drv)
+}

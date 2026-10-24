@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim, via team-lead brief): Drift sweep of every tracked doc for the new APIs; update the internal audit notes; run task check, test:engines, test:rustfs, test:s3, test:azure, test:clamav, test:asynq, cover, cover:records; fix real failures; update COVERAGE.md; docs:wrap, ds check, docker ps clean. Do not commit.\n\nContext: round 6 uncommitted on top of b3fdd80.\n\nAcceptance: all gates green or failures reported, docs consistent, COVERAGE.md measured.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T10:45:18.516082000Z",
+  "created_at": "2026-10-08T08:52:56.592788000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11ab734907c0da6539119110d7853",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T08:53:10.456503000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Round 6: docs drift sweep, feature-status page, full gates, coverage",
+  "updated_at": "2026-10-08T10:45:18.516084000Z"
+}

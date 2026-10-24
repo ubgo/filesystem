@@ -1,0 +1,4 @@
+func filesTagged(ctx context.Context, s *records.Store, tp *tags.Plugin, want ...string) ([]string, error) {
+	page, err := tp.Files(ctx, s, records.FileQuery{Scope: tenant}, want...)
+	return filenames(page), err
+}

@@ -1,0 +1,6 @@
+func cleanDirs(out io.Writer) {
+	for _, raw := range []string{"", "/", ".", "/avatars/"} {
+		dir, err := filesystem.CleanDir(raw)
+		fmt.Fprintf(out, "CleanDir(%q) -> %q %v\n", raw, dir, err)
+	}
+}

@@ -1,0 +1,11 @@
+func process(ctx context.Context, s *records.Store, f records.File, fail bool) error {
+	if _, err := s.SetStatus(ctx, tenant, f.ID, records.StatusProcessing, "thumbnails 1/2"); err != nil {
+		return err
+	}
+	if fail {
+		_, err := s.SetStatus(ctx, tenant, f.ID, records.StatusFailed, "thumbnail: unsupported format")
+		return err
+	}
+	_, err := s.SetStatus(ctx, tenant, f.ID, records.StatusReady, "")
+	return err
+}

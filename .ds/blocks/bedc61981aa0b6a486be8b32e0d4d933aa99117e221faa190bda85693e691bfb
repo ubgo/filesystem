@@ -1,0 +1,20 @@
+func newStore(t *testing.T, disk *filesystem.Disk, opts ...records.Option) *records.Store {
+	t.Helper()
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(t.TempDir(), "test.db")+"?_pragma=busy_timeout(5000)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks, append([]records.Option{records.WithOwnerTypes(ownerUser)}, opts...)...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Migrate(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	return store
+}

@@ -1,0 +1,13 @@
+func TestFromDSN(t *testing.T) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(memory.Scheme, memory.Opener); err != nil {
+		t.Fatal(err)
+	}
+	disk, err := mux.Open(t.Context(), "media", "mem://?readonly=true")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewAvatars(disk).Save(t.Context(), "u1", strings.NewReader(gif)); !errors.Is(err, filesystem.ErrReadOnly) {
+		t.Fatalf("err = %v, want CodeReadOnly", err)
+	}
+}

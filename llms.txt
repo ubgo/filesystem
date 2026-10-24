@@ -1,0 +1,156 @@
+# filesystem
+
+> One storage library for Go applications: a portable Disk over local disk, memory, Amazon S3 and every S3-compatible store (Cloudflare R2, Backblaze B2, Wasabi, DigitalOcean Spaces, SeaweedFS, Garage, MinIO), Google Cloud Storage, Azure Blob Storage, SFTP, FTP, WebDAV, a SQL table, cloud drives, Vercel Blob and Cloudinary; safe uploads (content sniffing, size caps, executable and active-content refusal, presigned and Uppy multipart uploads, tus resumable uploads, SSRF-guarded imports, ClamAV scanning with quarantine until scanned, EXIF stripping, upload sessions); signed URLs and HTTP handlers; and files as rows in Postgres, MySQL or SQLite attached to your models, with plugins for audit, folders, quotas, share links, tags, versions, image variants and dimensions.
+
+filesystem is a Go library (github.com/ubgo/filesystem) imported into the application, not run as a service. Applications hold a concrete `*filesystem.Disk`; backends implement a six-method `Driver` and declare their capabilities, and the Disk either falls back portably or fails with `CodeUnsupported`, never silently. Cross-cutting behaviour (retry, timeouts, limits, logging, metrics, tracing) wraps operations as interceptors. The records module keeps objects and rows consistent without a shared transaction: object first and row second on create, row first and object last on delete.
+
+The core module depends only on the Go standard library, and a test fails the build if that changes. Each adapter, the records module and each contrib package is a separate module, so an application downloads only what it imports.
+
+Every page below is plain Markdown in the repository. Code blocks in the guides are copies of example programs the test suite compiles and runs (docsync repo mode), and HTTP transcripts come from real runs.
+
+## Start
+- [Install](https://github.com/ubgo/filesystem/blob/main/docs/start/install.md)
+- [Your first app](https://github.com/ubgo/filesystem/blob/main/docs/start/first-app.md)
+- [Going to production](https://github.com/ubgo/filesystem/blob/main/docs/start/production.md)
+- [Test your app](https://github.com/ubgo/filesystem/blob/main/docs/start/testing.md)
+
+## Concepts
+- [Disks and drivers](https://github.com/ubgo/filesystem/blob/main/docs/concepts/disks-and-drivers.md)
+- [Keys](https://github.com/ubgo/filesystem/blob/main/docs/concepts/keys.md)
+- [Capabilities](https://github.com/ubgo/filesystem/blob/main/docs/concepts/capabilities.md)
+- [Errors](https://github.com/ubgo/filesystem/blob/main/docs/concepts/errors.md)
+- [Interceptors](https://github.com/ubgo/filesystem/blob/main/docs/concepts/interceptors.md)
+- [Composing disks](https://github.com/ubgo/filesystem/blob/main/docs/concepts/composing-disks.md)
+- [Configuration](https://github.com/ubgo/filesystem/blob/main/docs/concepts/configuration.md)
+- [Serving files](https://github.com/ubgo/filesystem/blob/main/docs/concepts/serving-files.md)
+- [Uploads](https://github.com/ubgo/filesystem/blob/main/docs/concepts/uploads.md)
+- [Security](https://github.com/ubgo/filesystem/blob/main/docs/concepts/security.md)
+- [Consistency](https://github.com/ubgo/filesystem/blob/main/docs/concepts/consistency.md)
+- [Multi-tenancy](https://github.com/ubgo/filesystem/blob/main/docs/concepts/multi-tenancy.md)
+- [Public and private files](https://github.com/ubgo/filesystem/blob/main/docs/concepts/public-and-private.md)
+- [Maintenance jobs](https://github.com/ubgo/filesystem/blob/main/docs/concepts/maintenance-jobs.md)
+- [Maintenance](https://github.com/ubgo/filesystem/blob/main/docs/maintenance/README.md)
+
+## Backends
+- [adapters](https://github.com/ubgo/filesystem/blob/main/docs/adapters/README.md)
+- [local](https://github.com/ubgo/filesystem/blob/main/docs/adapters/local.md)
+- [memory](https://github.com/ubgo/filesystem/blob/main/docs/adapters/memory.md)
+- [s3](https://github.com/ubgo/filesystem/blob/main/docs/adapters/s3.md)
+- [S3-compatible stores](https://github.com/ubgo/filesystem/blob/main/docs/adapters/s3-compatible.md)
+- [gcs](https://github.com/ubgo/filesystem/blob/main/docs/adapters/gcs.md)
+- [azure](https://github.com/ubgo/filesystem/blob/main/docs/adapters/azure.md)
+- [sftp](https://github.com/ubgo/filesystem/blob/main/docs/adapters/sftp.md)
+- [ftp](https://github.com/ubgo/filesystem/blob/main/docs/adapters/ftp.md)
+- [webdav](https://github.com/ubgo/filesystem/blob/main/docs/adapters/webdav.md)
+- [sqlblob](https://github.com/ubgo/filesystem/blob/main/docs/adapters/sqlblob.md)
+- [gdrive](https://github.com/ubgo/filesystem/blob/main/docs/adapters/gdrive.md)
+- [dropbox](https://github.com/ubgo/filesystem/blob/main/docs/adapters/dropbox.md)
+- [onedrive](https://github.com/ubgo/filesystem/blob/main/docs/adapters/onedrive.md)
+- [vercelblob](https://github.com/ubgo/filesystem/blob/main/docs/adapters/vercelblob.md)
+- [cloudinary](https://github.com/ubgo/filesystem/blob/main/docs/adapters/cloudinary.md)
+- [supabase](https://github.com/ubgo/filesystem/blob/main/docs/adapters/supabase.md)
+
+## Files as records
+- [Records overview](https://github.com/ubgo/filesystem/blob/main/docs/records/README.md)
+- [Files](https://github.com/ubgo/filesystem/blob/main/docs/records/files.md)
+- [Attachments](https://github.com/ubgo/filesystem/blob/main/docs/records/attachments.md)
+- [Lifecycle](https://github.com/ubgo/filesystem/blob/main/docs/records/lifecycle.md)
+- [Replace and visibility](https://github.com/ubgo/filesystem/blob/main/docs/records/replace-and-visibility.md)
+- [Processing status and quarantine](https://github.com/ubgo/filesystem/blob/main/docs/records/processing-status.md)
+- [Events and hooks](https://github.com/ubgo/filesystem/blob/main/docs/records/events-and-hooks.md)
+- [Migrations](https://github.com/ubgo/filesystem/blob/main/docs/records/migrations.md)
+- [HTTP endpoints](https://github.com/ubgo/filesystem/blob/main/docs/records/http-endpoints.md)
+
+## Plugins
+- [audit](https://github.com/ubgo/filesystem/blob/main/docs/plugins/audit.md)
+- [folders](https://github.com/ubgo/filesystem/blob/main/docs/plugins/folders.md)
+- [quota](https://github.com/ubgo/filesystem/blob/main/docs/plugins/quota.md)
+- [egress](https://github.com/ubgo/filesystem/blob/main/docs/plugins/egress.md)
+- [webhooks](https://github.com/ubgo/filesystem/blob/main/docs/plugins/webhooks.md)
+- [share](https://github.com/ubgo/filesystem/blob/main/docs/plugins/share.md)
+- [acl](https://github.com/ubgo/filesystem/blob/main/docs/plugins/acl.md)
+- [locks](https://github.com/ubgo/filesystem/blob/main/docs/plugins/locks.md)
+- [tags](https://github.com/ubgo/filesystem/blob/main/docs/plugins/tags.md)
+- [versions](https://github.com/ubgo/filesystem/blob/main/docs/plugins/versions.md)
+- [upload sessions](https://github.com/ubgo/filesystem/blob/main/docs/concepts/uploads.md#upload-sessions-a-token-valid-for-a-window)
+- [variants](https://github.com/ubgo/filesystem/blob/main/docs/plugins/variants.md)
+- [dimensions](https://github.com/ubgo/filesystem/blob/main/docs/plugins/dimensions.md)
+- [image processing](https://github.com/ubgo/filesystem/blob/main/docs/plugins/image-processing.md)
+- [video](https://github.com/ubgo/filesystem/blob/main/docs/plugins/video.md)
+- [audio](https://github.com/ubgo/filesystem/blob/main/docs/plugins/audio.md)
+- [pdf](https://github.com/ubgo/filesystem/blob/main/docs/plugins/pdf.md)
+- [office](https://github.com/ubgo/filesystem/blob/main/docs/plugins/office.md)
+- [ocr](https://github.com/ubgo/filesystem/blob/main/docs/plugins/ocr.md)
+- [vision](https://github.com/ubgo/filesystem/blob/main/docs/plugins/vision.md)
+- [pickers](https://github.com/ubgo/filesystem/blob/main/docs/plugins/pickers.md)
+- [svg](https://github.com/ubgo/filesystem/blob/main/docs/plugins/svg.md)
+- [archive](https://github.com/ubgo/filesystem/blob/main/docs/plugins/archive.md)
+- [crypt](https://github.com/ubgo/filesystem/blob/main/docs/plugins/crypt.md)
+- [remote](https://github.com/ubgo/filesystem/blob/main/docs/plugins/remote.md)
+
+## Recipes
+- [Recipes](https://github.com/ubgo/filesystem/blob/main/docs/recipes/README.md)
+- [avatars](https://github.com/ubgo/filesystem/blob/main/docs/recipes/avatars.md)
+- [product images](https://github.com/ubgo/filesystem/blob/main/docs/recipes/product-images.md)
+- [chat attachments](https://github.com/ubgo/filesystem/blob/main/docs/recipes/chat-attachments.md)
+- [team drive](https://github.com/ubgo/filesystem/blob/main/docs/recipes/team-drive.md)
+- [browser direct uploads](https://github.com/ubgo/filesystem/blob/main/docs/recipes/browser-direct-uploads.md)
+- [resumable uploads](https://github.com/ubgo/filesystem/blob/main/docs/recipes/resumable-uploads.md)
+- [mobile uploads](https://github.com/ubgo/filesystem/blob/main/docs/recipes/mobile-uploads.md)
+- [import from URL](https://github.com/ubgo/filesystem/blob/main/docs/recipes/import-from-url.md)
+- [virus scanning](https://github.com/ubgo/filesystem/blob/main/docs/recipes/virus-scanning.md)
+- [strip photo metadata](https://github.com/ubgo/filesystem/blob/main/docs/recipes/strip-photo-metadata.md)
+- [private downloads](https://github.com/ubgo/filesystem/blob/main/docs/recipes/private-downloads.md)
+- [public CDN](https://github.com/ubgo/filesystem/blob/main/docs/recipes/public-cdn.md)
+- [SaaS tenants](https://github.com/ubgo/filesystem/blob/main/docs/recipes/saas-tenants.md)
+- [account deletion](https://github.com/ubgo/filesystem/blob/main/docs/recipes/account-deletion.md)
+- [backups and mirrors](https://github.com/ubgo/filesystem/blob/main/docs/recipes/backups-and-mirrors.md)
+- [move to S3](https://github.com/ubgo/filesystem/blob/main/docs/recipes/move-to-s3.md)
+- [exports](https://github.com/ubgo/filesystem/blob/main/docs/recipes/exports.md)
+
+## Integrations
+- [net/http](https://github.com/ubgo/filesystem/blob/main/docs/integrations/net-http.md)
+- [gin](https://github.com/ubgo/filesystem/blob/main/docs/integrations/gin.md)
+- [echo](https://github.com/ubgo/filesystem/blob/main/docs/integrations/echo.md)
+- [fiber](https://github.com/ubgo/filesystem/blob/main/docs/integrations/fiber.md)
+- [framework adapters](https://github.com/ubgo/filesystem/blob/main/docs/integrations/framework-adapters.md)
+- [graphql](https://github.com/ubgo/filesystem/blob/main/docs/integrations/graphql.md)
+- [otel](https://github.com/ubgo/filesystem/blob/main/docs/integrations/otel.md)
+- [logging and metrics](https://github.com/ubgo/filesystem/blob/main/docs/integrations/logging-and-metrics.md)
+- [CLI](https://github.com/ubgo/filesystem/blob/main/docs/integrations/cli.md)
+- [ent](https://github.com/ubgo/filesystem/blob/main/docs/integrations/ent.md)
+- [gorm](https://github.com/ubgo/filesystem/blob/main/docs/integrations/gorm.md)
+- [sqlc](https://github.com/ubgo/filesystem/blob/main/docs/integrations/sqlc.md)
+
+## Extending
+- [Write a driver](https://github.com/ubgo/filesystem/blob/main/docs/extending/write-a-driver.md)
+- [Write an interceptor](https://github.com/ubgo/filesystem/blob/main/docs/extending/write-an-interceptor.md)
+- [Write a records plugin](https://github.com/ubgo/filesystem/blob/main/docs/extending/write-a-records-plugin.md)
+- [Write a scanner](https://github.com/ubgo/filesystem/blob/main/docs/extending/write-a-scanner.md)
+
+## Reference
+- [Error codes](https://github.com/ubgo/filesystem/blob/main/docs/reference/errors.md)
+- [Capabilities](https://github.com/ubgo/filesystem/blob/main/docs/reference/capabilities.md)
+- [DSN parameters](https://github.com/ubgo/filesystem/blob/main/docs/reference/dsn.md)
+- [Operations and events](https://github.com/ubgo/filesystem/blob/main/docs/reference/operations.md)
+- [Troubleshooting](https://github.com/ubgo/filesystem/blob/main/docs/reference/troubleshooting.md)
+## Modules
+- `github.com/ubgo/filesystem`: the core (`Disk`, `Driver`, `Manager`, `Mux`), `local`, `memory`, `layer` (interceptors), `sniff`, `signedurl`, `fshttp`, `upload` (policies, presigned and Uppy uploads, upload sessions), `scan` (clamd), `filesystemtest`. Standard library only.
+- `github.com/ubgo/filesystem/adapters/s3`, `gcs`, `azure`, `sftp`, `ftp`, `webdav`, `sqlblob`, `gdrive`, `dropbox`, `onedrive`, `vercelblob`, `cloudinary`: one module per backend.
+- `github.com/ubgo/filesystem/records`: files as rows on github.com/ubgo/sqlb (quarantine until scanned, processing status, trash, versions), with the plugins `audit`, `folders`, `quota`, `egress`, `webhooks`, `share`, `acl`, `locks`, `tags`, `versions`, `uploadsessions` and the `recordshttp` endpoints.
+- `github.com/ubgo/filesystem/contrib/imaging` (with `webp`, `avif`, `heic`, `icc`, `placeholder`): resizing, cropping, EXIF stripping, probing, and the records plugins `variants` (with 2x/3x densities) and `dimensions`.
+- `github.com/ubgo/filesystem/contrib/video`, `audio`, `videoplatform`, `pdf`, `office`, `ocr`, `vision`, `svg`, `archive`: media and document processing as upload hooks and records plugins.
+- `github.com/ubgo/filesystem/contrib/crypt`, `remote`, `pickers`, `cloudfront`, `cloudflare`, `notify`, `keynorm`, `otel`, `tus`: encryption at rest, remote media, cloud-drive pickers, CDN signing, bucket events, key normalisation, OpenTelemetry, tus resumable uploads.
+- `github.com/ubgo/filesystem/contrib/gin`, `echo`, `fiber`, `chi`, `gqlgen`, `ent`, `gorm`, `sqlc`: framework and ORM integrations.
+- `github.com/ubgo/filesystem/jobs` (with `jobs/river`, `jobs/asynq`): maintenance jobs and their schedulers.
+- `github.com/ubgo/filesystem/cmd/fs`: a command-line tool for any backend.
+
+## Install
+- `go get github.com/ubgo/filesystem`
+- `go get github.com/ubgo/filesystem/adapters/s3`
+- `go get github.com/ubgo/filesystem/records`
+
+## Links
+- Repository: https://github.com/ubgo/filesystem
+- Guides: https://github.com/ubgo/filesystem/blob/main/docs/README.md
+- Examples: https://github.com/ubgo/filesystem/tree/main/examples

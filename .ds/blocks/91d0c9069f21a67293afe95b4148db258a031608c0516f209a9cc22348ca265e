@@ -1,0 +1,12 @@
+func withoutScopedDisk(ctx context.Context, shared *filesystem.Disk, signer *signedurl.Signer, link, base string, out io.Writer) error {
+	disks, err := filesystem.NewManager(shared)
+	if err != nil {
+		return err
+	}
+	h := http.StripPrefix(signedPrefix, fshttp.Signed(disks, signer))
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, strings.TrimPrefix(link, base), nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	fmt.Fprintf(out, "same link, scoped disk not in the Manager: %d\n", rec.Code)
+	return nil
+}

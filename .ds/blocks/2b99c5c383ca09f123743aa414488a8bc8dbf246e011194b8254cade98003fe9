@@ -1,0 +1,18 @@
+var page = template.Must(template.New("page").Parse(`<!doctype html>
+<input type="file" id="file" accept="{{.Accept}}">
+<script>
+document.getElementById("file").onchange = async (e) => {
+  const file = e.target.files[0];
+  const ticket = await (await fetch("{{.Ticket}}", {method: "POST",
+    body: JSON.stringify({filename: file.name, content_type: file.type, size: file.size})})).json();
+  const form = new FormData();
+  for (const [name, value] of Object.entries(ticket.fields)) form.append(name, value);
+  form.append("file", file);
+  const sent = await fetch(ticket.url, {method: "POST", body: form});
+  if (!sent.ok) throw new Error("upload refused: " + sent.status);
+  const done = await fetch("{{.Confirm}}", {method: "POST",
+    body: JSON.stringify({key: ticket.key, filename: file.name, size: file.size})});
+  console.log(await done.json());
+};
+</script>
+`))

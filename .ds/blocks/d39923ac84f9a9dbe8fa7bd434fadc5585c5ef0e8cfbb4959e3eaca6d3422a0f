@@ -1,0 +1,17 @@
+func (a *App) createExport(w http.ResponseWriter, r *http.Request) {
+	key, created, err := a.Export(r.Context(), r.PathValue("id"))
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	link, err := a.Link(r.Context(), key)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	status := http.StatusOK
+	if created {
+		status = http.StatusCreated
+	}
+	writeJSON(w, status, exportResponse{Key: key, Created: created, URL: link.URL, ExpiresAt: link.ExpiresAt})
+}

@@ -1,0 +1,20 @@
+func ipRestricted(ctx context.Context, a *app, out io.Writer) error {
+	for _, allowed := range []string{loopback, officeRange} {
+		link, err := a.private.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{
+			Method: filesystem.MethodGet, Expires: linkLifetime, AllowedIP: allowed,
+		})
+		if err != nil {
+			return err
+		}
+		resp, _, err := fetch(http.MethodGet, link.URL, nil, nil)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "link for %s: %d\n", allowed, resp.StatusCode)
+	}
+	_, err := a.private.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{
+		Method: filesystem.MethodGet, Expires: linkLifetime, AllowedIP: "203.0.113.7/24",
+	})
+	fmt.Fprintf(out, "non-canonical range: %s\n", filesystem.CodeOf(err))
+	return nil
+}

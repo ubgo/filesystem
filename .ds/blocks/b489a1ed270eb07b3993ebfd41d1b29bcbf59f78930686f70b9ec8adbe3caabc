@@ -1,0 +1,19 @@
+func keepPDFRendition(ctx context.Context, disk *filesystem.Disk, f records.File) (string, error) {
+	tool := office.Tool{}
+	if !tool.Converts(f.ContentType) {
+		return "", filesystem.Errorf(filesystem.CodeUnsupported, "%s is not an office document", f.ContentType)
+	}
+	src, err := disk.Read(ctx, f.Key)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = src.Close() }()
+	out, err := tool.ConvertToPDF(ctx, src, f.ContentType)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = out.Close() }()
+	key := f.Key + pdfSuffix
+	_, err = disk.Write(ctx, key, out, filesystem.WriteOptions{ContentType: pdf.ContentType})
+	return key, err
+}

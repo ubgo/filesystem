@@ -1,0 +1,3 @@
+func issueTicket(ctx context.Context, s *records.Store, q *quota.Plugin, scope string, size int64) (quota.Reservation, error) {
+	return q.Reserve(ctx, s, scope, size, ticketTTL)
+}

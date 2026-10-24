@@ -1,0 +1,23 @@
+func newCustomACL(ps *projects, clock func() time.Time) *acl.Plugin {
+	return acl.New(
+		acl.WithLevels(
+			acl.LevelDef{Level: view},
+			acl.LevelDef{Level: comment, Includes: []acl.Level{view}},
+			acl.LevelDef{Level: edit, Includes: []acl.Level{comment}},
+			acl.LevelDef{Level: dropbox},
+		),
+		acl.WithLevelFor(func(a records.Action) (acl.Level, bool) {
+			switch a {
+			case records.ActionRead:
+				return view, true
+			case records.ActionSetText:
+				return comment, true
+			case records.ActionReplace, records.ActionTrash, records.ActionRestore, records.ActionSetVisibility, records.ActionPurge:
+				return edit, true
+			}
+			return "", false // the owner routes go to the app's own rule
+		}),
+		acl.WithContainers(ps),
+		acl.WithClock(clock),
+	)
+}

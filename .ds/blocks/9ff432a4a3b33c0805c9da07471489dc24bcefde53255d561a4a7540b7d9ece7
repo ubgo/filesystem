@@ -1,0 +1,19 @@
+func appendAndModTime(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	opts := filesystem.AppendOptions{MaxSize: logCap}
+	for _, line := range []string{"started\n", "uploaded 3 files\n"} {
+		if _, err := disk.Append(ctx, logKey, strings.NewReader(line), opts); err != nil {
+			return err
+		}
+	}
+	_, err := disk.Append(ctx, logKey, strings.NewReader("one line too many\n"), opts)
+	fmt.Fprintf(out, "append past %d bytes: %s\n", logCap, filesystem.CodeOf(err))
+	if err := disk.SetModTime(ctx, logKey, imported); err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, logKey)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "log: %d bytes, modified %s\n", e.Size, e.ModTime.UTC().Format(time.RFC3339))
+	return nil
+}

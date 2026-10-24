@@ -1,0 +1,9 @@
+func rotatedRing() audit.Keyring {
+	return audit.StaticKeyring{
+		CurrentID: rotationKeyID,
+		Keys: map[string][]byte{
+			"":            oldChainKey,
+			rotationKeyID: newChainKey,
+		},
+	}
+}

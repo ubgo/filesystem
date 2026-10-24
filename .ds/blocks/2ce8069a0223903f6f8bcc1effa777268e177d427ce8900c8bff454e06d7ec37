@@ -1,0 +1,21 @@
+func (a *App) purgeFiles(ctx context.Context, tenant string) (int, error) {
+	purged := 0
+	for _, trashed := range []bool{false, true} {
+		for {
+			page, err := a.Store.Files(ctx, records.FileQuery{Scope: tenant, Trashed: trashed})
+			if err != nil {
+				return purged, err
+			}
+			if len(page.Files) == 0 {
+				break
+			}
+			for _, f := range page.Files {
+				if err := a.Store.Purge(ctx, tenant, f.ID); err != nil {
+					return purged, err
+				}
+				purged++
+			}
+		}
+	}
+	return purged, nil
+}

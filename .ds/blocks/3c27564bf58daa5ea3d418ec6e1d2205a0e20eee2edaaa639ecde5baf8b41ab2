@@ -1,0 +1,33 @@
+func rotateDemo(ctx context.Context, w io.Writer, s *records.Store, wh *webhooks.Plugin, rc *recorder, portal webhooks.Endpoint) error {
+	old := portal.Secret
+	ref := webhooks.EndpointRef{Scope: tenant, ID: portal.ID}
+	rotated, err := wh.RotateSecret(ctx, s, ref, "")
+	if err != nil {
+		return err
+	}
+	check := func(step string) error {
+		if _, err := recordIn(ctx, s, tenant, tenant+"/"+strings.ReplaceAll(step, " ", "-")+".txt", step); err != nil {
+			return err
+		}
+		if _, err := wh.Deliver(ctx, s, time.Now()); err != nil {
+			return err
+		}
+		for _, d := range rc.take() {
+			if d.path != "/portal" {
+				continue
+			}
+			sigs := len(strings.Fields(d.header.Get(webhooks.HeaderSignature)))
+			oldOK := webhooks.VerifySignature(d.header, old, d.body, time.Now(), 0) == nil
+			newOK := webhooks.VerifySignature(d.header, rotated.Secret, d.body, time.Now(), 0) == nil
+			fmt.Fprintf(w, "%s: %d signature(s); old secret verifies %t, new secret verifies %t\n", step, sigs, oldOK, newOK)
+		}
+		return nil
+	}
+	if err := check("rotating"); err != nil {
+		return err
+	}
+	if _, err := wh.RetireSecrets(ctx, s, ref); err != nil {
+		return err
+	}
+	return check("retired")
+}

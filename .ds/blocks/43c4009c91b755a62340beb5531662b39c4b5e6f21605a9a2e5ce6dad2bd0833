@@ -1,0 +1,15 @@
+func trashSelection(ctx context.Context, s *records.Store, ids []string) (string, error) {
+	results, err := s.TrashMany(ctx, tenant, ids)
+	if err != nil {
+		return "", err
+	}
+	var out []string
+	for _, r := range results {
+		status := "ok"
+		if r.Err != nil {
+			status = string(filesystem.CodeOf(r.Err))
+		}
+		out = append(out, status)
+	}
+	return strings.Join(out, ", "), nil
+}

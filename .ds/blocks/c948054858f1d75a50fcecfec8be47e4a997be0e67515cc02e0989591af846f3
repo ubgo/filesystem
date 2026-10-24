@@ -1,0 +1,12 @@
+func startMirror(ctx context.Context, w io.Writer, d Disks) (*filesystem.Disk, error) {
+	app, err := filesystem.Mirror(appDisk, d.Old, d.New)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := app.WriteBytes(ctx, "invoices/2026/new.txt", []byte("written during the move\n"), filesystem.WriteOptions{}); err != nil {
+		return nil, err
+	}
+	onNew, err := d.New.Exists(ctx, "invoices/2026/new.txt")
+	fmt.Fprintf(w, "mirror: a new write reached %s=true %s=%v\n", oldDisk, newDisk, onNew)
+	return app, err
+}

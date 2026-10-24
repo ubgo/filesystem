@@ -1,0 +1,6 @@
+func membersOnly(r *http.Request, link share.Share) error {
+	if r.Header.Get(orgHeader) != link.Scope {
+		return filesystem.Errorf(filesystem.CodePermission, "sign in to %s", link.Scope)
+	}
+	return nil
+}

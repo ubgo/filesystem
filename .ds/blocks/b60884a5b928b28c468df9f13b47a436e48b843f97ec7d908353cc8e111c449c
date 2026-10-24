@@ -1,0 +1,7 @@
+func (a *App) trashFile(w http.ResponseWriter, r *http.Request) {
+	if err := a.Store.Trash(r.Context(), "", r.PathValue("file")); err != nil {
+		writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

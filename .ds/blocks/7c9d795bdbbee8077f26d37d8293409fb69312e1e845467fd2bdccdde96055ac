@@ -1,0 +1,3 @@
+func publish(ctx context.Context, s *records.Store, f records.File) error {
+	return s.SetVisibility(ctx, tenant, f.ID, filesystem.VisibilityPublic)
+}

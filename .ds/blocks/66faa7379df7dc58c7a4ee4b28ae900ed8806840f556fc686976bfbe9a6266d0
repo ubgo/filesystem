@@ -1,0 +1,19 @@
+func progress(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	var calls, last atomic.Int64
+	p := policy
+	p.Progress = func(_ context.Context, _ upload.Info, received int64) {
+		calls.Add(1)
+		last.Store(received)
+	}
+	big := pngHeader + strings.Repeat("x", 3*upload.ProgressStep)
+	res, err := upload.Receive(ctx, disk, strings.NewReader(big), "big.png", p)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "progress: %d calls, last %d of %d bytes\n", calls.Load(), last.Load(), res.Size)
+	return nil
+}

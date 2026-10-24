@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Built 2026-10-03 under the owner go-ahead; the feature catalogue QU and SH rows.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-03T05:08:07.185959000Z",
+  "created_at": "2026-10-03T05:08:07.147277000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a10029936b74498f40956e797ed90c",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "records/quota plugin: per-scope byte and file limits, race-free charging, recount",
+  "updated_at": "2026-10-03T05:08:07.185972000Z"
+}

@@ -1,0 +1,20 @@
+func (a *App) uploadFile(w http.ResponseWriter, r *http.Request) {
+	tenant, err := tenantOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize+64<<10)
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "send the file in the form field \"file\""))
+		return
+	}
+	defer func() { _ = file.Close() }()
+	f, err := a.Store.Upload(r.Context(), tenant, a.diskFor(tenant), file, header.Filename, policyFor(tenant))
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, toResponse(f))
+}

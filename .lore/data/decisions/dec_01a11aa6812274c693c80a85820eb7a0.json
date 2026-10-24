@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "walker.file calls nested only after mayBeArchive(head) on the same first bytes isArchiveContent re-reads, so isArchiveContent(b) is always true there and the 'return false, nil' branch could never run. Deleted (behaviour unchanged) under the coverage task tsk_01a11a7aab78774790ef65ebe50b3db7; the doc comment now states the invariant.",
+  "confidence": null,
+  "created_at": "2026-10-08T08:34:42.082309000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11aa6812274c693c80a85820eb7a0",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "archive: removed the unreachable 'not archive content' branch in walker.nested",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:34:42.082310000Z"
+}

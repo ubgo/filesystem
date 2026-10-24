@@ -1,0 +1,4 @@
+func uploadNote(ctx context.Context, s *records.Store, filename string, body io.Reader) (records.File, error) {
+	ctx = records.WithActor(ctx, "user:alice")
+	return s.Upload(ctx, tenant, diskName, body, filename, notesPolicy)
+}

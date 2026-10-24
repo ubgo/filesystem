@@ -1,0 +1,23 @@
+func abandoned(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	if _, err := disk.CreateMultipart(ctx, "videos/big.mp4", filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	cutoff := time.Now().Add(time.Second) // in production: a day or more ago
+	found, err := disk.FindAbandoned(ctx, cutoff)
+	if err != nil {
+		return err
+	}
+	for _, a := range found {
+		fmt.Fprintf(out, "would remove: %s upload of %s\n", a.Kind, a.Key)
+	}
+	n, err := disk.SweepAbandoned(ctx, cutoff)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "swept %d abandoned upload(s)\n", n)
+	return nil
+}

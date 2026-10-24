@@ -1,0 +1,3 @@
+func tenantDisk(shared *filesystem.Disk, tenant string) (*filesystem.Disk, error) {
+	return shared.Scope(tenant, filesystem.JoinKey(tenantsDir, tenant))
+}

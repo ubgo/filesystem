@@ -1,0 +1,26 @@
+func checksums(ctx context.Context, out io.Writer, disk *filesystem.Disk, drv *gcs.Driver) error {
+	body := []byte("order 42: 3 items")
+	sum := sha256.Sum256(body)
+	e, err := disk.WriteBytes(ctx, "orders/42.txt", body, filesystem.WriteOptions{SHA256: hex.EncodeToString(sum[:])})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "matching SHA-256: stored, entry sha256=%s...\n", e.SHA256[:12])
+
+	wrong := sha256.Sum256([]byte("something else"))
+	_, err = disk.WriteBytes(ctx, "orders/43.txt", body, filesystem.WriteOptions{SHA256: hex.EncodeToString(wrong[:])})
+	stored, existsErr := disk.Exists(ctx, "orders/43.txt")
+	if existsErr != nil {
+		return existsErr
+	}
+	fmt.Fprintf(out, "wrong SHA-256: %s, stored=%t\n", filesystem.CodeOf(err), stored)
+
+	info, err := drv.ObjectInfo(ctx, "orders/42.txt")
+	if err != nil {
+		return err
+	}
+	md := md5.Sum(body)
+	crcOK := info.CRC32C == crc32.Checksum(body, crc32.MakeTable(crc32.Castagnoli))
+	fmt.Fprintf(out, "GCS CRC32C matches local=%t, MD5 matches local=%t, generation set=%t\n", crcOK, bytes.Equal(info.MD5, md[:]), info.VersionID != "")
+	return nil
+}

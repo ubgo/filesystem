@@ -1,0 +1,1 @@
+type bearer struct{ tokens *tokenStore }

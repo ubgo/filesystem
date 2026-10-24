@@ -1,0 +1,10 @@
+func (a *App) findBySHA(ctx context.Context, user string, f records.File) (string, bool, error) {
+	page, err := a.Store.Files(ctx, records.FileQuery{
+		Scope: user, Limit: 1,
+		Filters: []sqlb.Predicate{sqlb.Eq(records.FileSHA256, f.SHA256), sqlb.NotEq(records.FileID, f.ID)},
+	})
+	if err != nil || len(page.Files) == 0 {
+		return "", false, err
+	}
+	return page.Files[0].ID, true, nil
+}

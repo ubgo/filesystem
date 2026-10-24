@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Done (QU-05..07, OB-04, CL-06, EV-05, CP-04). records: Event.ID (evt_ random or plugin-set, MaxEventIDBytes), Store.Now, Store.Served + ServeHooks (served.go) called by recordshttp GET /files/{id}, share handler, variants handler before answering (refuse on error). New records/egress (daily buckets, Days/Total, Report -> egress.daily_total with deterministic IDs, Prune). quota: Reserve/WithReservation(commit)/Release/Sweep (reserved column, atomic conditional UPDATE), WithUsageEvents (quota.usage_changed). audit: WithAccessLog(sampler)+SampleRate, WithHashChain(key) HMAC chain + Verify + Changes feed (seq under per-scope chain row lock held to commit), WithRetentionFloor, chain-aware Prune anchors. New records/webhooks (outbox in change tx, Standard Webhooks signing, backoff, max attempts, SSRF-guarded client via upload.PublicAddr, redacted Secret, VerifySignature). jobs: QuotaSweepReservations, EgressReport, WebhookDeliver, WebhookPrune. Migrations: audit 0003, quota 0003, egress 0001, webhooks 0001; goldens regenerated. Tests break-verified; SQLite only.",
+  "created_at": "2026-10-07T09:52:48.923793000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a1151fbbfd7ab6a17f5c11579bc3da",
+  "entity_table": "tasks",
+  "id": "cmt_01a115c7a91b7c54a1e6cbb795466f8d",
+  "updated_at": "2026-10-07T09:52:48.923795000Z"
+}

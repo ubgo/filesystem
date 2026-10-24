@@ -1,0 +1,19 @@
+func openWithParams(ctx context.Context, mux *filesystem.Mux, dir string, out io.Writer) error {
+	dsn := "file://" + filepath.ToSlash(dir) + "?prefix=tenant-a&visibility=public&public_url=" + cdnBase
+	disk, err := mux.Open(ctx, "media", dsn)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	e, err := disk.WriteBytes(ctx, "logo.png", []byte("png"), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	u, err := disk.PublicURL(ctx, e.Key)
+	if err != nil {
+		return err
+	}
+	_, statErr := os.Stat(filepath.Join(dir, "tenant-a", "logo.png"))
+	fmt.Fprintf(out, "key %s, %s, url %s, on disk under tenant-a: %t\n", e.Key, e.Visibility, u, statErr == nil)
+	return nil
+}

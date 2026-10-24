@@ -1,0 +1,24 @@
+func presignedParts(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	const key = "videos/clip.bin"
+	id, err := disk.CreateMultipart(ctx, key, filesystem.WriteOptions{ContentType: "application/octet-stream"})
+	if err != nil {
+		return err
+	}
+	part, err := disk.PresignPart(ctx, key, id, 1, linkLifetime)
+	if err != nil {
+		return err
+	}
+	if _, _, err := send(ctx, http.MethodPut, part.URL, strings.NewReader("one part, sent directly"), part.Header); err != nil {
+		return err
+	}
+	parts, err := disk.ListParts(ctx, key, id)
+	if err != nil {
+		return err
+	}
+	e, err := disk.CompleteMultipart(ctx, key, id, parts)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "multipart: %d part(s), %s is %d bytes\n", len(parts), e.Key, e.Size)
+	return nil
+}

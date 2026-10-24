@@ -1,0 +1,7 @@
+func (c *Changelog) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	return []records.Migration{{Owner: c.Name(), Name: "0001_changes", Statements: []string{
+		"CREATE TABLE IF NOT EXISTS " + TableNameChanges + " (scope " + t.Key + " NOT NULL, kind " + t.Short +
+			" NOT NULL, file_id " + t.Key + " NOT NULL, at " + t.Timestamp + " NOT NULL)" + t.TableSuffix,
+	}}}, nil
+}

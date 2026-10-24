@@ -1,0 +1,4 @@
+func writeKnownHosts(c credentials, addr string) error {
+	line := knownhosts.Line([]string{addr}, c.hostKey.PublicKey())
+	return os.WriteFile(c.KnownHosts, []byte(line+"\n"), 0o600)
+}

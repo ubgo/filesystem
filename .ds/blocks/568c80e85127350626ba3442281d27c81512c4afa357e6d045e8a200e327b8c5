@@ -1,0 +1,12 @@
+func newDisks() (*filesystem.Manager, *signedurl.Signer, error) {
+	signer, err := signedurl.New(baseURL+"/files", []signedurl.Key{{ID: "k1", Secret: signingSecret}})
+	if err != nil {
+		return nil, nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	return disks, signer, err
+}

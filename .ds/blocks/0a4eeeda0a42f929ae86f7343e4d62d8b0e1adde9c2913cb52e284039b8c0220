@@ -1,0 +1,24 @@
+func memoryDisks(origin string, secret []byte) (Disks, error) {
+	cdn, err := filesystem.NewDisk(diskCDN, memory.New(),
+		filesystem.WithDefaultVisibility(filesystem.VisibilityPublic),
+		filesystem.WithPublicURL(origin+cdnPrefix))
+	if err != nil {
+		return Disks{}, err
+	}
+	signer, err := signedurl.New(origin+signedPrefix, []signedurl.Key{{ID: "k1", Secret: secret}})
+	if err != nil {
+		return Disks{}, err
+	}
+	vault, err := filesystem.NewDisk(diskVault, memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return Disks{}, err
+	}
+	mgr, err := filesystem.NewManager(cdn, vault)
+	if err != nil {
+		return Disks{}, err
+	}
+	return Disks{CDN: cdn, Vault: vault, Serve: map[string]http.Handler{
+		cdnPrefix:    fshttp.Public(cdn),
+		signedPrefix: fshttp.Signed(mgr, signer),
+	}}, nil
+}

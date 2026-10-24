@@ -1,0 +1,12 @@
+func export(c echo.Context, a *app.App) error {
+	scope, err := fsecho.ScopeOf(c.Request())
+	if err != nil {
+		return err
+	}
+	role := c.Param(app.ParamRole)
+	files, err := a.Export(c.Request().Context(), scope, role)
+	if err != nil {
+		return err
+	}
+	return fsecho.Zip(c, a.Media, app.ExportName(role), files, fshttp.ZipOptions{})
+}

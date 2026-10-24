@@ -1,0 +1,24 @@
+func direct(ctx context.Context, out io.Writer) error {
+	b, err := newBucket()
+	if err != nil {
+		return err
+	}
+	defer b.srv.Close()
+	for _, body := range []string{pngFile, htmlFile} {
+		req := upload.TicketRequest{Filename: "photo.png", ContentType: "image/png", Size: int64(len(body))}
+		t, err := upload.Presign(ctx, b.disk, req, policy, ticketLifetime)
+		if err != nil {
+			return err
+		}
+		status, err := put(ctx, t, body)
+		if err != nil {
+			return err
+		}
+		res, err := upload.Confirm(ctx, b.disk, t.Key, req.Filename, policy)
+		left, _ := b.disk.Exists(ctx, t.Key)
+		fmt.Fprintf(out, "direct: PUT %d, confirm %q type %q, object kept: %t\n", status, filesystem.CodeOf(err), res.ContentType, left)
+	}
+	_, err = upload.Presign(ctx, b.disk, upload.TicketRequest{Filename: "page.html", ContentType: "text/html", Size: 1}, policy, ticketLifetime)
+	fmt.Fprintf(out, "presign declared text/html: %s\n", filesystem.CodeOf(err))
+	return nil
+}

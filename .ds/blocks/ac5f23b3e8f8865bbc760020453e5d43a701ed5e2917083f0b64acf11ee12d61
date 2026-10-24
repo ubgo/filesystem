@@ -1,0 +1,7 @@
+func uploadPhoto(ctx context.Context, s *records.Store, w, h int) (records.File, error) {
+	data, err := makePNG(w, h)
+	if err != nil {
+		return records.File{}, err
+	}
+	return s.Upload(ctx, tenant, diskName, bytes.NewReader(data), "beach.png", photoPolicy)
+}

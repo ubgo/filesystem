@@ -1,0 +1,23 @@
+func deleteThings(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	if err := disk.Delete(ctx, "never/written.txt"); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "deleted a missing key: ok")
+	if err := disk.DeleteKeys(ctx, []string{"docs/a.txt", "docs/b.txt", "docs/a.txt"}); err != nil {
+		return err
+	}
+	if err := disk.DeletePrefix(ctx, "archive"); err != nil {
+		return err
+	}
+	err := disk.DeletePrefix(ctx, "")
+	fmt.Fprintf(out, "delete the root: %s\n", filesystem.CodeOf(err))
+	var left []string
+	for e, err := range disk.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return err
+		}
+		left = append(left, e.Key)
+	}
+	fmt.Fprintf(out, "left: %s\n", strings.Join(left, " "))
+	return nil
+}

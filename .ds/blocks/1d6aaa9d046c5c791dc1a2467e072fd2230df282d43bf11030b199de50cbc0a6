@@ -1,0 +1,17 @@
+func uploadPhoto(ctx context.Context, w io.Writer, s *records.Store, v *variants.Plugin, p upload.Policy, name string, body []byte) error {
+	f, err := s.Upload(ctx, tenant, diskName, bytes.NewReader(body), name, p)
+	if err != nil {
+		fmt.Fprintf(w, "%s refused: %s: %v\n", name, filesystem.CodeOf(err), err)
+		return nil
+	}
+	width, height, _ := dimensions.Of(f)
+	hash, _ := dimensions.ThumbHashOf(f)
+	set, _, err := v.SrcSet(ctx, s, tenant, f.ID, linkLifetime, "w320", "w640", "w1280")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "%s: %d bytes uploaded, %d stored, %dx%d\n", name, len(body), f.Size, width, height)
+	fmt.Fprintf(w, "thumbhash: %s\n", base64.StdEncoding.EncodeToString(hash))
+	fmt.Fprintf(w, "srcset: %s\n", set)
+	return nil
+}

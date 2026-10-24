@@ -1,0 +1,12 @@
+func (a *app) listTrash(w http.ResponseWriter, r *http.Request) {
+	page, err := a.store.Files(r.Context(), records.FileQuery{Scope: currentUser(r), Trashed: true})
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	out := make([]photo, 0, len(page.Files))
+	for _, f := range page.Files {
+		out = append(out, photoOf(f))
+	}
+	writeJSON(w, http.StatusOK, out)
+}

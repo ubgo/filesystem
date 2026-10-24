@@ -1,0 +1,33 @@
+func ownHandler(ctx context.Context, a *app, out io.Writer) error {
+	for key, body := range map[string]string{ownReportKey: ownReportBody, ownPageKey: ownPageBody} {
+		ct := "text/plain; charset=utf-8"
+		if strings.HasSuffix(key, ".html") {
+			ct = "text/html; charset=utf-8"
+		}
+		if _, err := a.private.Write(ctx, key, strings.NewReader(body), filesystem.WriteOptions{ContentType: ct}); err != nil {
+			return err
+		}
+	}
+	h := ownDownload(a.private)
+	get := func(key, user string, header map[string]string) *httptest.ResponseRecorder {
+		r := httptest.NewRequest(http.MethodGet, "/"+key, nil)
+		r.Header.Set(headerUser, user)
+		for k, v := range header {
+			r.Header.Set(k, v)
+		}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, r)
+		return rec
+	}
+	fmt.Fprintf(out, "own handler as bob: %d\n", get(ownReportKey, "bob", nil).Code)
+	whole := get(ownReportKey, reportOwner, nil)
+	fmt.Fprintf(out, "own handler as alice: %d %q | %s | %s\n", whole.Code, whole.Body.String(),
+		whole.Header().Get("X-Content-Type-Options"), whole.Header().Get("Cache-Control"))
+	part := get(ownReportKey, reportOwner, map[string]string{"Range": ownRangeFirstBytes})
+	fmt.Fprintf(out, "own handler Range: %d %q %s\n", part.Code, part.Body.String(), part.Header().Get("Content-Range"))
+	again := get(ownReportKey, reportOwner, map[string]string{"If-None-Match": whole.Header().Get("ETag")})
+	fmt.Fprintf(out, "own handler If-None-Match: %d\n", again.Code)
+	page := get(ownPageKey, reportOwner, nil)
+	fmt.Fprintf(out, "own handler html asked inline: %s | %s\n", page.Header().Get("Content-Disposition"), page.Header().Get("Content-Security-Policy"))
+	return nil
+}

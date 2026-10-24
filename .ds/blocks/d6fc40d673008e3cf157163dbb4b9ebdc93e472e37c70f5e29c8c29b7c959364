@@ -1,0 +1,5 @@
+var notesPolicy = upload.Policy{
+	MaxSize: maxUpload,
+	Allowed: []string{"text/plain"},
+	Key:     upload.RandomKey("notes"),
+}

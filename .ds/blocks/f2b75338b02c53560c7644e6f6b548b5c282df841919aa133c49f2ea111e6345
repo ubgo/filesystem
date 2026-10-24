@@ -1,0 +1,14 @@
+func printSchema(out io.Writer, db *sql.DB) error {
+	drv, err := sqlblob.New(sqlblob.Config{DB: db, Dialect: sqlb.SQLiteDialect{}, Table: "avatars"})
+	if err != nil {
+		return err
+	}
+	stmts, err := drv.Schema()
+	if err != nil {
+		return err
+	}
+	for _, s := range stmts {
+		fmt.Fprintf(out, "schema: %s\n", strings.Join(strings.Fields(s), " "))
+	}
+	return nil
+}

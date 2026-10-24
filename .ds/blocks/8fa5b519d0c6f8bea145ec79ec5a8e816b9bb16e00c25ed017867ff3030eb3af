@@ -1,0 +1,12 @@
+func storageAudit(ctx context.Context, s *records.Store) (orphans, missing []string, err error) {
+	_, err = s.FindOrphans(ctx, diskName, "", time.Now().Add(time.Minute), func(key string) {
+		orphans = append(orphans, key)
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	_, err = s.MissingObjects(ctx, diskName, func(f records.File) {
+		missing = append(missing, f.Key)
+	})
+	return orphans, missing, err
+}

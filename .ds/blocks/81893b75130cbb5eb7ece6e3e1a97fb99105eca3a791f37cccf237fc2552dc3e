@@ -1,0 +1,19 @@
+func openGDrive(f *fakes.GDrive, tok tokenFunc, client *http.Client) (*filesystem.Disk, error) {
+	drv, err := gdrive.New(gdrive.Config{
+		// The folder the application created for itself; with the
+		// drive.file scope it sees nothing else.
+		FolderID: fakes.GDriveFolderID,
+		Token:    gdrive.TokenFunc(tok),
+		// Small chunks so the large body below spans several requests;
+		// leave ChunkSize at 0 (8 MiB) in production.
+		ChunkSize: gdrive.ChunkUnit,
+		Client:    client,
+		// Point at the fake; omit both for the real API.
+		APIURL:    f.APIURL(),
+		UploadURL: f.UploadURL(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("gdrive", drv)
+}

@@ -1,0 +1,13 @@
+func (a *app) listPhotos(w http.ResponseWriter, r *http.Request) {
+	user := currentUser(r)
+	list, err := a.store.Attachments(r.Context(), user, records.Owner{Type: ownerUser, ID: user}, rolePhotos)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	out := make([]photo, 0, len(list))
+	for _, af := range list {
+		out = append(out, photoOf(af.File))
+	}
+	writeJSON(w, http.StatusOK, out)
+}

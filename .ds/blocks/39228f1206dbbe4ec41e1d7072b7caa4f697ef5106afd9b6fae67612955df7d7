@@ -1,0 +1,16 @@
+func prefixedReaders(db *sql.DB) (g *gorm.DB, sqlcQueries string, entTable string, err error) {
+	g, err = gorm.Open(gormlite.OpenDB(db), &gorm.Config{Logger: logger.Discard, NamingStrategy: fsgorm.NewNamer(nil, appNames)})
+	if err != nil {
+		return nil, "", "", err
+	}
+	sqlcQueries, err = fssqlc.QueriesWith(fssqlc.EngineSQLite, appNames)
+	if err != nil {
+		return nil, "", "", err
+	}
+	for _, a := range (fsent.FileMixin{Names: appNames}).Annotations() {
+		if t, ok := a.(entsql.Annotation); ok {
+			entTable = t.Table
+		}
+	}
+	return g, sqlcQueries, entTable, nil
+}

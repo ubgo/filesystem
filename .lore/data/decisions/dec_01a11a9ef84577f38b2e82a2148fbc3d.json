@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "A per-disk key (SSEKMSKeyID) already covered one-disk-per-tenant. For one client/bucket shared by tenants under scoped disks, the driver gets a pure func(driverKey) string resolver (decide by prefix, no I/O, no ctx) because a scoped disk's prefix reaches the driver in the key; RequestOptions.SSEKMSKeyID overrides one call. Precedence call > resolver > SSEKMSKeyID; same SSE rules (KMS or empty SSE, never AES256/SSE-C). Resolved once in writeSettings so every write path (put, transfer manager, copy, multipart, presigned PUT, presigned POST) uses the same value.",
+  "confidence": null,
+  "created_at": "2026-10-08T08:26:28.293517000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11a9ef84577f38b2e82a2148fbc3d",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "S3 per-tenant SSE-KMS via Config.SSEKMSKeyFor(key) resolver plus RequestOptions.SSEKMSKeyID",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:26:28.293518000Z"
+}

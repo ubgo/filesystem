@@ -1,0 +1,32 @@
+func archiveRestore(ctx context.Context, out io.Writer, client *s3.Client, fake *fakeS3) error {
+	disk, err := newBucketDisk(ctx, client, "cold", fss3.Config{
+		Restore: true, RestoreTier: types.TierBulk, StorageClasses: true, StorageClass: types.StorageClassGlacier,
+	})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "logs/2019.tar", []byte("old logs"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	_, err = disk.ReadAll(ctx, "logs/2019.tar")
+	fmt.Fprintf(out, "archived read: %s, ErrArchived: %t\n", filesystem.CodeOf(err), errors.Is(err, fss3.ErrArchived))
+	if err := disk.Restore(ctx, "logs/2019.tar", filesystem.RestoreOptions{Days: restoreDays}); err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "logs/2019.tar")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "restore asked at tier %s: %s\n", fake.objects.restoreTier("/cold/logs/2019.tar"), e.Metadata[fss3.MetaRestore])
+	fake.objects.finishRestore("/cold/logs/2019.tar") // hours later on S3
+	b, err := disk.ReadAll(ctx, "logs/2019.tar")
+	if err != nil {
+		return err
+	}
+	e, err = disk.Stat(ctx, "logs/2019.tar")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "restored: reads %q, %s until %s\n", b, e.Metadata[fss3.MetaRestore], e.Metadata[fss3.MetaRestoreExpiry])
+	return nil
+}

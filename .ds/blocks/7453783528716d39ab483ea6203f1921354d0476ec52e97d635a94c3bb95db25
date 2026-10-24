@@ -1,0 +1,3 @@
+func addAuthor(engine string) ([]string, error) {
+	return records.NewDDL(engine).AddColumn(notes, records.Column(noteAuthor, records.TypesFor(engine).Key).Default("")).Statements()
+}

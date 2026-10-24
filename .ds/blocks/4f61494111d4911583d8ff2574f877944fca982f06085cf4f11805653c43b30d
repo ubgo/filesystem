@@ -1,0 +1,25 @@
+func storeProfile(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	key := "users/42/profile.json"
+	e, err := disk.Write(ctx, key, strings.NewReader(`{"name":"Ada"}`), filesystem.WriteOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stored: %s %d bytes %s\n", e.Key, e.Size, e.ContentType)
+	for entry, err := range disk.List(ctx, "users/42", filesystem.ListOptions{}) {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "listed: %s\n", entry.Key)
+	}
+	b, err := disk.ReadAll(ctx, key)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "read back: %s\n", b)
+	if err := disk.Delete(ctx, key); err != nil {
+		return err
+	}
+	ok, err := disk.Exists(ctx, key)
+	fmt.Fprintf(out, "exists after delete: %t\n", ok)
+	return err
+}

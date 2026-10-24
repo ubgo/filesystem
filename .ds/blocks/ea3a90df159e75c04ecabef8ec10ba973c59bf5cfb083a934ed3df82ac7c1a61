@@ -1,0 +1,22 @@
+func folderView(ctx context.Context, s *records.Store, fp *folders.Plugin, folder string) (string, error) {
+	q := records.FileQuery{Scope: tenant}
+	homes, err := fp.Files(ctx, s, folder, q)
+	if err != nil {
+		return "", err
+	}
+	links, err := fp.Linked(ctx, s, folder, q)
+	if err != nil {
+		return "", err
+	}
+	var names []string
+	for _, f := range homes.Files {
+		names = append(names, f.Filename)
+	}
+	for _, f := range links.Files {
+		names = append(names, f.Filename+" (shortcut)")
+	}
+	if len(names) == 0 {
+		return "empty", nil
+	}
+	return strings.Join(names, ", "), nil
+}

@@ -1,0 +1,4 @@
+type Disks struct {
+	CDN, Vault *filesystem.Disk
+	Serve      map[string]http.Handler
+}

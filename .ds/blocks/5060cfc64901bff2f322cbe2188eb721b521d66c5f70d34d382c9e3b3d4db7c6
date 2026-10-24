@@ -1,0 +1,43 @@
+func cdnOverPresigning(ctx context.Context, _ *app, out io.Writer) error {
+	client := s3.New(s3.Options{
+		Region:       "us-east-1",
+		Credentials:  credentials.NewStaticCredentialsProvider("AKIAEXAMPLE", "secret", ""),
+		BaseEndpoint: aws.String(bucketHost),
+		UsePathStyle: true,
+	})
+	drv, err := fss3.New(fss3.Config{Client: client, Bucket: "media"})
+	if err != nil {
+		return err
+	}
+	key, err := rsa.GenerateKey(rand.Reader, cdnKeyBits) // from the secret store in production
+	if err != nil {
+		return err
+	}
+	cdn, err := cloudfront.New(cloudfront.Config{BaseURL: cdnMedia, KeyPairID: "K2JCJMDEHXQW5F", PrivateKey: key})
+	if err != nil {
+		return err
+	}
+	for _, c := range []struct {
+		label   string
+		methods []filesystem.HTTPMethod
+	}{
+		{"WithURLSigner(cdn)", nil},
+		{"WithURLSigner(cdn, GET, PUT)", []filesystem.HTTPMethod{filesystem.MethodGet, filesystem.MethodPut}},
+	} {
+		disk, err := filesystem.NewDisk("media", drv, filesystem.WithURLSigner(cdn, c.methods...))
+		if err != nil {
+			return err
+		}
+		var hosts []string
+		for _, m := range []filesystem.HTTPMethod{filesystem.MethodGet, filesystem.MethodPut} {
+			link, err := disk.SignedURL(ctx, "videos/42/poster.jpg", filesystem.PresignOptions{Method: m, Expires: linkLifetime})
+			if err != nil {
+				hosts = append(hosts, fmt.Sprintf("%s %s", m, filesystem.CodeOf(err)))
+				continue
+			}
+			hosts = append(hosts, fmt.Sprintf("%s %s", m, signedBy(link.URL)))
+		}
+		fmt.Fprintf(out, "%s on S3: %s\n", c.label, strings.Join(hosts, ", "))
+	}
+	return nil
+}

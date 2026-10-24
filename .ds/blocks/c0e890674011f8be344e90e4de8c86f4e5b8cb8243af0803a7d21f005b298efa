@@ -1,0 +1,11 @@
+func usageLine(ctx context.Context, s *records.Store, q *quota.Plugin, scope string) (string, error) {
+	u, err := q.Usage(ctx, s, scope)
+	if err != nil {
+		return "", err
+	}
+	l, err := limits(ctx, scope)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s: %d of %d bytes, %d of %d files", scope, u.Bytes, l.Bytes, u.Files, l.Files), nil
+}

@@ -1,0 +1,11 @@
+func newStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, *uploadsessions.Plugin, error) {
+	p := uploadsessions.New()
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(p))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, p, nil
+}

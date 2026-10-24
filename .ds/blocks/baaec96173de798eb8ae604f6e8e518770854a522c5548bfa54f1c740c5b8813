@@ -1,0 +1,7 @@
+func applyRetention(ctx context.Context, s *records.Store, now time.Time) (preview, done records.RetentionReport, err error) {
+	if preview, err = s.SweepRetention(ctx, now, true); err != nil {
+		return preview, done, err
+	}
+	done, err = s.SweepRetention(ctx, now, false)
+	return preview, done, err
+}

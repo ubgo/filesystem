@@ -1,0 +1,24 @@
+func publicAndPrivate(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	if _, err := disk.WriteBytes(ctx, "avatars/u1.png", pngHeader, filesystem.WriteOptions{Visibility: filesystem.VisibilityPublic}); err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "invoices/42.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	for _, k := range []string{"avatars/u1.png", "invoices/42.pdf"} {
+		e, err := disk.Stat(ctx, k)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "%s: %s, %s\n", e.Key, e.ContentType, e.Visibility)
+	}
+	if err := disk.SetVisibility(ctx, "avatars/u1.png", filesystem.VisibilityPrivate); err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after SetVisibility: %s\n", e.Visibility)
+	return nil
+}

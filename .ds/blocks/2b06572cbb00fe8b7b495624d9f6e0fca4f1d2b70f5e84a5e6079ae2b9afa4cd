@@ -1,0 +1,6 @@
+func seatLimit(_ context.Context, _, uploader string) (quota.Limit, error) {
+	if uploader == "" {
+		return quota.Limit{}, nil
+	}
+	return seatPlan, nil
+}

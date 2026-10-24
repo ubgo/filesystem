@@ -1,0 +1,9 @@
+func poll(srv http.Handler, fileID string) (recordshttp.StatusResponse, error) {
+	rec := httptest.NewRecorder()
+	srv.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/files/"+fileID+"/status", nil))
+	var out recordshttp.StatusResponse
+	if rec.Code != http.StatusOK {
+		return out, fmt.Errorf("status %d: %s", rec.Code, rec.Body.String())
+	}
+	return out, json.Unmarshal(rec.Body.Bytes(), &out)
+}

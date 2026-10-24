@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "2026-10-03: gcs (100%, in-process fake-gcs) and azure (99.3% on Azurite, task test:azure) done; sftp in progress.",
+  "created_at": "2026-10-03T04:44:57.494886000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a0fffee275756aa8c33545390a262d",
+  "entity_table": "tasks",
+  "id": "cmt_01a100145f167db7b2c3754206da0a33",
+  "updated_at": "2026-10-03T04:44:57.494886000Z"
+}

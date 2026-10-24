@@ -1,0 +1,11 @@
+func orgDimensions(_ context.Context, f records.File) ([]quota.Dimension, error) {
+	org, ok := orgOf[f.Scope]
+	if !ok {
+		return nil, filesystem.Errorf(filesystem.CodePermission, "workspace %q has no organisation", f.Scope)
+	}
+	class, _, _ := strings.Cut(f.ContentType, "/")
+	return []quota.Dimension{
+		{Key: "org:" + org, Limit: orgPlan},
+		{Key: "type:" + f.Scope + ":" + class},
+	}, nil
+}

@@ -1,0 +1,12 @@
+func Freeze(dir string) filesystem.Interceptor {
+	return func(ctx context.Context, op *filesystem.Op, call filesystem.Call) error {
+		if !op.Mutating {
+			return call(ctx)
+		}
+		keys := append([]string{op.Key, op.Target}, op.Keys...)
+		if slices.ContainsFunc(keys, func(k string) bool { return k == dir || filesystem.KeyInDir(k, dir) }) {
+			return filesystem.Errorf(filesystem.CodeReadOnly, "%s/ is frozen", dir)
+		}
+		return call(ctx)
+	}
+}

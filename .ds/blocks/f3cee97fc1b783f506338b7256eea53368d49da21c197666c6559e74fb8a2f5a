@@ -1,0 +1,18 @@
+func TestTrashRetention(t *testing.T) {
+	const retention = 30 * 24 * time.Hour
+	c := &clock{now: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)}
+	disk := filesystemtest.NewFake(t, mediaDisk)
+	store := newStore(t, disk.Disk, records.WithClock(c.Now))
+	f, err := NewGallery(store).Add(t.Context(), "u1", strings.NewReader(gif), "a.gif")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Trash(t.Context(), "u1", f.ID); err != nil {
+		t.Fatal(err)
+	}
+	c.Advance(retention + 24*time.Hour)
+	if n, err := store.SweepTrash(t.Context(), c.Now().Add(-retention)); err != nil || n != 1 {
+		t.Fatalf("swept %d, %v", n, err)
+	}
+	disk.AssertEmpty()
+}

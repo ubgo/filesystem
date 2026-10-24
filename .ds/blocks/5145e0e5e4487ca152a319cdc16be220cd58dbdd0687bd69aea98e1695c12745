@@ -1,0 +1,3 @@
+func newLocatedPlugin() (*variants.Plugin, error) {
+	return variants.New(transforms, imaging.Options{}, variants.WithLocation(thumbsLocation))
+}

@@ -1,0 +1,22 @@
+func (d *Driver) List(ctx context.Context, dir string, opts filesystem.ListOptions) (filesystem.Page, error) {
+	prefix := ""
+	if dir != "" {
+		prefix = dir + "/"
+	}
+	keys, err := d.backend.Keys(ctx, prefix)
+	if err != nil {
+		return filesystem.Page{}, mapErr(err)
+	}
+	var objects []filesystem.Entry
+	for _, k := range keys {
+		o, err := d.backend.Get(ctx, k)
+		if errors.Is(err, ErrNoSuchKey) {
+			continue // deleted since Keys listed it
+		}
+		if err != nil {
+			return filesystem.Page{}, mapErr(err)
+		}
+		objects = append(objects, entry(k, o))
+	}
+	return filesystem.PageOf(objects, dir, opts), nil
+}

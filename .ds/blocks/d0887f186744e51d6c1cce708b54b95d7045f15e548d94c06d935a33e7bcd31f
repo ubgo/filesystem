@@ -1,0 +1,19 @@
+func TestFreezeCoversBatchesAndSignedUploads(t *testing.T) {
+	ctx := t.Context()
+	d, err := filesystem.NewDisk("d", memory.New(), filesystem.WithInterceptors(Freeze(frozenDir)), filesystem.WithURLSigner(signer{}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := d.DeleteKeys(ctx, []string{"a.txt", "legal/b.txt"}); filesystem.CodeOf(err) != filesystem.CodeReadOnly {
+		t.Errorf("batch delete = %v", err)
+	}
+	if _, err := d.SignedURL(ctx, "legal/b.txt", filesystem.PresignOptions{Method: filesystem.MethodPut, Expires: time.Minute}); filesystem.CodeOf(err) != filesystem.CodeReadOnly {
+		t.Errorf("signed PUT = %v", err)
+	}
+	if _, err := d.SignedURL(ctx, "legal/b.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Minute}); err != nil {
+		t.Errorf("signed GET = %v", err)
+	}
+	if err := d.DeletePrefix(ctx, "legal"); filesystem.CodeOf(err) != filesystem.CodeReadOnly {
+		t.Errorf("delete prefix = %v", err)
+	}
+}

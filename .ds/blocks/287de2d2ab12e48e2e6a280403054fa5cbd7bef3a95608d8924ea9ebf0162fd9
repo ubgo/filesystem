@@ -1,0 +1,15 @@
+func objectErrorDemo(ctx context.Context, w io.Writer, s *records.Store, failed *[]string) error {
+	a, err := store(ctx, s, archiveName, "archive/a.txt")
+	if err != nil {
+		return err
+	}
+	err = s.Purge(ctx, tenant, a.ID)
+	fmt.Fprintf(w, "Purge outside a Tx returns the object error: %s\n", filesystem.CodeOf(err))
+	b, err := store(ctx, s, archiveName, "archive/b.txt")
+	if err != nil {
+		return err
+	}
+	err = s.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error { return s.Purge(ctx, tenant, b.ID) })
+	fmt.Fprintf(w, "Purge inside a Tx: err=%v handler got %q\n", err, *failed)
+	return nil
+}

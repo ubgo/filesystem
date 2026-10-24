@@ -1,0 +1,29 @@
+func sizeLimits(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	nonEmpty := policy
+	nonEmpty.MinSize = 1
+	_, err = upload.Receive(ctx, disk, strings.NewReader(""), "empty.png", nonEmpty)
+	fmt.Fprintf(out, "empty file: %s\n", filesystem.CodeOf(err))
+	two := upload.Handler(disk, policy, upload.HandlerOptions{MaxFiles: 2, MaxTotal: requestTotal})
+	status, _, err := postForm(ctx, two, formFile{"a.png", pngFile}, formFile{"b.png", pngFile + pngFile})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "two files over MaxTotal %d: %d\n", requestTotal, status)
+	small := policy
+	small.MaxSize = freeLimit
+	one := upload.Handler(disk, small, upload.HandlerOptions{})
+	req := formRequest(ctx, "", formFile{"big.png", pngFile + strings.Repeat("x", hugeBody)})
+	body := &countingReader{r: req.Body}
+	req.Body = io.NopCloser(body)
+	rec := httptest.NewRecorder()
+	one.ServeHTTP(rec, req)
+	fmt.Fprintf(out, "body of %d bytes: %d after reading under %d\n", hugeBody, rec.Code, readBound)
+	if body.n >= readBound {
+		return fmt.Errorf("the handler read %d bytes of an oversized body", body.n)
+	}
+	return nil
+}

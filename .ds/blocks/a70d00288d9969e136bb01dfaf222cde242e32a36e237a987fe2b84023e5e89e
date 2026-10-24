@@ -1,0 +1,27 @@
+func (a *App) deleteMessage(w http.ResponseWriter, r *http.Request) {
+	user, err := userOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	m, err := a.message(r.Context(), r.PathValue("id"))
+	if err == nil && m.Author != user {
+		err = errForbidden
+	}
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	err = a.Store.Tx(r.Context(), func(ctx context.Context, tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM messages WHERE id = ?`, m.ID); err != nil {
+			return err
+		}
+		_, err := a.Store.PurgeOwner(ctx, workspace, records.Owner{Type: ownerMessage, ID: m.ID})
+		return err
+	})
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

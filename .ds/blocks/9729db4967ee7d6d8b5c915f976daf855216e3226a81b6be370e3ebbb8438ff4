@@ -1,0 +1,26 @@
+func purgeAfterCommit(ctx context.Context, d *demo, out io.Writer) error {
+	f, err := d.store.Upload(ctx, scope, diskName, strings.NewReader(pdf), "keep.pdf", policy)
+	if err != nil {
+		return err
+	}
+	err = d.store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		if err := d.store.Purge(ctx, scope, f.ID); err != nil {
+			return err
+		}
+		return errAppFailed
+	})
+	objects, rows, serr := d.state(ctx)
+	if serr != nil {
+		return serr
+	}
+	fmt.Fprintf(out, "purge rolled back: %v; objects %d, rows %d\n", errors.Is(err, errAppFailed), objects, rows)
+	if err := d.store.Purge(ctx, scope, f.ID); err != nil {
+		return err
+	}
+	objects, rows, err = d.state(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "purge committed: objects %d, rows %d\n", objects, rows)
+	return nil
+}

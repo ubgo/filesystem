@@ -1,0 +1,21 @@
+func switchPrimary(ctx context.Context, w io.Writer, d Disks) (*filesystem.Disk, error) {
+	app, err := filesystem.Mirror(appDisk, d.New, d.Old)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := app.WriteBytes(ctx, "invoices/2026/after-switch.txt", []byte("written after the switch\n"), filesystem.WriteOptions{}); err != nil {
+		return nil, err
+	}
+	onOld, err := d.Old.Exists(ctx, "invoices/2026/after-switch.txt")
+	if err != nil {
+		return nil, err
+	}
+	fmt.Fprintf(w, "switch: primary %s, a new write also reached %s=%v\n", newDisk, oldDisk, onOld)
+	_, err = app.SignedURL(ctx, "invoices/2026/upload.txt", filesystem.PresignOptions{Method: filesystem.MethodPut, Expires: signedLifetime})
+	fmt.Fprintf(w, "switch: signed PUT on the mirror: %s\n", filesystem.CodeOf(err))
+	get, err := app.SignedURL(ctx, "invoices/2026/001.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: signedLifetime})
+	if err == nil {
+		fmt.Fprintf(w, "switch: signed GET is signed by %s: %v\n", newDisk, get.URL != "")
+	}
+	return app, err
+}

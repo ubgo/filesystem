@@ -1,0 +1,20 @@
+func (a *App) storeOne(ctx context.Context, user string, body io.Reader, name string) (stored, error) {
+	out := stored{Filename: upload.SafeFilename(name)}
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		f, err := a.Store.Upload(ctx, user, diskName, body, name, a.policy)
+		if err != nil {
+			return err
+		}
+		if existing, ok, err := a.findBySHA(ctx, user, f); err != nil || ok {
+			out.FileID, out.Duplicate = existing, ok
+			return errors.Join(err, errDuplicate)
+		}
+		out.FileID = f.ID
+		_, err = a.Store.Attach(ctx, user, f.ID, records.Owner{Type: ownerUser, ID: user}, roleCameraRoll)
+		return err
+	})
+	if out.Duplicate && errors.Is(err, errDuplicate) {
+		return out, nil
+	}
+	return out, err
+}

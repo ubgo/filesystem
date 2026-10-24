@@ -1,0 +1,10 @@
+func (a *App) activity(w http.ResponseWriter, r *http.Request) {
+	handle(w, r, func(ctx context.Context, ws string, _ none) ([]activityEntry, error) {
+		page, err := a.Audit.Entries(ctx, a.Store, audit.Query{Scope: ws, Cursor: r.URL.Query().Get("cursor")})
+		out := make([]activityEntry, 0, len(page.Entries))
+		for _, e := range page.Entries {
+			out = append(out, activityEntry{At: e.At, Actor: e.Actor, Kind: e.Kind, FileID: e.FileID})
+		}
+		return out, err
+	})
+}

@@ -1,0 +1,19 @@
+func newSharedStore(ctx context.Context, db *sql.DB, now func() time.Time, opts ...locks.Option) (*records.Store, *locks.Plugin, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	lp := locks.New(append([]locks.Option{locks.WithHolderFunc(locks.TokenHolder), locks.WithClock(now)}, opts...)...)
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(lp))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, lp, nil
+}

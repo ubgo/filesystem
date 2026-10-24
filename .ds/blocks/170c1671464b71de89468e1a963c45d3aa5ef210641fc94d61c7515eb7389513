@@ -1,0 +1,22 @@
+func (a *App) confirm(w http.ResponseWriter, r *http.Request) {
+	user, err := userOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	var req confirmRequest
+	if err := decodeJSON(w, r, &req); err != nil {
+		writeError(w, err)
+		return
+	}
+	if !filesystem.KeyInDir(req.Key, path.Join(pendingDir, user)) {
+		writeError(w, filesystem.Errorf(filesystem.CodeNotFound, "no pending upload %q", req.Key))
+		return
+	}
+	f, err := a.finish(r.Context(), user, req.Key, req.Filename)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, toResponse(f))
+}

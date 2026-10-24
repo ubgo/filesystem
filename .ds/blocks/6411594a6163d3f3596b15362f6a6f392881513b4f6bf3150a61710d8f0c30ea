@@ -1,0 +1,11 @@
+var providers = []provider{
+	{"AWS S3", "s3://my-bucket?region=us-east-1&conditional_write=true"},
+	{"AWS S3 with object ACLs", "s3://my-bucket?region=us-east-1&acl=true&conditional_write=true"},
+	{"Cloudflare R2", "s3://my-bucket?region=auto&endpoint=https://<account-id>.r2.cloudflarestorage.com"},
+	{"Backblaze B2", "s3://my-bucket?region=us-west-004&endpoint=https://s3.us-west-004.backblazeb2.com"},
+	{"Wasabi", "s3://my-bucket?region=us-east-1&endpoint=https://s3.us-east-1.wasabisys.com"},
+	{"DigitalOcean Spaces", "s3://my-space?region=us-east-1&endpoint=https://nyc3.digitaloceanspaces.com"},
+	{"SeaweedFS", "s3://my-bucket?region=us-east-1&endpoint=http://127.0.0.1:8333&path_style=true&prune_prefixes=true&conditional_write=true"},
+	{"Garage", "s3://my-bucket?region=garage&endpoint=http://127.0.0.1:3900&path_style=true"},
+	{"MinIO", "s3://my-bucket?region=us-east-1&endpoint=http://127.0.0.1:9000&path_style=true"},
+}

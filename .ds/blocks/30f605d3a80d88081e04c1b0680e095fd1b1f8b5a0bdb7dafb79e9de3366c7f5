@@ -1,0 +1,15 @@
+func Example() {
+	for _, m := range []ent.Mixin{fsent.FileMixin{}, fsent.AttachmentMixin{}} {
+		var cols []string
+		for _, f := range m.Fields() {
+			cols = append(cols, f.Descriptor().Name)
+		}
+		fmt.Println(len(cols), "columns:", cols)
+	}
+	e := Attachment{}.Edges()[0].Descriptor()
+	fmt.Println("edge", e.Name, "on", e.Field, "unique:", e.Unique, "required:", e.Required)
+	// Output:
+	// 15 columns: [id scope disk storage_key filename content_type size sha256 visibility metadata created_at deleted_at uploaded_by status status_detail]
+	// 8 columns: [id scope file_id owner_type owner_id role position created_at]
+	// edge file on file_id unique: true required: true
+}

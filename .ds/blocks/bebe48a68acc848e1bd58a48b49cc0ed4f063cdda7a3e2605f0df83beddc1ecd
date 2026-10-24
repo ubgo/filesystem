@@ -1,0 +1,3 @@
+func sweep(ctx context.Context, s *records.Store, now time.Time) (int, error) {
+	return s.SweepTrash(ctx, now.Add(-trashRetention))
+}

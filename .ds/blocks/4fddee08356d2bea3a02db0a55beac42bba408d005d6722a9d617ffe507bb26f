@@ -1,0 +1,10 @@
+func signing(ctx context.Context, disk *filesystem.Disk, out io.Writer) {
+	for _, d := range []time.Duration{0, filesystem.MaxPresignExpiry + time.Second} {
+		err := filesystem.ValidatePresign(filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: d})
+		fmt.Fprintf(out, "expiry %s: %s\n", d, filesystem.CodeOf(err))
+	}
+	_, err := signedurl.New("https://app.example.com/files", []signedurl.Key{{ID: "k1", Secret: []byte("short")}})
+	fmt.Fprintf(out, "5-byte signing key: %s\n", filesystem.CodeOf(err))
+	_, err = disk.SignedURL(ctx, "a.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: time.Minute})
+	fmt.Fprintf(out, "signed URL with no signer configured: %s\n", filesystem.CodeOf(err))
+}

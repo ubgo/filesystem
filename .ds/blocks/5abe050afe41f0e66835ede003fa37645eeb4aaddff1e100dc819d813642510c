@@ -1,0 +1,10 @@
+func openDisks(ctx context.Context, lookup filesystem.LookupFunc, signer *signedurl.Signer) (*filesystem.Manager, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(local.Scheme, local.Opener); err != nil {
+		return nil, err
+	}
+	if err := mux.Register(s3.Scheme, s3.Opener); err != nil {
+		return nil, err
+	}
+	return mux.OpenManager(ctx, envPrefix, lookup, filesystem.WithURLSigner(signer))
+}

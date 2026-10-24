@@ -1,0 +1,8 @@
+func Mount(r Router, prefix string, h http.Handler) {
+	route := prefix
+	if !strings.HasSuffix(route, "/") {
+		route += "/"
+	}
+	strip := joinPath(r.BasePath(), prefix)
+	r.Any(route+catchAll, gin.WrapH(http.StripPrefix(strip, h)))
+}

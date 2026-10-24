@@ -1,0 +1,7 @@
+func newNegotiatingHandler(s *records.Store, vp *variants.Plugin) http.Handler {
+	return variants.Handler(s, vp, scopeOf, variants.HandlerOptions{
+		LinkLifetime: linkTTL,
+		Negotiate:    []imaging.Format{imaging.FormatPNG},
+		Density:      true,
+	})
+}

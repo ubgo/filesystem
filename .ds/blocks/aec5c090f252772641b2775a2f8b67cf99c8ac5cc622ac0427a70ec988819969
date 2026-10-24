@@ -1,0 +1,19 @@
+func newSigner(lookup filesystem.LookupFunc) (*signedurl.Signer, error) {
+	base, ok := lookup(envFilesURL)
+	if !ok || base == "" {
+		return nil, fmt.Errorf("%s is not set", envFilesURL)
+	}
+	raw, ok := lookup(envSigningKeys)
+	if !ok || raw == "" {
+		return nil, fmt.Errorf("%s is not set", envSigningKeys)
+	}
+	keys, err := parseSigningKeys(raw)
+	if err != nil {
+		return nil, err
+	}
+	signer, err := signedurl.New(base, keys)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", envSigningKeys, err) // the error names no secret
+	}
+	return signer, nil
+}

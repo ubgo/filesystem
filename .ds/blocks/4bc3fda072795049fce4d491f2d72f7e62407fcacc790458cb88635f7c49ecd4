@@ -1,0 +1,3 @@
+func sweepPending(ctx context.Context, disk *filesystem.Disk, now time.Time) (int, error) {
+	return upload.Sweep(ctx, disk, pendingDir, now.Add(-pendingMaxAge))
+}

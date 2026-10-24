@@ -1,0 +1,25 @@
+func (a *App) makePrivate(ctx context.Context, id string) (records.File, error) {
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		f, err := a.Store.File(ctx, "", id)
+		if err != nil || f.Visibility != filesystem.VisibilityPublic {
+			return err
+		}
+		public, err := a.Store.URL(ctx, f, linkLifetime)
+		if err != nil {
+			return err
+		}
+		if err := a.Store.SetVisibility(ctx, "", id, filesystem.VisibilityPrivate); err != nil {
+			return err
+		}
+		a.Store.AfterCommit(ctx, func(ctx context.Context) {
+			if err := a.Purge(ctx, []string{public}); err != nil {
+				fmt.Fprintf(os.Stderr, "cdn purge of %s: %v\n", public, err)
+			}
+		})
+		return nil
+	})
+	if err != nil {
+		return records.File{}, err
+	}
+	return a.Store.File(ctx, "", id)
+}

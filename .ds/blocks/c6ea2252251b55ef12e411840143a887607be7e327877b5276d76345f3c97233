@@ -1,0 +1,3 @@
+func prune(ctx context.Context, s *records.Store, au *audit.Plugin, now time.Time) (int64, error) {
+	return au.Prune(ctx, s, now.Add(-retention))
+}

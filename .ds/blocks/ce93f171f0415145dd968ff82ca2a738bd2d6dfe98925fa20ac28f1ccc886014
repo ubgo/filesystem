@@ -1,0 +1,11 @@
+func cloudinaryForeign(ctx context.Context, out io.Writer, disk *filesystem.Disk, fake *fakes.Cloudinary) error {
+	fake.Seed("raw", "authenticated", "brand/terms.txt", []byte("terms"))
+	fake.Seed("raw", "authenticated", "brand/My Logo.txt", []byte("logo"))
+	fake.Seed("image", "authenticated", "brand/logo", pngHeader)
+	page, err := disk.ListPage(ctx, "brand", filesystem.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "brand/ holds 3 resources, the driver lists: %s\n", keysOf(page))
+	return nil
+}

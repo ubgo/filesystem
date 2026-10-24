@@ -1,0 +1,8 @@
+func newMorePlugins() (*focal.Plugin, *variants.Plugin, error) {
+	fp := focal.New()
+	vp, err := variants.New(moreTransforms, imaging.Options{},
+		variants.WithFocal(fp),
+		variants.WithDensities(nameAvatar),
+	)
+	return fp, vp, err
+}

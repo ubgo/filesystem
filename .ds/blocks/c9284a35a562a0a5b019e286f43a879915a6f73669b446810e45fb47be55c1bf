@@ -1,0 +1,20 @@
+func handle[In, Out any](w http.ResponseWriter, r *http.Request, fn func(ctx context.Context, ws string, in In) (Out, error)) {
+	ws, err := workspaceOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	var in In
+	if r.ContentLength > 0 {
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxJSONBody)).Decode(&in); err != nil {
+			writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "invalid JSON body"))
+			return
+		}
+	}
+	out, err := fn(r.Context(), ws, in)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}

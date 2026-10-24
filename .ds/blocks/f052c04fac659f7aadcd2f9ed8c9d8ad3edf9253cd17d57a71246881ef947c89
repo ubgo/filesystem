@@ -1,0 +1,10 @@
+func postPDFs(ctx context.Context, s *records.Store, post records.Owner) (records.FilePage, error) {
+	attached, err := s.AttachedTo(tenant, post, "")
+	if err != nil {
+		return records.FilePage{}, err
+	}
+	return s.Files(ctx, records.FileQuery{
+		Scope:   tenant,
+		Filters: []sqlb.Predicate{attached, sqlb.Eq(records.FileContentType, "application/pdf")},
+	})
+}

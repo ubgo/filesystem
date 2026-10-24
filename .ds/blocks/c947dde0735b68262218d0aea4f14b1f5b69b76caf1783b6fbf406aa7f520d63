@@ -1,0 +1,6 @@
+var sizes = map[string]imaging.Transform{
+	"logo-header":      {Mode: imaging.ModeFit, Width: 512, Height: 128, Format: imaging.FormatPNG},
+	"favicon-32":       {Mode: imaging.ModeFill, Width: 32, Height: 32, Format: imaging.FormatPNG},
+	"favicon-180":      {Mode: imaging.ModeFill, Width: 180, Height: 180, Format: imaging.FormatPNG},
+	"email-header-600": {Mode: imaging.ModeFit, Width: 1200, Height: 600, Format: imaging.FormatJPEG},
+}

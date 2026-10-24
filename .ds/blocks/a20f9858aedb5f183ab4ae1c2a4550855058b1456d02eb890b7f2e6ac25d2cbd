@@ -1,0 +1,27 @@
+func folder(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	p := policy
+	p.Key = upload.FolderKey("users/" + demoUser + "/drive")
+	p.Collision = upload.CollisionRename
+	h := upload.Handler(disk, p, upload.HandlerOptions{MaxFiles: 4})
+	rec, err := post(ctx, h, nil,
+		file("Trip/day1/beach.png", photo),
+		file("Trip/day2/hike.png", photo),
+		file("Trip/../../../etc/cron.png", photo),
+		file("Trip/day1/beach.png", photo),
+	)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "folder upload: %d\n", rec.Code)
+	for e, err := range disk.List(ctx, "users", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "  %s\n", e.Key)
+	}
+	return nil
+}

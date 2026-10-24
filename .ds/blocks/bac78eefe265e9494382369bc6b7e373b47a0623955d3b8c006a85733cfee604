@@ -1,0 +1,13 @@
+func refusedConfig(ctx context.Context, out io.Writer) error {
+	disk, err := mem("uploads")
+	if err != nil {
+		return err
+	}
+	_, err = jobs.UploadSweep(disk, incomingDir, 0).Run(ctx, later)
+	fmt.Fprintf(out, "sweep with minAge 0: %s\n", filesystem.CodeOf(err))
+	s := jobs.NewScheduler(jobs.SchedulerOptions{})
+	sweep := jobs.UploadSweep(disk, incomingDir, minAge)
+	err = s.Run(ctx, jobs.Schedule{Job: sweep, Every: time.Hour}, jobs.Schedule{Job: sweep, Every: time.Hour})
+	fmt.Fprintf(out, "two schedules with one name: %s\n", filesystem.CodeOf(err))
+	return nil
+}

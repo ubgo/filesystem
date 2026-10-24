@@ -1,0 +1,6 @@
+func (TypeLock) BeforeReplace(_ context.Context, _ *records.Store, cur records.File, next *records.File) error {
+	if cur.ContentType != next.ContentType {
+		return filesystem.Errorf(filesystem.CodeRejected, "content type %s cannot become %s", cur.ContentType, next.ContentType)
+	}
+	return nil
+}

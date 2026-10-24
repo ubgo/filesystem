@@ -1,0 +1,4 @@
+type slow struct {
+	*memory.Driver
+	release chan struct{}
+}

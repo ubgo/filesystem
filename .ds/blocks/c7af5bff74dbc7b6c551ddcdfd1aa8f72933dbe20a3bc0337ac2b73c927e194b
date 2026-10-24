@@ -1,0 +1,16 @@
+func openDisk(dataDir, base string, secret []byte) (*filesystem.Manager, *signedurl.Signer, error) {
+	signer, err := signedurl.New(base+signedPrefix, []signedurl.Key{{ID: "k1", Secret: secret}})
+	if err != nil {
+		return nil, nil, err
+	}
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, drv, filesystem.WithURLSigner(signer), filesystem.WithDefaultVisibility(filesystem.VisibilityPrivate))
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	return disks, signer, err
+}

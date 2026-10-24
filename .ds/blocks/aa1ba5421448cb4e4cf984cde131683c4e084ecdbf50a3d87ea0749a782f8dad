@@ -1,0 +1,3 @@
+func postStory(ctx context.Context, s *records.Store, now time.Time) (records.File, error) {
+	return s.Upload(ctx, tenant, diskName, strings.NewReader("sunset"), "story.txt", textPolicy, records.Expires(now.Add(storyLife)))
+}

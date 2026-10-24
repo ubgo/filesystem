@@ -1,0 +1,17 @@
+func upload1(ctx context.Context, out io.Writer, store *records.Store, disk *filesystem.Disk, path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = f.Close() }()
+	file, err := store.Upload(ctx, scope, diskMedia, f, filepath.Base(path), policy)
+	if err != nil {
+		return err
+	}
+	// The preview, text and OCR are made once the upload commits; the row
+	// as stored now has them, or a failed status saying why not.
+	if file, err = store.File(ctx, scope, file.ID); err != nil {
+		return err
+	}
+	return report(ctx, out, disk, file)
+}

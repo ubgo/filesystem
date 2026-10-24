@@ -1,0 +1,3 @@
+func openProtected(ctx context.Context, s *records.Store, p *share.Plugin, token, password string) (records.File, error) {
+	return p.Resolve(ctx, s, token, share.WithPassword(password))
+}

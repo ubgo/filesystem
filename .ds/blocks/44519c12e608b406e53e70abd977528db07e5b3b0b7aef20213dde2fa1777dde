@@ -1,0 +1,1 @@
+type liarDriver struct{ inner *memory.Driver }

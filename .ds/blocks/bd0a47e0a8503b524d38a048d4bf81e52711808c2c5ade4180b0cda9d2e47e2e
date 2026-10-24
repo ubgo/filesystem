@@ -1,0 +1,6 @@
+var policy = upload.Policy{
+	MaxSize: 50 << 20,
+	Allowed: []string{pdf.ContentType},
+	Key:     upload.RandomKey("documents"),
+	Inspect: tool.Inspect(pdf.Limits{MaxPages: maxPages}),
+}

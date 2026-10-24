@@ -1,0 +1,15 @@
+func failFirst(kind filesystem.OpKind, n int) filesystem.Interceptor {
+	var mu sync.Mutex
+	return func(ctx context.Context, op *filesystem.Op, call filesystem.Call) error {
+		mu.Lock()
+		fail := op.Kind == kind && n > 0
+		if fail {
+			n--
+		}
+		mu.Unlock()
+		if fail {
+			return filesystem.Errorf(filesystem.CodeUnavailable, "injected outage")
+		}
+		return call(ctx)
+	}
+}

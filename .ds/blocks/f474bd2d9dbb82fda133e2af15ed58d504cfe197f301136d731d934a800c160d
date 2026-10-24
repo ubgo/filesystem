@@ -1,0 +1,5 @@
+func (a *App) view(w http.ResponseWriter, r *http.Request) {
+	a.redirect(w, r, func(ctx context.Context, f records.File) (string, error) {
+		return a.Store.URL(ctx, f, linkLifetime)
+	})
+}

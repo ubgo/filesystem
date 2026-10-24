@@ -1,0 +1,33 @@
+func objectTags(ctx context.Context, out io.Writer, client *s3.Client, _ *fakeS3) error {
+	disk, err := newBucketDisk(ctx, client, "tagged", fss3.Config{Tagging: true})
+	if err != nil {
+		return err
+	}
+	wctx, err := fss3.WithRequestOptions(ctx, disk, "invoices/7.pdf", fss3.RequestOptions{Tags: map[string]string{"tenant": "acme", "class": "billing"}})
+	if err != nil {
+		return err // an invalid key
+	}
+	if _, err := disk.WriteBytes(wctx, "invoices/7.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	written, err := disk.Tags(ctx, "invoices/7.pdf")
+	if err != nil {
+		return err
+	}
+	if err := disk.SetTags(ctx, "invoices/7.pdf", map[string]string{"tenant": "acme", "retain": "7y"}); err != nil {
+		return err
+	}
+	replaced, err := disk.Tags(ctx, "invoices/7.pdf")
+	if err != nil {
+		return err
+	}
+	if _, err := disk.Copy(ctx, "invoices/7.pdf", "archive/7.pdf"); err != nil {
+		return err
+	}
+	copied, err := disk.Tags(ctx, "archive/7.pdf")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "tags on write: %s; after SetTags: %s; the copy keeps: %s\n", tagList(written), tagList(replaced), tagList(copied))
+	return nil
+}

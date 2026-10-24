@@ -1,0 +1,22 @@
+func newStore(ctx context.Context, db *sql.DB) (*records.Store, *quota.Plugin, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	q, err := quota.New(workspaceLimit, quota.WithUploaderLimits(seatLimit))
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(q))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, q, nil
+}

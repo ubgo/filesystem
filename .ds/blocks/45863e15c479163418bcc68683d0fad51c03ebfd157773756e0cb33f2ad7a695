@@ -1,0 +1,19 @@
+func TestRetryRidesOutOutage(t *testing.T) {
+	disk := filesystemtest.NewFake(t, "media", filesystem.WithInterceptors(
+		layer.Retry(layer.RetryOptions{Attempts: 3, Sleep: noSleep}),
+		failFirst(filesystem.OpWrite, 2),
+	))
+	if _, err := disk.WriteBytes(t.Context(), "a.txt", []byte("a"), filesystem.WriteOptions{}); err != nil {
+		t.Fatalf("retried write: %v", err)
+	}
+	disk.AssertContent("a.txt", "a")
+
+	streamed := filesystemtest.NewFake(t, "media", filesystem.WithInterceptors(
+		layer.Retry(layer.RetryOptions{Attempts: 3, Sleep: noSleep}),
+		failFirst(filesystem.OpWrite, 1),
+	))
+	if _, err := NewAvatars(streamed.Disk).Save(t.Context(), "u1", bytes.NewReader([]byte(gif))); !errors.Is(err, filesystem.ErrUnavailable) {
+		t.Fatalf("streamed upload: err = %v, want CodeUnavailable", err)
+	}
+	streamed.AssertEmpty()
+}

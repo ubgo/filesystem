@@ -1,0 +1,26 @@
+func perRequest(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	limited := map[string]bool{planSpammer: true}
+	resolve := func(r *http.Request, p upload.Policy) (upload.Policy, error) {
+		if limited[r.Header.Get(planHeader)] {
+			slow := filesystem.NewError(filesystem.CodeUnavailable, errors.New("too many uploads"))
+			return p, slow.WithRetryAfter(retryAfter)
+		}
+		p.MaxSize = freeLimit
+		if r.Header.Get(planHeader) == planPaid {
+			p.MaxSize = paidLimit
+		}
+		return p, nil
+	}
+	h := upload.Handler(disk, policy, upload.HandlerOptions{Resolve: resolve})
+	body := pngFile + strings.Repeat("x", freeLimit)
+	for _, plan := range []string{planFree, planPaid, planSpammer} {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, formRequest(ctx, plan, formFile{"photo.png", body}))
+		fmt.Fprintf(out, "plan %s: %d retry-after=%q\n", plan, rec.Code, rec.Header().Get("Retry-After"))
+	}
+	return nil
+}

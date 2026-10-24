@@ -1,0 +1,6 @@
+var avatars = upload.Policy{
+	MaxSize:     2 << 20,
+	Allowed:     []string{"image/png", "image/jpeg", "image/webp"},
+	Key:         upload.RandomKey("avatars"),
+	AllowPublic: true,
+}

@@ -1,0 +1,9 @@
+func allowUppy(r *http.Request, key string) error {
+	if r.Header.Get(headerUser) == "" {
+		return errSignedOut
+	}
+	if !filesystem.KeyInDir(key, "incoming") {
+		return errNotYours
+	}
+	return nil
+}

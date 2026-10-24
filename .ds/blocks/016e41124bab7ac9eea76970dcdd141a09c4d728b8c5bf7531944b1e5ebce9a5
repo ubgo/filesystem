@@ -1,0 +1,6 @@
+func newMux(s *records.Store, p *share.Plugin, disks *filesystem.Manager, signer *signedurl.Signer) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.Handle(sharePrefix, http.StripPrefix(sharePrefix, share.Handler(s, p)))
+	mux.Handle(filesPrefix+"/", http.StripPrefix(filesPrefix, fshttp.Signed(disks, signer)))
+	return mux
+}

@@ -1,0 +1,79 @@
+# gitleaks configuration: the default rules, plus allowlists for fixtures and
+# documentation values that look like credentials but are not. Each entry is
+# scoped to the files it covers, so a real secret added anywhere else is still
+# reported. Run: gitleaks detect --source . --no-git
+
+[extend]
+useDefault = true
+
+# Schema migration fixtures: the checksum column holds the SHA-256 of each
+# migration's SQL, which the generic key rule mistakes for a key.
+[[allowlists]]
+description = "SHA-256 migration checksums in records test fixtures"
+targetRules = ["generic-api-key"]
+paths = ['''^records/testdata/migrations_[a-z_]+\.sql$''']
+
+# Azurite, the local Azure Storage emulator, ships one fixed development
+# account key that Microsoft documents publicly; it opens nothing real.
+[[allowlists]]
+description = "Azurite emulator's published development account key"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = ['''Eby8vdM02x''']
+paths = [
+  '''^Taskfile\.yml$''',
+  '''^adapters/azure/delegate_test\.go$''',
+  '''^docs/adapters/azure\.md$''',
+  '''^examples/adapters-azure/README\.md$''',
+]
+
+# Sample program output: storage object keys (generated file names), not
+# credentials.
+[[allowlists]]
+description = "Object keys printed in sample program output"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = ['''(key="[a-z0-9]+[^"]*"|"key":"[a-z0-9]+[^"]*")''']
+paths = [
+  '''^docs/extending/write-a-scanner\.md$''',
+  '''^examples/extending-scanner/README\.md$''',
+  '''^examples/pickers-import/README\.md$''',
+]
+
+# The SaaS tenants recipe signs its curl calls with the example's own made-up
+# tenant keys (key-acme, key-globex, key-admin), defined in the example code.
+[[allowlists]]
+description = "Made-up tenant keys of the SaaS tenants recipe"
+targetRules = ["curl-auth-header"]
+regexTarget = "line"
+regexes = ['''Bearer key-(acme|globex|admin)\b''']
+paths = [
+  '''^docs/recipes/saas-tenants\.md$''',
+  '''^examples/recipe-saas-tenants/README\.md$''',
+]
+
+# Test placeholders: values a test feeds in to prove they are redacted or
+# forwarded; none was ever issued by any service.
+[[allowlists]]
+description = "Placeholder credentials in tests"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = [
+  '''"AIza-test-key-''',
+  '''"tok-SECRET-''',
+  '''"GPS-SECRET-''',
+]
+paths = [
+  '''^contrib/vision/google/google_test\.go$''',
+  '''^contrib/videoplatform/secret_test\.go$''',
+  '''^contrib/imaging/exifcopyright_internal_test\.go$''',
+]
+
+# An error message naming two config fields (RootNamespaceID, NamespaceID),
+# which the Dropbox token rule matches by shape.
+[[allowlists]]
+description = "Dropbox driver error message, not a token"
+targetRules = ["dropbox-api-token"]
+regexTarget = "line"
+regexes = ['''RootNamespaceID and NamespaceID are exclusive''']
+paths = ['''^adapters/dropbox/dropbox\.go$''']

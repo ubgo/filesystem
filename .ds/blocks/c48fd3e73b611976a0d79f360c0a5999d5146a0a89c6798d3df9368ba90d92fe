@@ -1,0 +1,1 @@
+var allowedTypes = []string{"image/jpeg", "image/png", "image/webp", "application/pdf", "video/mp4"}

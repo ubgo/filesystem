@@ -1,0 +1,12 @@
+func record(ops, written *expvar.Map) func(context.Context, layer.Event) {
+	return func(_ context.Context, e layer.Event) {
+		outcome := outcomeOK
+		if e.Err != nil {
+			outcome = string(e.Code)
+		}
+		ops.Add(e.Op.Disk+"."+string(e.Op.Kind)+"."+outcome, 1)
+		if e.Err == nil && e.Op.Bytes > 0 {
+			written.Add(e.Op.Disk, e.Op.Bytes)
+		}
+	}
+}

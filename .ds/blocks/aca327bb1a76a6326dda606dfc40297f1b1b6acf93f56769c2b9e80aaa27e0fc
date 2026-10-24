@@ -1,0 +1,16 @@
+func conventions(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	cancelled, cancel := context.WithCancel(ctx)
+	cancel()
+	_, err := disk.WriteBytes(cancelled, "late.txt", []byte("x"), filesystem.WriteOptions{})
+	stored, _ := disk.Exists(ctx, "late.txt")
+	fmt.Fprintf(out, "cancelled write: %s, is context.Canceled: %t, stored: %t\n",
+		filesystem.CodeOf(err), errors.Is(err, context.Canceled), stored)
+	b, err := fs.ReadFile(disk.FS(ctx), greetingKey)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "fs.ReadFile: %q\n", b)
+	_, err = filesystem.NewDisk(diskName, memory.New(), filesystem.WithPublicURL("cdn.example.com"))
+	fmt.Fprintf(out, "bad option at start-up: %s\n", filesystem.CodeOf(err))
+	return nil
+}

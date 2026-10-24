@@ -1,0 +1,10 @@
+func (p *Plugin) isHeld(ctx context.Context, s *records.Store, scope, fileID string) (bool, error) {
+	var id string
+	q := sqlb.NewSelect(s.Dialect()).Columns(sqlb.Bind(FileID, &id)).From(Table).
+		Where(sqlb.Eq(Scope, scope), sqlb.Eq(FileID, fileID))
+	err := s.One(ctx, q)
+	if errors.Is(err, sqlb.ErrNoRows) {
+		return false, nil
+	}
+	return err == nil, err
+}

@@ -1,0 +1,20 @@
+func (s HTTPScanner) Scan(ctx context.Context, r io.Reader) (scan.Verdict, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.URL, r)
+	if err != nil {
+		return scan.Verdict{}, err
+	}
+	req.Header.Set("Content-Type", "application/octet-stream")
+	resp, err := s.Client.Do(req)
+	if err != nil {
+		return scan.Verdict{}, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		return scan.Verdict{}, fmt.Errorf("scanner answered %s", resp.Status)
+	}
+	var v verdictReply
+	if err := json.NewDecoder(io.LimitReader(resp.Body, maxVerdictBytes)).Decode(&v); err != nil {
+		return scan.Verdict{}, err
+	}
+	return scan.Verdict{Clean: v.Clean, Signature: v.Signature}, nil
+}

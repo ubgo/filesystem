@@ -1,0 +1,23 @@
+func retention(ctx context.Context, out io.Writer, f fixture) error {
+	drv, disk, err := newBucketDisk(f, "records", false, gcs.Config{RetainFor: time.Hour})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "contracts/acme.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	info, err := drv.ObjectInfo(ctx, "contracts/acme.pdf")
+	if err != nil {
+		return err
+	}
+	until := time.Now().AddDate(0, 0, 30).UTC().Truncate(time.Second)
+	if err := disk.SetHold(ctx, "contracts/acme.pdf", filesystem.Hold{RetainUntil: until}); err != nil {
+		return err
+	}
+	h, err := disk.Hold(ctx, "contracts/acme.pdf")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "retention: mode %s on write, extended to 30 days: %t\n", info.RetentionMode, h.RetainUntil.Equal(until))
+	return nil
+}

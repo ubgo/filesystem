@@ -1,0 +1,17 @@
+func (a *App) ImportJob() jobs.Job {
+	return jobs.Func(jobName, func(ctx context.Context, _ time.Time) (jobs.Result, error) {
+		var n int64
+		for {
+			queued, err := a.queued(ctx)
+			if err != nil || len(queued) == 0 {
+				return jobs.Result{Count: n}, err
+			}
+			for _, f := range queued {
+				if err := a.importOne(ctx, f); err != nil {
+					return jobs.Result{Count: n}, err
+				}
+				n++
+			}
+		}
+	})
+}

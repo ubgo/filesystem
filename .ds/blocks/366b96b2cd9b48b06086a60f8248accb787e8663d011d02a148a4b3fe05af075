@@ -1,0 +1,3 @@
+func newPlugin(t map[string]imaging.Transform, onEager func(context.Context, records.File, string, error)) (*variants.Plugin, error) {
+	return variants.New(t, imaging.Options{}, variants.WithEager(onEager, nameThumb))
+}

@@ -1,0 +1,10 @@
+func syncBackup(ctx context.Context, out io.Writer, cold, backup *filesystem.Disk) error {
+	plan, err := filesystem.Sync(ctx, cold, "files", backup, "files", filesystem.SyncOptions{Delete: true, DryRun: true})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "sync dry run: %d to copy, %d to delete\n", plan.Copied, plan.Deleted)
+	rep, err := filesystem.Sync(ctx, cold, "files", backup, "files", filesystem.SyncOptions{Delete: true})
+	fmt.Fprintf(out, "sync: copied %d, deleted %d, unchanged %d\n", rep.Copied, rep.Deleted, rep.Unchanged)
+	return err
+}

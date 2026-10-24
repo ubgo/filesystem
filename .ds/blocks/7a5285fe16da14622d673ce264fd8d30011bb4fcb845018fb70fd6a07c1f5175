@@ -1,0 +1,7 @@
+func newSigner(base string) (*signedurl.Signer, error) {
+	secret := make([]byte, signingKeySize)
+	if _, err := rand.Read(secret); err != nil {
+		return nil, err
+	}
+	return signedurl.New(base, []signedurl.Key{{ID: signingKeyID, Secret: secret}})
+}

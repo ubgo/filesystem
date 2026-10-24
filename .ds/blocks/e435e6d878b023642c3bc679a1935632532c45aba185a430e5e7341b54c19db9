@@ -1,0 +1,9 @@
+func TestAvatarUploadOverHTTP(t *testing.T) {
+	disk := filesystemtest.NewFake(t, mediaDisk)
+	img := filesystemtest.FakeImage(t, filesystemtest.PNG, 64, 64)
+	rec := postAvatar(t, NewAvatars(disk.Disk), "u1", filesystemtest.UploadFile{Field: avatarField, Name: "me.png", Content: img})
+	if rec.Code != http.StatusOK || rec.Body.String() != "avatars/u1\n" {
+		t.Fatalf("got %d %q", rec.Code, rec.Body)
+	}
+	disk.AssertExists("avatars/u1")
+}

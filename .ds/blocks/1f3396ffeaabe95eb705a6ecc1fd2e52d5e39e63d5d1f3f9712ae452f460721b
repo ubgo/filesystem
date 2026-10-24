@@ -1,0 +1,13 @@
+func (a *App) avatar(w http.ResponseWriter, r *http.Request) {
+	list, err := a.Store.Attachments(r.Context(), "", records.Owner{Type: ownerUser, ID: r.PathValue("id")}, roleAvatar)
+	if err != nil || len(list) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	link, err := a.Store.URL(r.Context(), list[0].File, linkLifetime)
+	if err != nil {
+		http.Error(w, http.StatusText(fshttp.StatusOf(err)), fshttp.StatusOf(err))
+		return
+	}
+	http.Redirect(w, r, link, http.StatusFound)
+}

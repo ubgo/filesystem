@@ -1,0 +1,26 @@
+func (a *App) uploadAvatar(w http.ResponseWriter, r *http.Request) {
+	user := records.Owner{Type: ownerUser, ID: r.PathValue("id")}
+	r.Body = http.MaxBytesReader(w, r.Body, maxAvatarSize+64<<10)
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "send the image in the form field \"file\"", http.StatusBadRequest)
+		return
+	}
+	defer func() { _ = file.Close() }()
+	var stored records.File
+	err = a.Store.Tx(r.Context(), func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if stored, err = a.Store.Upload(ctx, "", diskName, file, header.Filename, avatars); err != nil {
+			return err
+		}
+		_, err = a.Store.SetAttachment(ctx, "", stored.ID, user, roleAvatar, records.PreviousTrash)
+		return err
+	})
+	if err != nil {
+		http.Error(w, http.StatusText(fshttp.StatusOf(err)), fshttp.StatusOf(err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(map[string]string{"file": stored.ID, "content_type": stored.ContentType})
+}

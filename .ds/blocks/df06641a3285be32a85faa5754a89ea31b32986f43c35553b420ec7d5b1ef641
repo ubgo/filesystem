@@ -1,0 +1,10 @@
+func openStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, error) {
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithOwnerTypes(ownerUser))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := store.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	return store, nil
+}

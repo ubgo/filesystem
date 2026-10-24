@@ -1,0 +1,11 @@
+func (a *App) describe(ctx context.Context, f records.File) (coverResponse, error) {
+	srcset, candidates, err := a.Variants.SrcSet(ctx, a.Store, f.Scope, f.ID, linkLifetime, widthNames...)
+	if err != nil {
+		return coverResponse{}, err
+	}
+	urls := make(map[string]string, len(candidates))
+	for _, c := range candidates {
+		urls[c.Name] = c.URL
+	}
+	return coverResponse{FileID: f.ID, SrcSet: srcset, URLs: urls}, nil
+}

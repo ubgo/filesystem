@@ -1,0 +1,16 @@
+func storedChecksum(ctx context.Context, out io.Writer, client *s3.Client, _ *fakeS3) error {
+	disk, err := newBucketDisk(ctx, client, "crc-store", fss3.Config{ChecksumAlgorithm: types.ChecksumAlgorithmCrc32c})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "a.txt", []byte("hello"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "a.txt")
+	if err != nil {
+		return err
+	}
+	stored := e.Metadata[fss3.MetaChecksumPrefix+"crc32c"]
+	fmt.Fprintf(out, "stored crc32c: %s, presign declared: %t\n", stored, disk.Capabilities().Presign)
+	return nil
+}

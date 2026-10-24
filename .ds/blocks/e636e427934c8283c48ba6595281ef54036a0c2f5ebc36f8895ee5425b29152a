@@ -1,0 +1,12 @@
+func schedules(uploads, thumbs *filesystem.Disk) []diskjobs.Schedule {
+	nightly := diskjobs.Daily(sweepHour, sweepMinute, time.UTC)
+	trim := diskjobs.Func(nameTrimCache, func(ctx context.Context, _ time.Time) (diskjobs.Result, error) {
+		n, err := filesystem.TrimCache(ctx, thumbs, cacheBudget)
+		return diskjobs.Result{Count: int64(n)}, err
+	})
+	return []diskjobs.Schedule{
+		{Job: diskjobs.UploadSweep(uploads, pendingDir, uploadMaxAge), Next: nightly, RunAtStart: true},
+		{Job: diskjobs.SweepAbandoned(uploads, uploadMaxAge), Next: nightly, RunAtStart: true, DryRun: true},
+		{Job: trim, Every: time.Hour, RunAtStart: true},
+	}
+}

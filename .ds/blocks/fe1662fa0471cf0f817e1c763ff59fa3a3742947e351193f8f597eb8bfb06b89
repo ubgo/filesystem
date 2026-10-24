@@ -1,0 +1,23 @@
+func writeEncrypted(ctx context.Context, disk *filesystem.Disk, backend filesystem.Driver, key string, body []byte) (written, stored int64, plaintext bool, err error) {
+	if _, err := disk.WriteBytes(ctx, key, body, filesystem.WriteOptions{}); err != nil {
+		return 0, 0, false, err
+	}
+	st, err := disk.Stat(ctx, key)
+	if err != nil {
+		return 0, 0, false, err
+	}
+	raw, err := backend.Stat(ctx, key)
+	if err != nil {
+		return 0, 0, false, err
+	}
+	rc, err := backend.Read(ctx, key, filesystem.ByteRange{})
+	if err != nil {
+		return 0, 0, false, err
+	}
+	defer func() { _ = rc.Close() }()
+	onDisk, err := io.ReadAll(rc)
+	if err != nil {
+		return 0, 0, false, err
+	}
+	return st.Size, raw.Size, bytes.Contains(onDisk, body[:min(len(body), 16)]), nil
+}

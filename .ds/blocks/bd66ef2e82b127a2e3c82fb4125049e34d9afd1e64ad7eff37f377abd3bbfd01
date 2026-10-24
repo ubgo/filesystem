@@ -1,0 +1,24 @@
+func signedUpload(ctx context.Context, a *app, out io.Writer) error {
+	link, err := a.private.SignedURL(ctx, "avatars/u1.png", filesystem.PresignOptions{
+		Method: filesystem.MethodPut, Expires: linkLifetime, ContentType: "image/png",
+	})
+	if err != nil {
+		return err
+	}
+	png := []byte("\x89PNG\r\n\x1a\n not really")
+	resp, _, err := fetch(http.MethodPut, link.URL, bytes.NewReader(png), http.Header{"Content-Type": {"text/html"}})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "PUT with another type %d\n", resp.StatusCode)
+	resp, _, err = fetch(http.MethodPut, link.URL, bytes.NewReader(png), link.Header)
+	if err != nil {
+		return err
+	}
+	e, err := a.private.Stat(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "PUT with the signed headers %d, stored %d bytes as %s\n", resp.StatusCode, e.Size, e.ContentType)
+	return nil
+}

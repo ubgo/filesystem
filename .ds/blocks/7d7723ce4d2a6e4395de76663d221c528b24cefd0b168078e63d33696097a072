@@ -1,0 +1,24 @@
+func modes(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	if _, err := disk.WriteBytes(ctx, "site/logo.svg", []byte("<svg/>"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPublic}); err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, "users/u1/id.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	root, ok := filesystem.As[*os.Root](disk)
+	if !ok {
+		return fmt.Errorf("disk %s is not a local disk", disk.Name())
+	}
+	for _, k := range []string{"site/logo.svg", "users/u1/id.pdf"} {
+		info, err := root.Stat(k)
+		if err != nil {
+			return err
+		}
+		e, err := disk.Stat(ctx, k)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "%s: mode %v, %s, %s\n", k, info.Mode().Perm(), e.Visibility, e.ContentType)
+	}
+	return nil
+}

@@ -1,0 +1,7 @@
+func openWithDSN(ctx context.Context, container string) (*filesystem.Disk, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(azure.Scheme, azure.Opener); err != nil {
+		return nil, err
+	}
+	return mux.Open(ctx, "media", azure.Scheme+"://"+container)
+}

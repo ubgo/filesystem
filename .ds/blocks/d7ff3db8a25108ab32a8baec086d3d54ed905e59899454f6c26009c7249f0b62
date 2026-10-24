@@ -1,0 +1,17 @@
+func sqlcAllLiveFiles(ctx context.Context, q *fsdb.Queries, scope string) ([]string, error) {
+	page, err := q.ListLiveFiles(ctx, fsdb.ListLiveFilesParams{Scope: scope, PageSize: pageSize})
+	var names []string
+	for err == nil {
+		for _, f := range page {
+			names = append(names, f.Filename)
+		}
+		if len(page) < pageSize {
+			return names, nil
+		}
+		last := page[len(page)-1]
+		page, err = q.ListLiveFilesAfter(ctx, fsdb.ListLiveFilesAfterParams{
+			Scope: scope, AfterCreatedAt: last.CreatedAt, AfterID: last.ID, PageSize: pageSize,
+		})
+	}
+	return nil, err
+}

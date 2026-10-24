@@ -1,0 +1,30 @@
+func localLimits(ctx context.Context, out io.Writer, dir string) error {
+	drv, err := local.New(dir)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("uploads", drv)
+	if err != nil {
+		_ = drv.Close()
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	_, err = disk.WriteBytes(ctx, local.StagingDir+"/tmp/x", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "local %s/tmp/x: %s\n", local.StagingDir, filesystem.CodeOf(err))
+	if _, err := disk.WriteBytes(ctx, "report", []byte("file"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	_, err = disk.WriteBytes(ctx, "report/2026.pdf", []byte("nested"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "local report then report/2026.pdf: %s\n", filesystem.CodeOf(err))
+	mem, err := filesystem.NewDisk("cache", memory.New())
+	if err != nil {
+		return err
+	}
+	for _, k := range []string{"report", "report/2026.pdf"} {
+		if _, err := mem.WriteBytes(ctx, k, []byte(k), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	fmt.Fprintln(out, "memory report then report/2026.pdf: ok")
+	return nil
+}

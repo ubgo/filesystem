@@ -1,0 +1,43 @@
+func frontDoor(ctx context.Context, out io.Writer) error {
+	svc := newBlobService()
+	srv := httptest.NewTLSServer(svc)
+	defer srv.Close()
+	host := strings.TrimPrefix(srv.URL, "https://")
+	opts := standInOptions(srv)
+	named, err := frontDoorDisk(srv.URL+"/", staticToken{}, opts, frontDoorAccount)
+	if err != nil {
+		return err
+	}
+	signed, err := signGet(ctx, named)
+	if err != nil {
+		return err
+	}
+	byHost, err := frontDoorDisk(srv.URL+"/", staticToken{}, opts, "")
+	if err != nil {
+		return err
+	}
+	unnamed, err := signGet(ctx, byHost)
+	if err != nil {
+		return err
+	}
+	svc.mu.Lock()
+	hosts := append([]string(nil), svc.keyHosts...)
+	svc.mu.Unlock()
+	sort.Strings(hosts)
+	fmt.Fprintf(out, "front door: key requests went to the configured host: %t, signed URL keeps it: %t\n",
+		len(hosts) == 2 && hosts[0] == host && hosts[1] == host, signed.Host == host)
+	fmt.Fprintf(out, "front door: signature differs from the host-label account's: %t\n", signed.Query().Get("sig") != unnamed.Query().Get("sig"))
+	for _, c := range []struct {
+		label   string
+		account string
+		cred    azcore.TokenCredential
+	}{{"AccountName without Credential", frontDoorAccount, nil}, {`AccountName "Files.Example"`, "Files.Example", staticToken{}}} {
+		client, err := azblob.NewClient(srv.URL+"/", staticToken{}, opts)
+		if err != nil {
+			return err
+		}
+		_, err = azure.New(azure.Config{Client: client, Container: "media", UserDelegation: true, AccountName: c.account, Credential: c.cred})
+		fmt.Fprintf(out, "front door: %s: %s\n", c.label, filesystem.CodeOf(err))
+	}
+	return nil
+}

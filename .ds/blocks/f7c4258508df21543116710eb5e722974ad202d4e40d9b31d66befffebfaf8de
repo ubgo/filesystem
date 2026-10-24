@@ -1,0 +1,20 @@
+func openDropbox(f *fakes.Dropbox, tok tokenFunc, client *http.Client) (*filesystem.Disk, error) {
+	drv, err := dropbox.New(dropbox.Config{
+		// Keys live under this folder; empty means the account root (or the
+		// app folder, for an app-folder app).
+		Root:  "/Apps/Invoices",
+		Token: dropbox.TokenFunc(tok),
+		// Bodies longer than one chunk go through an upload session; leave
+		// ChunkSize at 0 (8 MiB) in production.
+		ChunkSize: gdrive.ChunkUnit,
+		Client:    client,
+		// Point at the fake; omit both for api.dropboxapi.com and
+		// content.dropboxapi.com.
+		APIURL:     f.APIURL(),
+		ContentURL: f.APIURL(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("dropbox", drv)
+}

@@ -1,0 +1,9 @@
+func moveToArchive(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	moved, err := disk.Move(ctx, "users/42-backup.png", "archive/42.png")
+	if err != nil {
+		return err
+	}
+	_, err = disk.Stat(ctx, "users/42-backup.png")
+	fmt.Fprintf(out, "moved to %s, old key: %s\n", moved.Key, filesystem.CodeOf(err))
+	return nil
+}

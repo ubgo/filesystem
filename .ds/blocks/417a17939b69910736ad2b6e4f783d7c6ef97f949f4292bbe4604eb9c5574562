@@ -1,0 +1,1 @@
+type CDNPurger func(ctx context.Context, urls []string) error

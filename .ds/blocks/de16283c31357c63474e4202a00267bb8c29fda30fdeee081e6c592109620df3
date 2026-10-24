@@ -1,0 +1,17 @@
+func copyAndMove(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	if _, err := disk.Copy(ctx, greetingKey, "backup/hello.txt"); err != nil {
+		return err
+	}
+	e, err := disk.Move(ctx, "backup/hello.txt", "archive/hello.txt")
+	if err != nil {
+		return err
+	}
+	moved, err := disk.Exists(ctx, "backup/hello.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "copied and moved to %s (old key exists: %t)\n", e.Key, moved)
+	_, err = disk.Copy(ctx, greetingKey, greetingKey)
+	fmt.Fprintf(out, "copy onto itself: %s\n", filesystem.CodeOf(err))
+	return nil
+}

@@ -1,0 +1,9 @@
+func schedules(store *records.Store, disk *filesystem.Disk, auditLog *audit.Plugin) []jobs.Schedule {
+	return []jobs.Schedule{
+		{Job: jobs.SweepTrash(store, trashRetention), Every: time.Hour, Jitter: 5 * time.Minute, RunAtStart: true},
+		{Job: jobs.UploadSweep(disk, "incoming", uploadMaxAge), Every: time.Hour, Jitter: 5 * time.Minute, RunAtStart: true},
+		{Job: jobs.SweepAbandoned(disk, uploadMaxAge), Every: 6 * time.Hour, Jitter: 10 * time.Minute, RunAtStart: true},
+		{Job: jobs.SweepOrphans(store, diskName, "files", uploadMaxAge), Every: 24 * time.Hour, Jitter: time.Hour, RunAtStart: true},
+		{Job: jobs.AuditPrune(auditLog, store, auditRetention), Every: 24 * time.Hour, Jitter: time.Hour, RunAtStart: true},
+	}
+}

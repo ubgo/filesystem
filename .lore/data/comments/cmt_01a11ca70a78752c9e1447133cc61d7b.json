@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Audit done 2026-10-08: the internal audit notes, 87 findings (17/56/14), 35 need product decisions. Awaiting owner's pick for fix mode.",
+  "created_at": "2026-10-08T17:54:31.672318000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a11c9c7b3c7d048417db90ad77b65e",
+  "entity_table": "tasks",
+  "id": "cmt_01a11ca70a78752c9e1447133cc61d7b",
+  "updated_at": "2026-10-08T17:54:31.672318000Z"
+}

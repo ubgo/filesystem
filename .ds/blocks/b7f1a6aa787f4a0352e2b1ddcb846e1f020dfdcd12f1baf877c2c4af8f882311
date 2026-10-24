@@ -1,0 +1,10 @@
+func detection(out io.Writer) {
+	for _, c := range []struct{ name, data string }{
+		{"invoice.pdf", pngBytes}, {"photo.jpg", htmlBytes}, {"logo.png", svgBytes}, {"page.html", "just text"},
+	} {
+		t := sniff.Detect([]byte(c.data), c.name)
+		fmt.Fprintf(out, "detect %s -> %s (active: %t)\n", c.name, t, sniff.IsActive(t))
+	}
+	err := images.Accepts(sniff.SVG)
+	fmt.Fprintf(out, "policy allowing image/* and an SVG: %s\n", filesystem.CodeOf(err))
+}

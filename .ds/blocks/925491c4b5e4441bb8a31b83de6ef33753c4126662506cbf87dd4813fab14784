@@ -1,0 +1,27 @@
+func form(ctx context.Context, out io.Writer) error {
+	files := []formFile{{"a.png", pngFile}, {"page.html", htmlFile}, {"b.pdf", pdfFile}}
+	for _, partial := range []bool{false, true} {
+		disk, err := newDisk()
+		if err != nil {
+			return err
+		}
+		recorded := 0
+		h := upload.Handler(disk, policy, upload.HandlerOptions{
+			MaxFiles: maxFilesPerRequest,
+			Partial:  partial,
+			OnStored: func(_ context.Context, _ *http.Request, stored []upload.Result) error {
+				recorded = len(stored) // a real app inserts rows here
+				return nil
+			},
+		})
+		status, body, err := postForm(ctx, h, files...)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "form partial=%t: %d, stored %d, recorded %d\n", partial, status, count(ctx, disk), recorded)
+		if !partial {
+			fmt.Fprintf(out, "  body %s\n", body)
+		}
+	}
+	return nil
+}

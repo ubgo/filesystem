@@ -1,0 +1,4 @@
+func tooBig(src []byte) error {
+	_, err := imaging.Process(bytes.NewReader(src), modes["fit"], imaging.Options{MaxPixels: tinyPixels})
+	return err
+}

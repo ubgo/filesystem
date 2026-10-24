@@ -1,0 +1,10 @@
+func order(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", memory.New(),
+		filesystem.WithInterceptors(trace("outer", out), trace("inner", out)))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "order:")
+	_, err = disk.Exists(ctx, "a.txt")
+	return err
+}

@@ -1,0 +1,12 @@
+func serveUntilDone(ctx context.Context, srv *http.Server) error {
+	errs := make(chan error, 1)
+	go func() { errs <- srv.ListenAndServe() }()
+	select {
+	case err := <-errs:
+		return err
+	case <-ctx.Done():
+		shutdown, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		return srv.Shutdown(shutdown)
+	}
+}

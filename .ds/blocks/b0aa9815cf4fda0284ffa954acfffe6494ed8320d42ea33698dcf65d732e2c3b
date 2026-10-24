@@ -1,0 +1,11 @@
+func newStore(db *sql.DB, dialect sqlb.Dialect, notes Notes) (*records.Store, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, err
+	}
+	return records.New(db, dialect, disks, records.WithPlugins(notes), records.WithMigrationLockWait(lockWait))
+}

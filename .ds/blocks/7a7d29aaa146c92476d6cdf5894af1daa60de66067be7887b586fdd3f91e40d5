@@ -1,0 +1,13 @@
+func noMultipart(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	_, err := disk.CreateMultipart(ctx, "big.bin", filesystem.WriteOptions{})
+	fmt.Fprintf(out, "multipart: %s\n", filesystem.CodeOf(err))
+	if err := disk.DeletePrefix(ctx, "avatars"); err != nil {
+		return err
+	}
+	ok, err := disk.Exists(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after DeletePrefix: exists=%t\n", ok)
+	return nil
+}

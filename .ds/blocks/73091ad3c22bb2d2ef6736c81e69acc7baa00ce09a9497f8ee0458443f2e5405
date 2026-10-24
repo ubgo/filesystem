@@ -1,0 +1,16 @@
+func New(ctx context.Context, dataDir string) (*App, error) {
+	store, disk, err := openStore(ctx, dataDir)
+	if err != nil {
+		return nil, err
+	}
+	app := &App{Store: store, TempDir: filepath.Join(dataDir, "tus")}
+	h, err := app.newTus(disk)
+	if err != nil {
+		return nil, err
+	}
+	mux := http.NewServeMux()
+	mux.Handle(tusPath, http.StripPrefix(tusPath, h))
+	mux.HandleFunc("GET /files", app.list)
+	app.Handler = withUser(mux)
+	return app, nil
+}

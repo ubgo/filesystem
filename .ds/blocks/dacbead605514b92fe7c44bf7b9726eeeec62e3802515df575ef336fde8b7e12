@@ -1,0 +1,16 @@
+func sizes(out io.Writer) error {
+	limit, err := filesystem.ParseSize("10MB")
+	if err != nil {
+		return err
+	}
+	binary, err := filesystem.ParseSize("1.5GiB")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "10MB = %d bytes, 1.5GiB = %d bytes, 10*MiB = %d\n", limit, binary, 10*filesystem.MiB)
+	for _, typo := range []string{"10mb", "10 MB", "1.5B", "-1KB"} {
+		_, err := filesystem.ParseSize(typo)
+		fmt.Fprintf(out, "ParseSize(%q): %s\n", typo, filesystem.CodeOf(err))
+	}
+	return nil
+}

@@ -1,0 +1,232 @@
+version: '3'
+
+# A test command piped into grep must still fail the task when the tests fail.
+set: [pipefail]
+
+# Every `go test` and `go vet` runs under `testlock` (~/.local/bin/testlock),
+# a machine-wide lock that lets only one heavy suite run at a time across
+# projects and sessions; a second caller waits, and the exit code passes
+# through. `-count=1` stays only on tasks whose tests depend on outside
+# services or measure coverage; plain runs use Go's test cache.
+
+# Every module of the repository. The root is the core module (standard
+# library only); each other directory has its own go.mod with a replace
+# back to the root, so a test of one module always builds against the
+# working tree of the others.
+vars:
+  MODULES: '. adapters/s3 adapters/gcs adapters/azure adapters/sftp adapters/ftp adapters/sqlblob adapters/webdav adapters/dropbox adapters/onedrive adapters/gdrive adapters/vercelblob adapters/cloudinary records contrib/imaging contrib/imaging/webp contrib/imaging/avif contrib/imaging/heic contrib/imaging/icc contrib/archive contrib/crypt contrib/remote contrib/pickers contrib/cloudfront contrib/cloudflare contrib/notify contrib/notify/eventgrid contrib/notify/sqs contrib/notify/pubsub contrib/otel contrib/keynorm contrib/tus cmd/fs examples examples/frameworks examples/gqlgen examples/media examples/remote-media examples/imaging-codecs examples/documents examples/pickers-import contrib/internal/fwtest contrib/gin contrib/echo contrib/fiber contrib/chi contrib/gqlgen contrib/video contrib/audio contrib/videoplatform contrib/pdf contrib/office contrib/ocr contrib/vision contrib/svg contrib/svg/raster contrib/sqlc contrib/gorm contrib/ent jobs jobs/diskjobs jobs/river jobs/asynq'
+  SEAWEED_PORT: '8333'
+  CLAMD_ADDR: 127.0.0.1:3310
+  # Azurite's documented development account; not a secret.
+  AZURITE_CONNECTION: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;'
+  PG_DSN: 'postgres://postgres:root@localhost:5432/filesystem_test?sslmode=disable'
+  # compose.yml's throwaway MySQL (profile mysql).
+  MYSQL_DSN: 'root:filesystem@tcp(127.0.0.1:33071)'
+  S3_TEST_DSN: 's3://filesystem-test?region=us-east-1&endpoint=http://127.0.0.1:{{.SEAWEED_PORT}}&path_style=true&prune_prefixes=true&conditional_write=true&tagging=true'
+  # compose.yml's throwaway Redis (profile redis), for the Asynq adapter.
+  REDIS_ADDR: '127.0.0.1:63790'
+  # compose.yml's throwaway RustFS (profile rustfs).
+  RUSTFS_ENDPOINT: 'http://127.0.0.1:19333'
+  RUSTFS_TEST_DSN: 's3://filesystem-test?region=us-east-1&endpoint={{.RUSTFS_ENDPOINT}}&path_style=true&conditional_write=true&tagging=true'
+
+tasks:
+  default:
+    desc: List every task
+    cmds: ['task --list']
+
+  build:
+    desc: Compile every package of every module
+    cmds:
+      - for: {var: MODULES, split: ' '}
+        cmd: cd {{.ITEM}} && go build ./...
+
+  test:
+    desc: Run the tests of every module
+    cmds:
+      - for: {var: MODULES, split: ' '}
+        cmd: cd {{.ITEM}} && testlock go test ./...
+      # The codec modules use a system library when one is installed; this
+      # run forces their built-in pure-Go code, so both backends are tested.
+      - for: [contrib/imaging/webp, contrib/imaging/avif, contrib/imaging/heic]
+        cmd: cd {{.ITEM}} && testlock go test -tags nodynamic ./...
+
+  vet:
+    desc: go vet every module, for the host and for Linux, Windows and FreeBSD (the local driver's platform claims)
+    cmds:
+      - for: {var: MODULES, split: ' '}
+        cmd: cd {{.ITEM}} && testlock go vet ./...
+      - for: [linux, windows, freebsd]
+        cmd: GOOS={{.ITEM}} GOARCH=amd64 testlock go vet ./...
+
+  fmt:check:
+    desc: Fail when any Go file is not gofmt-formatted
+    cmds:
+      - 'test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)'
+
+  docs:wrap:
+    desc: Fail on hard-wrapped prose in any Markdown file, including the symlinked docsi/
+    cmds: ['go run ./internal/mdwrap .']
+
+  check:
+    desc: The gate - gofmt, vet (host and cross-OS), every module's tests, the Markdown wrap check, and docsync (every snippet in the guides matches its example)
+    cmds:
+      - task: fmt:check
+      - task: vet
+      - task: test
+      - task: docs:wrap
+      - task: docs:drift
+
+  docs:drift:
+    desc: docsync - fail when a snippet copied into the guides no longer matches the example code it came from, or a cited block is gone; needs the ds CLI (go install github.com/ubgo/docsync/cli/cmd/ds@latest)
+    cmds:
+      - 'command -v ds >/dev/null || { echo "docs:drift needs the ds CLI: go install github.com/ubgo/docsync/cli/cmd/ds@latest"; exit 1; }'
+      - ds check
+
+  docs:refresh:
+    desc: docsync - copy the current example code into every snippet of the guides (run after changing an example a guide cites, then review the prose)
+    cmds:
+      - ds scan
+      - ds refresh
+
+  cover:
+    desc: Statement coverage per package of every module; the profiles land in .cover/
+    cmds:
+      - mkdir -p .cover
+      # jobs/diskjobs (a module of its own) holds the scheduler and the
+      # database-free jobs that moved out of jobs; most of their tests stay
+      # in jobs (through its aliases), so the jobs run counts coverage of
+      # diskjobs too (-coverpkg), or diskjobs would read as untested.
+      - for: {var: MODULES, split: ' '}
+        cmd: cd {{.ITEM}} && testlock go test -count=1 {{if eq .ITEM "jobs"}}-coverpkg=./...,github.com/ubgo/filesystem/jobs/diskjobs {{end}}-coverprofile={{.ROOT_DIR}}/.cover/{{replace "/" "-" (replace "." "core" .ITEM)}}.out ./...
+
+  # services:up and services:down start and remove one compose.yml profile.
+  # Every integration task below registers its teardown defer FIRST, then
+  # brings its profile up: Task registers a defer only when it reaches it,
+  # so a defer placed after a failed `up --wait` would never run. Runs are
+  # single-instance per machine: compose.yml has a fixed project name and
+  # fixed ports, so a second concurrent run of a task fails on the port
+  # (or shares the container and has it removed underneath it); run one
+  # integration task at a time.
+  services:up:
+    internal: true
+    cmds: ['docker compose --profile {{.PROFILE}} up -d --wait']
+
+  services:down:
+    desc: Remove every container of this repository's compose.yml, with its volumes (the test tasks already do this after each run)
+    cmds: ['docker compose --profile s3 --profile rustfs --profile azure --profile clamav --profile mysql --profile redis down -v --remove-orphans']
+
+  test:s3:
+    desc: Run the S3 conformance suite and the pinned-headers check against a throwaway SeaweedFS (signature checks on), then remove it
+    cmds:
+      - defer: docker compose --profile s3 down -v
+      - task: services:up
+        vars: {PROFILE: s3}
+      - 'for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:{{.SEAWEED_PORT}} && exit 0; sleep 1; done; echo "SeaweedFS did not start"; exit 1'
+      - 'cd adapters/s3 && testlock go test -count=1 -run AgainstARealStore -v ./... | grep -E -- "--- (PASS|FAIL|SKIP)|^ok|^FAIL"'
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      FILESYSTEM_S3_TEST_DSN: '{{.S3_TEST_DSN}}'
+
+  test:rustfs:
+    desc: Run the S3 conformance suite and the pinned-headers check against a throwaway RustFS, then remove it
+    cmds:
+      - defer: docker compose --profile rustfs down -v
+      - task: services:up
+        vars: {PROFILE: rustfs}
+      - 'for i in $(seq 1 30); do curl -s -o /dev/null {{.RUSTFS_ENDPOINT}} && exit 0; sleep 1; done; echo "RustFS did not start"; exit 1'
+      - 'cd adapters/s3 && testlock go test -count=1 -run AgainstARealStore -v ./... | grep -E -- "--- (PASS|FAIL|SKIP)|^ok|^FAIL"'
+    env:
+      AWS_ACCESS_KEY_ID: filesystem
+      AWS_SECRET_ACCESS_KEY: filesystem-secret
+      FILESYSTEM_S3_TEST_DSN: '{{.RUSTFS_TEST_DSN}}'
+
+  engines:pg:
+    desc: Create the filesystem_test database on the host Postgres (Postgres.app, postgres/root) if missing
+    cmds:
+      - 'PGPASSWORD=root psql -h localhost -U postgres -d postgres -Atc "select 1 from pg_database where datname=''filesystem_test''" | grep -q 1 || PGPASSWORD=root psql -h localhost -U postgres -d postgres -c "CREATE DATABASE filesystem_test"'
+
+  test:engines:
+    desc: Run the records module (core, its plugins and recordshttp), adapters/sqlblob, contrib/imaging (variants, dimensions) and contrib/videoplatform on SQLite, Postgres and a throwaway MySQL; each test gets its own schema or database (records/recordstest), and the MySQL container is removed afterwards
+    deps: [engines:pg]
+    cmds:
+      - defer: docker compose --profile mysql down -v
+      - task: services:up
+        vars: {PROFILE: mysql}
+      - for: [records, adapters/sqlblob, contrib/imaging, contrib/videoplatform, contrib/sqlc, contrib/gorm, contrib/ent]
+        cmd: cd {{.ITEM}} && testlock go test -count=1 ./...
+      - for: [records, adapters/sqlblob, contrib/imaging, contrib/videoplatform, contrib/sqlc, contrib/gorm, contrib/ent]
+        cmd: cd {{.ITEM}} && FILESYSTEM_RECORDS_ENGINE=postgres FILESYSTEM_RECORDS_PG_DSN='{{.PG_DSN}}' testlock go test -count=1 ./...
+      # River's integration test migrates River into a schema of its own on the host Postgres and drops it.
+      - cd jobs/river && FILESYSTEM_RIVER_PG_DSN='{{.PG_DSN}}' testlock go test -count=1 ./...
+      - for: [records, adapters/sqlblob, contrib/imaging, contrib/videoplatform, contrib/sqlc, contrib/gorm, contrib/ent]
+        cmd: cd {{.ITEM}} && FILESYSTEM_RECORDS_ENGINE=mysql FILESYSTEM_RECORDS_MYSQL_DSN='{{.MYSQL_DSN}}' testlock go test -count=1 ./...
+
+  cover:records:
+    desc: Coverage of the records module merged across SQLite, Postgres and a throwaway MySQL (each engine covers its own branches)
+    deps: [engines:pg]
+    cmds:
+      - defer: docker compose --profile mysql down -v
+      - task: services:up
+        vars: {PROFILE: mysql}
+      - mkdir -p {{.ROOT_DIR}}/.cover
+      - cd records && testlock go test -count=1 -coverprofile={{.ROOT_DIR}}/.cover/records-sqlite.out ./... > /dev/null
+      - cd records && FILESYSTEM_RECORDS_ENGINE=postgres FILESYSTEM_RECORDS_PG_DSN='{{.PG_DSN}}' testlock go test -count=1 -coverprofile={{.ROOT_DIR}}/.cover/records-pg.out ./... > /dev/null
+      - cd records && FILESYSTEM_RECORDS_ENGINE=mysql FILESYSTEM_RECORDS_MYSQL_DSN='{{.MYSQL_DSN}}' testlock go test -count=1 -coverprofile={{.ROOT_DIR}}/.cover/records-mysql.out ./... > /dev/null
+      - go run {{.ROOT_DIR}}/internal/covmerge -o {{.ROOT_DIR}}/.cover/records-merged.out {{.ROOT_DIR}}/.cover/records-sqlite.out {{.ROOT_DIR}}/.cover/records-pg.out {{.ROOT_DIR}}/.cover/records-mysql.out
+      # The library's total: internal/testdb and recordstest are test infrastructure (no tests of their own, so they would count as 0%).
+      - grep -v -e '/internal/testdb/' -e '/recordstest/' {{.ROOT_DIR}}/.cover/records-merged.out > {{.ROOT_DIR}}/.cover/records-library.out
+      - cd records && go tool cover -func={{.ROOT_DIR}}/.cover/records-library.out | tail -1
+
+  test:azure:
+    desc: Run the Azure driver's tests, the conformance suite and the Azure example against a throwaway Azurite, then remove it; without Azurite they skip
+    cmds:
+      - defer: docker compose --profile azure down -v
+      - task: services:up
+        vars: {PROFILE: azure}
+      - 'for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:10000 && exit 0; sleep 1; done; echo "Azurite did not start"; exit 1'
+      - mkdir -p {{.ROOT_DIR}}/.cover
+      # The profile is what COVERAGE.md's azure row and its uncovered lines are read from.
+      - cd adapters/azure && testlock go test -count=1 -coverprofile={{.ROOT_DIR}}/.cover/adapters-azure-live.out ./...
+      - cd examples && testlock go test -count=1 ./adapters-azure/
+    env:
+      FILESYSTEM_AZURE_TEST_CONNECTION: '{{.AZURITE_CONNECTION}}'
+
+  test:asynq:
+    desc: Run the jobs/asynq adapter's tests against a throwaway Redis from compose.yml, then remove it
+    cmds:
+      - defer: docker compose --profile redis down -v
+      - task: services:up
+        vars: {PROFILE: redis}
+      - cd jobs/asynq && FILESYSTEM_ASYNQ_REDIS_ADDR={{.REDIS_ADDR}} testlock go test -count=1 ./...
+
+  azure:up:
+    desc: Start the throwaway Azurite on 127.0.0.1:10000 for running examples/adapters-azure by hand; `task azure:down` removes it
+    cmds:
+      - task: services:up
+        vars: {PROFILE: azure}
+      - 'for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:10000 && exit 0; sleep 1; done; echo "Azurite did not start"; exit 1'
+
+  azure:down:
+    desc: Remove the Azurite container started by azure:up, with its data
+    cmds: ['docker compose --profile azure down -v']
+
+  test:clamav:
+    desc: Run the scan package's tests against a throwaway clamd (it downloads signatures on every start, which takes a few minutes), then remove it
+    cmds:
+      - defer: docker compose --profile clamav down -v
+      - task: services:up
+        vars: {PROFILE: clamav}
+      - testlock go test -count=1 -run TestLiveClamd -v ./scan/
+    env:
+      FILESYSTEM_CLAMD_ADDR: '{{.CLAMD_ADDR}}'
+
+  docs:mermaid:
+    desc: Render every Mermaid diagram in the GitHub-rendered Markdown with the real Mermaid CLI (needs Node; not part of check because it downloads the CLI)
+    cmds: ['internal/scripts/mermaid-check.sh']
+
+  tidy:
+    desc: go mod tidy in every module
+    cmds:
+      - for: {var: MODULES, split: ' '}
+        cmd: cd {{.ITEM}} && GOFLAGS=-mod=mod go mod tidy

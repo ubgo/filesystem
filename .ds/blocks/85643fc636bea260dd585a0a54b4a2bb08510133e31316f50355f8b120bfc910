@@ -1,0 +1,14 @@
+func fakeS3(t *testing.T) string {
+	t.Helper()
+	srv := httptest.NewServer(gofakes3.New(s3mem.New()).Server())
+	t.Cleanup(srv.Close)
+	client := awss3.New(awss3.Options{BaseEndpoint: aws.String(srv.URL), UsePathStyle: true, Region: "us-east-1", Credentials: credentials.NewStaticCredentialsProvider("a", "b", "")})
+	if _, err := client.CreateBucket(t.Context(), &awss3.CreateBucketInput{Bucket: aws.String(testBucket)}); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("AWS_ACCESS_KEY_ID", "a")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "b")
+	t.Setenv("AWS_CONFIG_FILE", "/nonexistent")
+	t.Setenv("AWS_SHARED_CREDENTIALS_FILE", "/nonexistent")
+	return "s3://" + testBucket + "?region=us-east-1&path_style=true&endpoint=" + url.QueryEscape(srv.URL)
+}

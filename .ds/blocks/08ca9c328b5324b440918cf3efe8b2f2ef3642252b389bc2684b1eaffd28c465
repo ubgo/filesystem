@@ -1,0 +1,17 @@
+func diskCleansFirst(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("media", memory.New())
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(ctx, `\avatars\\u1.png`, []byte("png"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	ok, err := disk.Exists(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "written as a messy key, found as avatars/u1.png: %t\n", ok)
+	_, err = disk.Read(ctx, "avatars/../../secrets.txt")
+	fmt.Fprintf(out, "read with ..: %v\n", err)
+	return nil
+}

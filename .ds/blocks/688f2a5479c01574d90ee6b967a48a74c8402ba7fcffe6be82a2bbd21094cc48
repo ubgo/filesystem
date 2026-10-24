@@ -1,0 +1,37 @@
+func signedLinks(ctx context.Context, out io.Writer) error {
+	routes := http.NewServeMux()
+	srv := httptest.NewServer(routes)
+	defer srv.Close()
+	signer, err := signedurl.New(srv.URL+signedPrefix, []signedurl.Key{{ID: "k1", Secret: demoSecret}})
+	if err != nil {
+		return err
+	}
+	shared, err := filesystem.NewDisk("shared", memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return err
+	}
+	acme, err := tenantDisk(shared, "acme")
+	if err != nil {
+		return err
+	}
+	if _, err := acme.WriteBytes(ctx, "report.pdf", []byte("%PDF-1.7 acme"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	disks, err := filesystem.NewManager(shared, acme)
+	if err != nil {
+		return err
+	}
+	routes.Handle(signedPrefix+"/", http.StripPrefix(signedPrefix, fshttp.Signed(disks, signer)))
+	link, err := acme.SignedURL(ctx, "report.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	resp, err := http.Get(link.URL)
+	if err != nil {
+		return err
+	}
+	_ = resp.Body.Close()
+	path := strings.TrimPrefix(link.URL[:strings.IndexByte(link.URL, '?')], srv.URL)
+	fmt.Fprintf(out, "signed link %s: %d\n", path, resp.StatusCode)
+	return withoutScopedDisk(ctx, shared, signer, link.URL, srv.URL, out)
+}

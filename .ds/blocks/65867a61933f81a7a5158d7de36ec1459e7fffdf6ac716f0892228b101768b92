@@ -1,0 +1,21 @@
+func run(ctx context.Context, w io.Writer, dataDir string) error {
+	d, stop, err := openDisks(ctx, dataDir)
+	if err != nil {
+		return err
+	}
+	defer stop()
+	if err := seed(ctx, d.Old); err != nil {
+		return err
+	}
+	if _, err := startMirror(ctx, w, d); err != nil {
+		return err
+	}
+	if err := copyExisting(ctx, w, d); err != nil {
+		return err
+	}
+	app, err := switchPrimary(ctx, w, d)
+	if err != nil {
+		return err
+	}
+	return backup(ctx, w, app, d)
+}

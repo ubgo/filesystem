@@ -1,0 +1,11 @@
+func newRouter(h app.Handlers) *fiber.App {
+	f := fiber.New(fiber.Config{BodyLimit: fiberBodyLimit, ReadTimeout: readTimeout})
+	f.Post(app.PathUpload, adaptor.HTTPHandler(h.Upload))
+	f.Post(app.PathTicket, adaptor.HTTPHandler(h.Ticket))
+	f.All(app.PathUppy+"/*", adaptor.HTTPHandler(http.StripPrefix(app.PathUppy, h.Uppy)))
+	f.All(app.PathTus+"*", adaptor.HTTPHandler(http.StripPrefix(app.PathTus, h.Tus)))
+	f.All(app.PathFiles+"/*", adaptor.HTTPHandler(http.StripPrefix(app.PathFiles, h.Files)))
+	f.All(app.PathPublic+"/*", adaptor.HTTPHandler(http.StripPrefix(app.PathPublic, h.Public)))
+	f.All(app.PathRecords+"/*", adaptor.HTTPHandler(http.StripPrefix(app.PathRecords, h.Records)))
+	return f
+}

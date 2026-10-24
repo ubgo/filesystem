@@ -1,0 +1,15 @@
+func openDisk(ctx context.Context, db *sql.DB, opts ...filesystem.Option) (*filesystem.Disk, error) {
+	drv, err := sqlblob.New(sqlblob.Config{
+		DB:            db,
+		Dialect:       sqlb.SQLiteDialect{},
+		Table:         "avatars",
+		MaxObjectSize: maxAvatar,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := drv.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("avatars", drv, opts...)
+}

@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "local.WithDurability(DurabilityFull|DurabilityFile|DurabilityNone). Default Full: the staged file is fsynced before the rename and the directories whose entries the rename (and any newly created parents) changed are fsynced after, as renameio and databases do, so a write that returned survives a crash or power cut. File (the previous behaviour) fsyncs only the bytes, so a crash can bring back the old version or lose a new key; None syncs nothing, for caches/scratch/tests. Safe default because callers assume a returned write is durable; the cost is one extra directory fsync per write. Directory sync is skipped on Windows. A Move is durable at its destination only (the source dir may have been pruned). (2026-10-08, IN-10)",
+  "confidence": null,
+  "created_at": "2026-10-08T08:09:21.305548000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11a8f4c997864b0b6a8f430d160b2",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "Local driver defaults to DurabilityFull (fsync file and directories)",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:09:21.305548000Z"
+}

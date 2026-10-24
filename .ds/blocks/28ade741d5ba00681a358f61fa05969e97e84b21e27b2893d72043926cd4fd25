@@ -1,0 +1,4 @@
+var transforms = map[string]imaging.Transform{
+	nameThumb: {Mode: imaging.ModeFill, Width: 128, Height: 128, Format: imaging.FormatJPEG},
+	nameCard:  {Mode: imaging.ModeFit, Width: 400, Height: 400, Format: imaging.FormatJPEG, Quality: 80},
+}

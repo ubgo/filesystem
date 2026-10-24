@@ -1,0 +1,4 @@
+type metered struct {
+	*memory.Driver
+	reads int
+}

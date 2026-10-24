@@ -1,0 +1,37 @@
+func legalHold(ctx context.Context, out io.Writer, client *s3.Client, fake *fakeS3) error {
+	if _, err := client.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: aws.String("records"), ObjectLockEnabledForBucket: aws.Bool(true)}); err != nil {
+		return err
+	}
+	fake.objects.enableLock("records") // the fake ignores ObjectLockEnabledForBucket
+	drv, err := fss3.New(fss3.Config{Client: client, Bucket: "records", ObjectLock: true})
+	if err != nil {
+		return err
+	}
+	if err := drv.CheckBucket(ctx); err != nil {
+		return err // ObjectLock declared on a bucket without it: CodeInvalidArgument
+	}
+	disk, err := filesystem.NewDisk("records", drv)
+	if err != nil {
+		return err
+	}
+	wctx, err := fss3.WithRequestOptions(ctx, disk, "contracts/acme.pdf", fss3.RequestOptions{LegalHold: true})
+	if err != nil {
+		return err
+	}
+	if _, err := disk.WriteBytes(wctx, "contracts/acme.pdf", []byte("signed"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	hold, err := disk.Hold(ctx, "contracts/acme.pdf")
+	if err != nil {
+		return err
+	}
+	delErr := disk.Delete(ctx, "contracts/acme.pdf")
+	_, writeErr := disk.WriteBytes(ctx, "contracts/acme.pdf", []byte("forged"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "legal hold: %t; delete: %s; overwrite: %s\n", hold.Legal, filesystem.CodeOf(delErr), filesystem.CodeOf(writeErr))
+	if err := disk.SetHold(ctx, "contracts/acme.pdf", filesystem.Hold{}); err != nil { // lift it
+		return err
+	}
+	err = disk.Delete(ctx, "contracts/acme.pdf")
+	fmt.Fprintf(out, "hold lifted, delete: %v\n", err)
+	return nil
+}

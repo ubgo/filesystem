@@ -1,0 +1,10 @@
+func openWithDSN(ctx context.Context, fakeURL string) (*filesystem.Disk, error) {
+	mux := filesystem.NewMux()
+	if err := mux.Register(gcs.Scheme, gcs.Opener); err != nil {
+		return nil, err
+	}
+	q := url.Values{}
+	q.Set(gcs.ParamEndpoint, fakeURL+"/storage/v1/")
+	q.Set(gcs.ParamNoAuth, "true")
+	return mux.Open(ctx, "media-dsn", gcs.Scheme+"://"+bucketName+"?"+q.Encode())
+}

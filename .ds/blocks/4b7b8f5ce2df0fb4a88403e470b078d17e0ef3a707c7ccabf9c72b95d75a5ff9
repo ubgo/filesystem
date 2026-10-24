@@ -1,0 +1,15 @@
+func (a *App) newSharedTus(disk *filesystem.Disk, store tus.SessionStore, locker handler.Locker) (http.Handler, error) {
+	return tus.New(tus.Config{
+		Disk:     disk,
+		Policy:   policy,
+		Store:    store,
+		Locker:   locker, // required with Store: a lock local to one instance stops nothing
+		BasePath: tusPath,
+		Authorize: func(ctx context.Context, _ http.Header) error {
+			_, err := userFrom(ctx)
+			return err
+		},
+		OnStored: a.record,
+		Logger:   quietLog, // tusd logs every request at Info
+	})
+}

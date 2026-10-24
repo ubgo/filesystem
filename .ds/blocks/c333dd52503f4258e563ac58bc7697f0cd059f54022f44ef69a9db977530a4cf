@@ -1,0 +1,6 @@
+func scopeOf(r *http.Request) (string, error) {
+	if t := r.Header.Get(headerTenant); t != "" {
+		return t, nil
+	}
+	return "", errNoSession
+}

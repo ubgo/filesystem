@@ -1,0 +1,15 @@
+func newRouter(a *app.App) *echo.Echo {
+	e := echo.New()
+	e.HideBanner = true
+	e.HTTPErrorHandler = fsecho.ErrorHandler(e.DefaultHTTPErrorHandler)
+	e.Use(middleware.Recover())
+	e.POST(app.PathUpload, echo.WrapHandler(a.Upload))
+	fsecho.Mount(e, app.PathFiles, a.Files)
+	me := e.Group(app.GroupMe,
+		fsecho.Actor(func(c echo.Context) (string, error) { return app.User(c.Request()) }),
+		fsecho.Scope(func(c echo.Context) (string, error) { return app.Tenant(c.Request()) }),
+	)
+	fsecho.Mount(me, app.MountMedia, a.Records)
+	me.GET(app.PathExport+"/:"+app.ParamRole, func(c echo.Context) error { return export(c, a) })
+	return e
+}

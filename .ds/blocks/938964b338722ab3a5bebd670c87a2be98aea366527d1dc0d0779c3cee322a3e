@@ -1,0 +1,11 @@
+func uploadInto(ctx context.Context, s *records.Store, fp *folders.Plugin, folder, name string) (records.File, error) {
+	var f records.File
+	err := s.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if f, err = s.Upload(ctx, tenant, diskName, strings.NewReader("content of "+name), name, textPolicy); err != nil {
+			return err
+		}
+		return fp.Put(ctx, s, tenant, f.ID, folder)
+	})
+	return f, err
+}

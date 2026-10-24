@@ -1,0 +1,1 @@
+func isMerchant(r *http.Request) bool { return r.Header.Get(headerMerchant) == merchantToken }

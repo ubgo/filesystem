@@ -1,0 +1,22 @@
+func customJob(ctx context.Context, out io.Writer) error {
+	cache, err := mem("cache")
+	if err != nil {
+		return err
+	}
+	for _, k := range []string{"a", "b", "c"} {
+		if _, err := cache.WriteBytes(ctx, k, []byte("12345"), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	trim := jobs.Func("trim-media-cache", func(ctx context.Context, _ time.Time) (jobs.Result, error) {
+		n, err := filesystem.TrimCache(ctx, cache, 10)
+		return jobs.Result{Count: int64(n)}, err
+	})
+	r, err := trim.Run(ctx, later)
+	if err != nil {
+		return err
+	}
+	exports := jobs.UploadSweep(cache, "exports", minAge).Named("sweep-exports")
+	fmt.Fprintf(out, "%s: %d trimmed; a second sweep named %s\n", trim.Name, r.Count, exports.Name)
+	return nil
+}

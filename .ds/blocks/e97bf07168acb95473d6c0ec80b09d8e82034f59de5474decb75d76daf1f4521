@@ -1,0 +1,12 @@
+func openSigned(ctx context.Context, dir, base string) (*filesystem.Disk, *signedurl.Signer, error) {
+	signer, err := signedurl.New(base, []signedurl.Key{{ID: "k1", Secret: signingSecret}})
+	if err != nil {
+		return nil, nil, err
+	}
+	mux := filesystem.NewMux()
+	if err := mux.Register(local.Scheme, local.Opener); err != nil {
+		return nil, nil, err
+	}
+	disk, err := mux.Open(ctx, "private", local.Scheme+"://"+filepath.ToSlash(dir), filesystem.WithURLSigner(signer))
+	return disk, signer, err
+}

@@ -1,0 +1,26 @@
+func (a *App) finish(ctx context.Context, user, key, filename string) (records.File, error) {
+	res, err := upload.Confirm(ctx, a.Disk, key, filename, policyFor(user))
+	if err != nil {
+		return records.File{}, err
+	}
+	final := path.Join(filesDir, user, path.Base(res.Key))
+	if _, err := a.Disk.Move(ctx, res.Key, final); err != nil {
+		return records.File{}, err
+	}
+	var f records.File
+	err = a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		f, err = a.Store.CreateFile(ctx, records.NewFile{
+			Disk: diskName, Key: final, Filename: res.Filename,
+			ContentType: res.ContentType, Size: res.Size, SHA256: res.SHA256, UploadedBy: user,
+		})
+		if err != nil {
+			return err
+		}
+		_, err = a.Store.Attach(ctx, "", f.ID, records.Owner{Type: ownerUser, ID: user}, roleUploads)
+		return err
+	})
+	if err != nil {
+		return records.File{}, errors.Join(err, a.Disk.Delete(context.WithoutCancel(ctx), final))
+	}
+	return f, nil
+}

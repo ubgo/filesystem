@@ -1,0 +1,8 @@
+func issueFor(ctx context.Context, sessions *upload.Sessions, userID string) (upload.IssuedSession, error) {
+	return sessions.Issue(ctx, endpoint, upload.SessionRequest{
+		Prefix:  "users/" + userID,
+		MaxSize: sessionMax,
+		Allowed: []string{"text/plain"},
+		TTL:     sessionTTL,
+	})
+}

@@ -1,0 +1,19 @@
+func importHandler(disk *filesystem.Disk, src pickers.Source, fetch upload.FetchOptions) http.Handler {
+	policy := upload.Policy{MaxSize: 10 << 20, Allowed: []string{"application/pdf"}}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var in struct {
+			ID    string `json:"id"`
+			Token string `json:"token"`
+		}
+		if err := json.NewDecoder(io.LimitReader(r.Body, 4<<10)).Decode(&in); err != nil {
+			http.Error(w, "bad pick", http.StatusBadRequest)
+			return
+		}
+		res, err := pickers.Import(r.Context(), disk, src, pickers.Pick{ID: in.ID, Token: in.Token}, policy, fetch)
+		if err != nil {
+			http.Error(w, string(filesystem.CodeOf(err)), http.StatusUnprocessableEntity)
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{"key": res.Key, "filename": res.Filename, "type": res.ContentType, "size": res.Size})
+	})
+}

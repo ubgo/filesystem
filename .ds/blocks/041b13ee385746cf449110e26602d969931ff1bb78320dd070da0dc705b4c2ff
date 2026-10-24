@@ -1,0 +1,31 @@
+func recordScopes(ctx context.Context, out io.Writer) error {
+	db, err := sql.Open("sqlite", memoryDB)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = db.Close() }()
+	db.SetMaxOpenConns(1)
+	disk, err := filesystem.NewDisk("media", memory.New())
+	if err != nil {
+		return err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return err
+	}
+	store, err := records.New(db, sqlb.SQLiteDialect{}, disks)
+	if err != nil {
+		return err
+	}
+	if _, err := store.Migrate(ctx); err != nil {
+		return err
+	}
+	p := upload.Policy{MaxSize: 1 << 20, Allowed: []string{"application/pdf"}}
+	f, err := store.Upload(ctx, "acme", "media", strings.NewReader("%PDF-1.7 acme"), "plan.pdf", p)
+	if err != nil {
+		return err
+	}
+	_, err = store.File(ctx, "globex", f.ID)
+	fmt.Fprintf(out, "globex asks for acme's file: %s\n", filesystem.CodeOf(err))
+	return nil
+}

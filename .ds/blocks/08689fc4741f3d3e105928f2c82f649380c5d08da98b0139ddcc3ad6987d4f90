@@ -1,0 +1,28 @@
+func New(ctx context.Context, dataDir string, diskOpts ...filesystem.Option) (*App, error) {
+	drv, err := local.New(filepath.Join(dataDir, "files"))
+	if err != nil {
+		return nil, err
+	}
+	disk, err := filesystem.NewDisk(diskName, drv, diskOpts...)
+	if err != nil {
+		return nil, err
+	}
+	app := &App{}
+	if app.Disks, err = filesystem.NewManager(disk); err != nil {
+		return nil, err
+	}
+	if app.DB, err = openDB(ctx, dataDir); err != nil {
+		return nil, err
+	}
+	app.Store, err = records.New(app.DB, sqlb.SQLiteDialect{}, app.Disks,
+		records.WithOwnerTypes(ownerUser, ownerTeam),
+		records.WithObjectErrorHandler(app.rememberOrphan))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := app.Store.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	app.Handler = app.routes()
+	return app, nil
+}

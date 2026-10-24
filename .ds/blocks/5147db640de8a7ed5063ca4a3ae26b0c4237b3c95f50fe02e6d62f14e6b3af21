@@ -1,0 +1,11 @@
+func readOnly(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("archive", memory.New(), filesystem.WithInterceptors(filesystem.ReadOnly()))
+	if err != nil {
+		return err
+	}
+	_, err = disk.WriteBytes(ctx, "a.txt", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "read-only write: %s\n", filesystem.CodeOf(err))
+	_, err = disk.Exists(ctx, "a.txt")
+	fmt.Fprintf(out, "read-only exists: %v\n", err)
+	return nil
+}

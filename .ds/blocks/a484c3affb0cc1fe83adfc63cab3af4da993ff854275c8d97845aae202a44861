@@ -1,0 +1,11 @@
+func reservedNames(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	for _, k := range []string{"exports/con.txt", "exports/console.txt"} {
+		_, err := disk.WriteBytes(ctx, k, []byte("x"), filesystem.WriteOptions{})
+		code := filesystem.CodeOf(err)
+		if err == nil {
+			code = "ok"
+		}
+		fmt.Fprintf(out, "write %s: %s\n", k, code)
+	}
+	return nil
+}

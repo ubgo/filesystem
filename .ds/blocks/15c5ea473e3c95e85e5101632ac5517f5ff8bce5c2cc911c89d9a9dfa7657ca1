@@ -1,0 +1,10 @@
+func FailOpen(s scan.Scanner, onError func(error)) scan.Scanner {
+	return scan.ScannerFunc(func(ctx context.Context, r io.Reader) (scan.Verdict, error) {
+		v, err := s.Scan(ctx, r)
+		if err != nil {
+			onError(err)
+			return scan.Verdict{Clean: true}, nil
+		}
+		return v, nil
+	})
+}

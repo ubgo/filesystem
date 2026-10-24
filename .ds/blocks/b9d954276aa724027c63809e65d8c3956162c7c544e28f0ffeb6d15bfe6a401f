@@ -1,0 +1,8 @@
+func everyoneButContractor(ctx context.Context, s *records.Store, ap *acl.Plugin, teamFolder, finance string, now time.Time) error {
+	if _, err := ap.Grant(ctx, s, tenant, acl.Grant{Subject: team, Kind: acl.OnFolder, Resource: teamFolder, Level: acl.Write}); err != nil {
+		return err
+	}
+	until := now.Add(auditWindow)
+	_, err := ap.Grant(ctx, s, tenant, acl.Grant{Subject: contractor, Kind: acl.OnFolder, Resource: finance, Level: acl.Read, Effect: acl.Deny, ExpiresAt: &until})
+	return err
+}

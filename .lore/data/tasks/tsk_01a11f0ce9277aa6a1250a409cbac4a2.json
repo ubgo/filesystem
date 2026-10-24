@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim): \"yes do all the batch man\" (after: about 75 findings remain in the internal audit notes, mostly inconvenient or cosmetic plus product-decision items).\n\nAcceptance: every open finding fixed per the satl-no-hardwire fix mode, or, where a fix would break a security floor or a documented promise, recorded in the report as kept with the reason; product decisions taken with the safe default and recorded; full gates green; ask before commit.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-09T09:45:38.846325000Z",
+  "created_at": "2026-10-09T05:05:02.247695000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11f0ce9277aa6a1250a409cbac4a2",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "No-hardwire round 2: every remaining audit finding (B5 B8 B9 B11 B15-B17, I3-I56, C1-C14)",
+  "updated_at": "2026-10-09T09:45:38.846327000Z"
+}

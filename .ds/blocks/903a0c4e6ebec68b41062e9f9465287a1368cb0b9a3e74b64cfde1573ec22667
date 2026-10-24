@@ -1,0 +1,33 @@
+func (a *App) retryOrphans(ctx context.Context) (int, error) {
+	rows, err := a.DB.QueryContext(ctx, "SELECT disk, storage_key FROM orphaned_objects")
+	if err != nil {
+		return 0, err
+	}
+	var queued []orphan
+	for rows.Next() {
+		var o orphan
+		if err := rows.Scan(&o.disk, &o.key); err != nil {
+			_ = rows.Close()
+			return 0, err
+		}
+		queued = append(queued, o)
+	}
+	if err := errors.Join(rows.Err(), rows.Close()); err != nil {
+		return 0, err
+	}
+	done := 0
+	for _, o := range queued {
+		disk, err := a.Disks.Disk(o.disk)
+		if err == nil {
+			err = disk.Delete(ctx, o.key)
+		}
+		if err != nil {
+			continue // still failing; the next pass tries again
+		}
+		if _, err := a.DB.ExecContext(ctx, "DELETE FROM orphaned_objects WHERE disk = ? AND storage_key = ?", o.disk, o.key); err != nil {
+			return done, err
+		}
+		done++
+	}
+	return done, nil
+}

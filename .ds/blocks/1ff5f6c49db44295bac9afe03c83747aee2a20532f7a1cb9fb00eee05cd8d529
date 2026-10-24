@@ -1,0 +1,32 @@
+func sendfile(ctx context.Context, out io.Writer) error {
+	dir, err := os.MkdirTemp("", "concepts-delivery-")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = os.RemoveAll(dir) }()
+	drv, err := local.New(dir)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("assets", drv, filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	if err != nil {
+		return err
+	}
+	if _, err := disk.Write(ctx, "logos/acme corp.png", bytes.NewReader(pixel), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	handler := fshttp.Public(disk, fshttp.PublicOptions{Sendfile: &fshttp.Sendfile{
+		Header: fshttp.HeaderAccelRedirect,
+		// Only the cleaned key reaches the mapping, never the request path.
+		Path: func(_, key string) (string, bool) {
+			return protectedLocation + filesystem.EscapeKey(key), true
+		},
+	}})
+	for _, path := range []string{"/logos/acme%20corp.png", "/logos/../../etc/passwd"} {
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, httptest.NewRequestWithContext(ctx, http.MethodGet, "http://app.test"+path, nil))
+		h := rec.Header()
+		fmt.Fprintf(out, "sendfile %s: %d %s=%q body %d bytes | %s | %s\n", path, rec.Code, fshttp.HeaderAccelRedirect, h.Get(fshttp.HeaderAccelRedirect), rec.Body.Len(), h.Get("Content-Type"), h.Get(fshttp.HeaderContentTypeOptions))
+	}
+	return nil
+}

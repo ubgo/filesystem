@@ -1,0 +1,8 @@
+func mediaDSN(endpoint string) string {
+	q := url.Values{}
+	q.Set(fss3.ParamRegion, fakeRegion)
+	q.Set(fss3.ParamEndpoint, endpoint)
+	q.Set(fss3.ParamPathStyle, "true")
+	q.Set(fss3.ParamPartSize, fmt.Sprint(partSize))
+	return fss3.Scheme + "://" + bucketName + "?" + q.Encode()
+}

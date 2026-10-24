@@ -1,0 +1,28 @@
+func roundTrip(ctx context.Context, out io.Writer, endpoint string) error {
+	mux := filesystem.NewMux()
+	if err := mux.Register(fss3.Scheme, fss3.Opener); err != nil {
+		return err
+	}
+	disk, err := mux.Open(ctx, "media", providerDSN(endpoint))
+	if err != nil {
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	if _, err := disk.Write(ctx, "photos/cat.txt", strings.NewReader("meow"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	b, err := disk.ReadAll(ctx, "photos/cat.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "round trip: read back %q\n", b)
+	for entry, err := range disk.List(ctx, "photos", filesystem.ListOptions{}) {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "listed: %s %d bytes\n", entry.Key, entry.Size)
+	}
+	_, err = disk.Write(ctx, "photos/cat.txt", strings.NewReader("woof"), filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "if-not-exists without conditional_write: %s\n", filesystem.CodeOf(err))
+	return nil
+}

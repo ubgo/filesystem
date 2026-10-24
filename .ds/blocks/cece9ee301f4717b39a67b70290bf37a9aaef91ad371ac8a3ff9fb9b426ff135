@@ -1,0 +1,35 @@
+func demo(ctx context.Context, w io.Writer, lenient, strict *records.Store) error {
+	photo, err := makePNG(640, 480)
+	if err != nil {
+		return err
+	}
+	f, dims, err := uploadAndMeasure(ctx, lenient, "photo.png", photo)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "photo.png: %s, metadata %v\n", dims, f.Metadata)
+	_, dims, err = uploadAndMeasure(ctx, lenient, "notes.txt", []byte("plain text"))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "notes.txt: %s\n", dims)
+	corrupt := []byte(pngSignature + strings.Repeat("x", 64))
+	_, dims, err = uploadAndMeasure(ctx, lenient, "broken.png", corrupt)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "broken.png: %s\n", dims)
+	if _, _, err = uploadAndMeasure(ctx, strict, "broken.png", corrupt); err != nil {
+		fmt.Fprintf(w, "broken.png with WithStrict: %s\n", filesystem.CodeOf(err))
+	}
+	wide, err := makePNG(1920, 1080)
+	if err != nil {
+		return err
+	}
+	dims, err = replaceAndMeasure(ctx, lenient, f.ID, wide)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "photo.png after replace: %s\n", dims)
+	return nil
+}

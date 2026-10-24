@@ -1,0 +1,10 @@
+func (c *Changelog) OnEvent(ctx context.Context, s *records.Store, e records.Event) error {
+	ins := sqlb.NewInsert(s.Dialect()).Into(changes).Row(
+		sqlb.Set(changeScope, e.Scope), sqlb.Set(changeKind, string(e.Kind)), sqlb.Set(changeFileID, e.FileID), sqlb.Set(changeAt, e.At),
+	)
+	if _, err := s.Exec(ctx, ins); err != nil {
+		return err
+	}
+	s.AfterCommit(ctx, func(context.Context) { c.Sent = append(c.Sent, string(e.Kind)) })
+	return nil
+}

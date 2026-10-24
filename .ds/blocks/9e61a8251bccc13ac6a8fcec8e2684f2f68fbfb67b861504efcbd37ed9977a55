@@ -1,0 +1,3 @@
+func escapeForURL(out io.Writer) {
+	fmt.Fprintf(out, "EscapeKey -> %s\n", filesystem.EscapeKey("naïve café/résumé #1.pdf"))
+}

@@ -1,0 +1,27 @@
+func oembedPreviews(ctx context.Context, out io.Writer, disk *filesystem.Disk, allow func(netip.Addr) bool) error {
+	prov := newProvider()
+	defer prov.Close()
+	cache, err := newOEmbedCache(disk, allow, prov.URL)
+	if err != nil {
+		return err
+	}
+
+	p, err := cache.LinkPreview(ctx, prov.URL+"/watch?v=1")
+	if err != nil {
+		return err
+	}
+	o := p.OEmbed
+	if o == nil {
+		return fmt.Errorf("no oEmbed for the watch page: %s", p.OEmbedError)
+	}
+	fmt.Fprintf(out, "oembed    %s %q by %q from %q, %dx%d, thumbnail %s\n", o.Type, o.Title, o.AuthorName, o.ProviderName, o.Width, o.Height, o.ThumbnailURL)
+	fmt.Fprintf(out, "oembed    javascript: provider URL dropped: %t, html is an iframe for a sandbox: %t\n", o.ProviderURL == "", strings.HasPrefix(o.HTML, "<iframe "))
+
+	p, err = cache.LinkPreview(ctx, prov.URL+"/post")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "off-list  discovery link followed: %t, oEmbed %t, preview stands: %q\n", prov.evilHits.Load() > 0, p.OEmbed != nil, p.Title)
+	fmt.Fprintf(out, "endpoint  asked %d time(s) in all\n", prov.endpointHits.Load())
+	return nil
+}

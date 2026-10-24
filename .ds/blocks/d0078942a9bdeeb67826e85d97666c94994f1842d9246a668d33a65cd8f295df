@@ -1,0 +1,21 @@
+func (a *App) accept(w http.ResponseWriter, r *http.Request) {
+	tenant := r.Header.Get(headerTenant)
+	if tenant == "" {
+		writeError(w, filesystem.Errorf(filesystem.CodePermission, "sign in first"))
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, maxImportBytes+formOverhead)
+	file, hdr, err := r.FormFile("file")
+	if err != nil {
+		writeError(w, filesystem.Errorf(filesystem.CodeInvalidArgument, "send the CSV in the form field \"file\""))
+		return
+	}
+	defer func() { _ = file.Close() }()
+	f, err := a.enqueue(r.Context(), tenant, file, hdr.Filename)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	w.Header().Set("Location", "/imports/"+f.ID)
+	writeJSON(w, http.StatusAccepted, importResponse{ImportID: f.ID, Status: f.Status, Detail: f.StatusDetail})
+}

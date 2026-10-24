@@ -1,0 +1,17 @@
+func (a *App) record(ctx context.Context, res upload.Result, meta map[string]string) error {
+	user, err := userFrom(ctx)
+	if err != nil {
+		return err
+	}
+	return a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		f, err := a.Store.CreateFile(ctx, records.NewFile{
+			Disk: diskName, Key: res.Key, Filename: res.Filename,
+			ContentType: res.ContentType, Size: res.Size, SHA256: res.SHA256, UploadedBy: user,
+		})
+		if err != nil {
+			return err
+		}
+		_, err = a.Store.Attach(ctx, "", f.ID, records.Owner{Type: ownerUser, ID: user}, roleUploads)
+		return err
+	})
+}

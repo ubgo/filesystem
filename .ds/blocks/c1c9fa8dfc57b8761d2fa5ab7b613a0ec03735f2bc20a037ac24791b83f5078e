@@ -1,0 +1,8 @@
+func attachPhotos(ctx context.Context, s *records.Store, post records.Owner, photos []records.File) error {
+	for _, f := range photos {
+		if _, err := s.Attach(ctx, tenant, f.ID, post, roleGallery); err != nil {
+			return fmt.Errorf("photo %s: %w", f.Key, err)
+		}
+	}
+	return nil
+}

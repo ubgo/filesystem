@@ -1,0 +1,10 @@
+func trimText(_ context.Context, in upload.Info, body io.Reader) (io.Reader, upload.Info, error) {
+	if !strings.HasPrefix(in.ContentType, "text/plain") {
+		return body, in, nil
+	}
+	b, err := io.ReadAll(body)
+	if err != nil {
+		return nil, upload.Info{}, err
+	}
+	return bytes.NewReader(bytes.TrimSpace(b)), in, nil
+}

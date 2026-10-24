@@ -1,0 +1,32 @@
+func TestPhotoLifecycle(t *testing.T) {
+	srv, dir := testServer(t)
+	img := pngBytes(t)
+
+	status, body := uploadAs(t, srv, "alice", "beach.png", img)
+	if status != http.StatusCreated {
+		t.Fatalf("upload = %d %s", status, body)
+	}
+	p := decode[photo](t, body)
+	if p.ContentType != "image/png" || p.Size != int64(len(img)) || p.Filename != "beach.png" {
+		t.Fatalf("uploaded %+v", p)
+	}
+	stored, err := filepath.Glob(filepath.Join(dir, "files", rolePhotos, "*.png"))
+	if err != nil || len(stored) != 1 {
+		t.Fatalf("stored files = %v, %v", stored, err)
+	}
+
+	if _, body = do(t, srv, http.MethodGet, "/photos", "alice", nil, ""); len(decode[[]photo](t, body)) != 1 {
+		t.Fatalf("alice's photos = %s", body)
+	}
+	if _, body = do(t, srv, http.MethodGet, "/photos", "bob", nil, ""); len(decode[[]photo](t, body)) != 0 {
+		t.Fatalf("bob sees %s", body)
+	}
+	if status, _ = do(t, srv, http.MethodGet, "/photos/"+p.ID, "bob", nil, ""); status != http.StatusNotFound {
+		t.Fatalf("bob opening alice's photo = %d", status)
+	}
+	if status, body = do(t, srv, http.MethodGet, "/photos/"+p.ID, "alice", nil, ""); status != http.StatusOK || !bytes.Equal(body, img) {
+		t.Fatalf("download through the signed link = %d, %d bytes", status, len(body))
+	}
+
+	trashAndPurge(t, srv, p.ID, stored[0])
+}

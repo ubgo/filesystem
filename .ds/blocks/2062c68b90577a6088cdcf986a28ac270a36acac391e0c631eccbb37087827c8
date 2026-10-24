@@ -1,0 +1,6 @@
+type config struct {
+	BaseURL    string
+	DataDir    string
+	StorageDSN string
+	Secret     []byte
+}

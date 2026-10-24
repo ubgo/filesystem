@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Built DO-02 (pdf meta.go: title, author, created, encrypted), DO-05 (pdf text.go: Tool.Text, WithText, WithOCR, Recognizer seam, text derivative capped at MaxText), DO-03 (contrib/office: soffice converter as a pdf.Converter, with a fresh HOME and profile, macros off, link updates off, process-group kill, output watch cap), DO-06 (contrib/ocr: tesseract Recognize plus an image plugin, header and pixel check, language allowlist), SR-05 (contrib/vision: Labeler, opt-in-per-scope plugin through records/tags, google REST adapter with the key in a header and held as a redacted Secret). Guides docs/plugins/{pdf,office,ocr,vision}.md, the module READMEs, and the examples/documents module (search, labels). Each feature was break-verified. soffice is not installed here, so the real LibreOffice test skipped.",
+  "created_at": "2026-10-07T11:53:49.271278000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a1151fbe987bf6a310a5e19836dc75",
+  "entity_table": "tasks",
+  "id": "cmt_01a1163671d77468bece22bdd08c97c2",
+  "updated_at": "2026-10-07T11:53:49.271279000Z"
+}

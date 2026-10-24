@@ -1,0 +1,22 @@
+func failures(ctx context.Context, out io.Writer, d drive) error {
+	revoked := func(context.Context) (string, error) { return "", errors.New("refresh token revoked") }
+	wrong := func(context.Context) (string, error) { return "expired-token", nil }
+	results := make([]string, 0, 2)
+	for _, tok := range []tokenFunc{revoked, wrong} {
+		disk, err := d.open(tok, nil)
+		if err != nil {
+			return err
+		}
+		_, err = disk.Stat(ctx, "notes/todo.txt")
+		results = append(results, outcome(err))
+	}
+	fmt.Fprintf(out, "%s: failing token source: %s, refused token: %s\n", d.name, results[0], results[1])
+	disk, err := d.open(validToken, &http.Client{Transport: throttled{}})
+	if err != nil {
+		return err
+	}
+	_, err = disk.Stat(ctx, "notes/todo.txt")
+	wait, _ := filesystem.RetryAfterOf(err)
+	fmt.Fprintf(out, "%s: rate limited: %s, retry after %s\n", d.name, outcome(err), wait)
+	return nil
+}

@@ -1,0 +1,15 @@
+func demoScanner(down bool) scan.Scanner {
+	return scan.ScannerFunc(func(_ context.Context, r io.Reader) (scan.Verdict, error) {
+		if down {
+			return scan.Verdict{}, errors.New("dial tcp 127.0.0.1:3310: connection refused")
+		}
+		b, err := io.ReadAll(r)
+		if err != nil {
+			return scan.Verdict{}, err
+		}
+		if bytes.Contains(b, []byte("EICAR")) {
+			return scan.Verdict{Signature: eicar}, nil
+		}
+		return scan.Verdict{Clean: true}, nil
+	})
+}

@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Built: Route/Mount (route.go), Failover (failover.go), Overlay (overlay.go), CachedRead+TrimCache (cachedisk.go), Batch (batch.go, used by DeleteKeys/DeletePrefix fallbacks), shared merged listing (listmerge.go), layer.Bandwidth/Fault/Hedge. Core hooks: Op.WrapBody, Op.Hedgeable; Stat/Read concurrency-safe. Conformance suite runs over route, failover, overlay, cached. Every feature test break-verified. Docs: docs/concepts/composing-disks.md (new), interceptors.md Step 10, layer/README.md rows. Not done: fs cp -r on Batch (cmd/fs not owned), docs/README.md index row, jobs TrimCache job, Failover as a Mirror option.",
+  "created_at": "2026-10-07T08:31:18.981961000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a1151fb7907090be0b5d4fe791744e",
+  "entity_table": "tasks",
+  "id": "cmt_01a1157d0bc57ed492b1623f265d7505",
+  "updated_at": "2026-10-07T08:31:18.981962000Z"
+}

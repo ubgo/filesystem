@@ -1,0 +1,29 @@
+func failover(ctx context.Context, out io.Writer) error {
+	replica, err := mem("replica")
+	if err != nil {
+		return err
+	}
+	if _, err := replica.WriteBytes(ctx, "logo.png", []byte("logo"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	primary, err := filesystem.NewDisk("primary", outage{memory.New()})
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.Failover("media", primary, []*filesystem.Disk{replica}, filesystem.FailoverOptions{
+		OnFailover: func(_ context.Context, e filesystem.FailoverEvent) {
+			fmt.Fprintf(out, "failover: %s %s moved from %s to %s\n", e.Op, e.Key, e.From, e.To)
+		},
+	})
+	if err != nil {
+		return err
+	}
+	b, err := disk.ReadAll(ctx, "logo.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "failover: read %q while the primary is down\n", b)
+	_, err = disk.WriteBytes(ctx, "new.png", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "failover: write during the outage: %s\n", filesystem.CodeOf(err))
+	return nil
+}

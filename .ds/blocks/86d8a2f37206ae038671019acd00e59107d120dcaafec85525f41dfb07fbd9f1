@@ -1,0 +1,15 @@
+func seatUsage(ctx context.Context, s *records.Store, q *quota.Plugin) (string, error) {
+	var parts []string
+	for _, m := range []string{alice, bob} {
+		u, err := q.UploaderUsage(ctx, s, team, m)
+		if err != nil {
+			return "", err
+		}
+		parts = append(parts, fmt.Sprintf("%s %d/%d", strings.TrimPrefix(m, "user:"), u.Bytes, seatPlan.Bytes))
+	}
+	u, err := q.Usage(ctx, s, team)
+	if err != nil {
+		return "", err
+	}
+	return strings.Join(parts, ", ") + fmt.Sprintf(", team %d/%d bytes", u.Bytes, teamPlan.Bytes), nil
+}

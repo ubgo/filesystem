@@ -1,0 +1,14 @@
+func thumbnails(w io.Writer, p *imaging.Pipeline, src []byte) error {
+	for _, t := range []imaging.Transform{
+		{Mode: imaging.ModeFit, Width: thumbSide, Height: thumbSide, Format: imaging.FormatJPEG},
+		{Mode: imaging.ModeFit, Width: thumbSide, Height: thumbSide, Format: imaging.FormatWebP, Quality: webpQuality},
+		{Mode: imaging.ModeFit, Width: thumbSide, Height: thumbSide, Format: imaging.FormatAVIF, Quality: avifQuality},
+	} {
+		res, err := p.Process(bytes.NewReader(src), t, imaging.Options{})
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "%-10s %dx%d %s\n", res.ContentType, res.Width, res.Height, t.Extension())
+	}
+	return nil
+}

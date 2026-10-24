@@ -1,0 +1,19 @@
+func redaction(ctx context.Context, out io.Writer) error {
+	key := signedurl.Key{ID: "2026-10", Secret: demoSigningSecret}
+	signer, err := signedurl.New("https://app.example.com/files", []signedurl.Key{key})
+	if err != nil {
+		return err
+	}
+	var logs bytes.Buffer
+	slog.New(slog.NewJSONHandler(&logs, nil)).Info("signer ready", "key", key, "signer", signer)
+	printed := fmt.Sprintf("%v %+v %#v %s", key, key, key, key) + logs.String()
+	fmt.Fprintf(out, "key printed: %v\n", key)
+	fmt.Fprintf(out, "secret in any print or log: %t\n", strings.Contains(printed, string(demoSigningSecret)))
+	mux := filesystem.NewMux()
+	if err := mux.Register("mem", memory.Opener); err != nil {
+		return err
+	}
+	_, err = mux.Open(ctx, "media", "mem://bucket?password=hunter2&prefix=../x")
+	fmt.Fprintf(out, "DSN error: %v (password shown: %t)\n", err, strings.Contains(fmt.Sprint(err), "hunter2"))
+	return nil
+}

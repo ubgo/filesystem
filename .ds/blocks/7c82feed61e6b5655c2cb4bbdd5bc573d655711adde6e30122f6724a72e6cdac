@@ -1,0 +1,10 @@
+var attachmentPolicy = upload.Policy{
+	MaxSize: maxAttachmentBytes,
+	Allowed: []string{
+		"image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf", "text/plain", "text/csv", "application/zip",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	},
+	Key:        upload.RandomKey("chat"),
+	Visibility: filesystem.VisibilityPrivate,
+}

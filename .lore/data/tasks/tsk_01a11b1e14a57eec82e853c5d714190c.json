@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim): \"yes do all\" (answering: run the standards pass and commit+push now, or close the Azure and sqlblob gaps first?)\n\nContext: round 6 uncommitted on top of b3fdd80; COVERAGE.md lists the gaps.\n\nAcceptance: tests for append over MaxSize, Restore default priority, tags refused 400, opener.go:189 and any other reachable line; COVERAGE.md updated.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T10:50:41.870111000Z",
+  "created_at": "2026-10-08T10:45:18.629976000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11b1e14a57eec82e853c5d714190c",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T10:45:40.086370000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Azure coverage: test reachable uncovered lines (95.4%)",
+  "updated_at": "2026-10-08T10:50:41.870113000Z"
+}

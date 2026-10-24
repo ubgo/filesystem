@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim):\n  yes do\n\nContext:\n  Reply to: 'Want me to bring those packages back to 100% before the commit? That would be a separate test-writing pass.' Measured: core 95.8, s3 96.3, gcs 98.0, sftp 98.5, filesystemtest 97.4, pdf 96.0, cmd/fs 96.7 (COVERAGE.md had them at 100%).\n\nAcceptance:\n  Each package back to 100% under the same measurement task cover uses, or each remaining line reported with the reason; COVERAGE.md re-measured.",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T07:33:15.682873000Z",
+  "created_at": "2026-10-08T06:10:53.803199000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a22d8eb73189157a6b944732560",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Restore 100% coverage on packages the batch dropped below it",
+  "updated_at": "2026-10-08T07:33:15.683039000Z"
+}

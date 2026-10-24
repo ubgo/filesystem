@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim, via team-lead brief):\n  UP-15 \"Upload sessions with expiry — server-issued upload token valid for a window (tus expiration, Supabase signed uploads, Uploadcare). Core.\" Today there is no recorded upload-session entity. Build the smallest real thing: a session the server issues (key or key prefix, size/type limits, expiry), redeemable for uploads until it expires, refused after; where it lives (upload package with a pluggable store interface, plus a records-backed store) is your call — keep the core stdlib-only. Expired sessions must be sweepable. Security bar: tokens are signed or random-unguessable, expiry always enforced server-side, limits re-checked on the bytes.\n\nContext:\n  Files: upload/, records/\nAcceptance:\n  issue/redeem/expire/sweep sessions with tests",
+  "commitment": "accepted",
+  "completed_at": "2026-10-08T08:17:53.496529000Z",
+  "created_at": "2026-10-08T07:56:22.233867000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a11a8369597d4295fc59658be709bb",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-08T07:56:26.565962000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "UP-15 upload sessions with expiry",
+  "updated_at": "2026-10-08T08:17:53.496543000Z"
+}

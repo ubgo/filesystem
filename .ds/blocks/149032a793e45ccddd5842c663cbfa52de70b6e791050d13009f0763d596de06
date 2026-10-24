@@ -1,0 +1,3 @@
+func thumbsLocation(f records.File, _ string) (string, string, error) {
+	return thumbsDisk, "thumbs/" + f.Scope + "/" + f.ID + "/", nil
+}

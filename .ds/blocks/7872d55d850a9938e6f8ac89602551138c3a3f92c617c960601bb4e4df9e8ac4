@@ -1,0 +1,24 @@
+func sweepStaged(ctx context.Context, out io.Writer, disk *filesystem.Disk, appDir string) error {
+	staged := filepath.Join(appDir, webdav.StagingDir, "tmp", strings.Repeat("a", 26))
+	if err := os.WriteFile(staged, []byte("half an upload"), 0o600); err != nil {
+		return err
+	}
+	dayAgo := time.Now().Add(-24 * time.Hour)
+	if err := os.Chtimes(staged, dayAgo, dayAgo); err != nil {
+		return err
+	}
+	cutoff := time.Now().Add(-time.Hour)
+	found, err := disk.FindAbandoned(ctx, cutoff)
+	if err != nil {
+		return err
+	}
+	for _, a := range found {
+		fmt.Fprintf(out, "abandoned: %s %s\n", a.Kind, a.ID)
+	}
+	n, err := disk.SweepAbandoned(ctx, cutoff)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "swept: %d\n", n)
+	return nil
+}

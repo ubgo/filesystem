@@ -1,0 +1,34 @@
+func vercelBasics(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	if _, err := disk.WriteBytes(ctx, "avatars/u1.png", pngHeader, filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stat: %s %d bytes %s etag=%s\n", e.Key, e.Size, e.ContentType, e.ETag)
+	r, err := disk.ReadRange(ctx, "avatars/u1.png", filesystem.ByteRange{Offset: 1, Length: 3})
+	if err != nil {
+		return err
+	}
+	head, err := io.ReadAll(r)
+	_ = r.Close()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "range read: %q\n", head)
+	if _, err := disk.Copy(ctx, "avatars/u1.png", "avatars/u1-backup.png"); err != nil {
+		return err
+	}
+	page, err := disk.ListPage(ctx, "avatars", filesystem.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "list avatars: %d entries after a server-side copy\n", len(page.Entries))
+	if err := disk.Delete(ctx, "avatars/u1-backup.png"); err != nil {
+		return err
+	}
+	ok, err := disk.Exists(ctx, "avatars/u1-backup.png")
+	fmt.Fprintf(out, "after delete: exists=%t (%s)\n", ok, outcome(err))
+	return err
+}

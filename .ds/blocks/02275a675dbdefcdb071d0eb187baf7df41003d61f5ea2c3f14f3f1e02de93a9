@@ -1,0 +1,11 @@
+func smallInvoices(ctx context.Context, s *records.Store, tp *tags.Plugin) ([]string, error) {
+	tagged, err := tp.Filter(s, tenant, "invoice")
+	if err != nil {
+		return nil, err
+	}
+	page, err := s.Files(ctx, records.FileQuery{
+		Scope:   tenant,
+		Filters: []sqlb.Predicate{tagged, sqlb.Less(records.FileSize, int64(smallFile))},
+	})
+	return filenames(page), err
+}

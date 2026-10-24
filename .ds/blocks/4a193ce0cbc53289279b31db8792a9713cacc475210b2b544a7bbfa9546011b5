@@ -1,0 +1,11 @@
+func openWithConfig(client *s3.Client) (*filesystem.Disk, error) {
+	drv, err := fss3.New(fss3.Config{
+		Client:   client,
+		Bucket:   bucketName,
+		PartSize: partSize,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("media", drv)
+}

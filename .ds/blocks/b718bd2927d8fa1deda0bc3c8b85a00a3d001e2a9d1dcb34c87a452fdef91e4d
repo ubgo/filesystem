@@ -1,0 +1,9 @@
+type Handlers struct {
+	Upload  http.Handler // POST multipart form uploads
+	Ticket  http.Handler // POST a TicketRequest, get a presigned PUT
+	Uppy    http.Handler // Uppy's AWS S3 multipart protocol
+	Tus     http.Handler // tus resumable uploads
+	Files   http.Handler // signed downloads and uploads
+	Public  http.Handler // public files by key
+	Records http.Handler // upload, attach, list, reorder, read, trash
+}

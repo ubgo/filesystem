@@ -1,0 +1,16 @@
+func openVercel(token string, access vercelblob.Access, fake *fakes.Vercel) (*filesystem.Disk, error) {
+	drv, err := vercelblob.New(vercelblob.Config{
+		Token:   token,
+		Access:  access,
+		APIURL:  fake.API.URL,
+		BlobURL: fake.Blobs.URL,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var opts []filesystem.Option
+	if access == vercelblob.AccessPublic {
+		opts = append(opts, filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+	}
+	return filesystem.NewDisk("blob-"+string(access), drv, opts...)
+}

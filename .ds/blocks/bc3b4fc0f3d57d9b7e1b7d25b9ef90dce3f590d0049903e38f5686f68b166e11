@@ -1,0 +1,7 @@
+type receiver struct {
+	mu     sync.Mutex
+	secret webhooks.Secret
+	seen   map[string]bool
+	calls  int
+	got    []string
+}

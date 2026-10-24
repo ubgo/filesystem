@@ -1,0 +1,8 @@
+func storyboard(ctx context.Context, disk *filesystem.Disk, f records.File) (video.Sprite, error) {
+	src, err := disk.Read(ctx, f.Key)
+	if err != nil {
+		return video.Sprite{}, err
+	}
+	defer func() { _ = src.Close() }()
+	return tool.Storyboard(ctx, src, video.Storyboard{Interval: storyboardEvery, Columns: 3, TileSize: 120})
+}

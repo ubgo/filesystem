@@ -1,0 +1,15 @@
+func (a *App) ImportLegacy(ctx context.Context, customer, key string, body []byte, filename string) (records.File, error) {
+	if _, err := a.Disk.WriteBytes(ctx, key, body, filesystem.WriteOptions{}); err != nil {
+		return records.File{}, err
+	}
+	var f records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if f, err = a.Store.CreateFile(ctx, records.NewFile{Disk: diskName, Key: key, Filename: filename}); err != nil {
+			return err
+		}
+		_, err = a.Store.Attach(ctx, "", f.ID, records.Owner{Type: ownerCustomer, ID: customer}, roleInvoices)
+		return err
+	})
+	return f, err
+}

@@ -1,0 +1,27 @@
+func gzipAsStored(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+	if _, err := zw.Write(bytes.Repeat([]byte("log line\n"), 100)); err != nil {
+		return err
+	}
+	if err := zw.Close(); err != nil {
+		return err
+	}
+	_, err := disk.WriteBytes(ctx, "logs/app.log.gz", buf.Bytes(), filesystem.WriteOptions{
+		ContentType: "text/plain",
+		Headers:     filesystem.HTTPHeaders{ContentEncoding: "gzip", CacheControl: "private, max-age=60"},
+	})
+	if err != nil {
+		return err
+	}
+	got, err := disk.ReadAll(ctx, "logs/app.log.gz")
+	if err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "logs/app.log.gz")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "gzip object: stored %d bytes, read %d, identical=%t, cache-control=%q\n", buf.Len(), len(got), bytes.Equal(got, buf.Bytes()), e.Headers.CacheControl)
+	return nil
+}

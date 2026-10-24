@@ -1,0 +1,3 @@
+func newCaseInsensitive() *folders.Plugin {
+	return folders.New(folders.WithNameKey(folders.FoldCase))
+}

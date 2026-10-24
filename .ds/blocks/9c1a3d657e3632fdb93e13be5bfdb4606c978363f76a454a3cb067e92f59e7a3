@@ -1,0 +1,21 @@
+func bucketReplication(ctx context.Context, out io.Writer, client *s3.Client, _ *fakeS3) error {
+	err := fss3.SetReplication(ctx, client, "history", fss3.ReplicationConfig{
+		Role: "arn:aws:iam::111122223333:role/s3-replication",
+		Rules: []fss3.ReplicationRule{{
+			ID: "contracts-dr", Priority: 1, Prefix: "contracts/",
+			DestinationBucket: "arn:aws:s3:::history-eu-west-1",
+			StorageClass:      "STANDARD_IA",
+			ReplicateDeletes:  false, // a backup, not a mirror
+		}},
+	})
+	if err != nil {
+		return err
+	}
+	cfg, err := fss3.Replication(ctx, client, "history")
+	if err != nil {
+		return err
+	}
+	r := cfg.Rules[0]
+	fmt.Fprintf(out, "replication: %s %s -> %s, deletes replicated: %t\n", r.ID, r.Prefix, r.DestinationBucket, r.ReplicateDeletes)
+	return nil
+}

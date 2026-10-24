@@ -1,0 +1,12 @@
+func (a *App) setAvatar(ctx context.Context, userID string, body io.Reader, filename string, p upload.Policy) (records.File, error) {
+	var stored records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if stored, err = a.Store.Upload(ctx, "", diskName, body, filename, p); err != nil {
+			return err
+		}
+		_, err = a.Store.SetAttachment(ctx, "", stored.ID, records.Owner{Type: ownerUser, ID: userID}, roleAvatar, records.PreviousPurge)
+		return err
+	})
+	return stored, err
+}

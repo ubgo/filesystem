@@ -1,0 +1,18 @@
+func openOneDrive(f *fakes.OneDrive, tok tokenFunc, client *http.Client) (*filesystem.Disk, error) {
+	drv, err := onedrive.New(onedrive.Config{
+		// Any Graph drive: /me/drive, /drives/{id}, /sites/{id}/drive.
+		Drive: "/me/drive",
+		Root:  "Apps/Invoices",
+		Token: onedrive.TokenFunc(tok),
+		// Fragments must be multiples of FragmentUnit; leave ChunkSize at
+		// 0 (10 MiB) in production.
+		ChunkSize: onedrive.FragmentUnit,
+		Client:    client,
+		// Point at the fake; omit for graph.microsoft.com.
+		BaseURL: f.BaseURL(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("onedrive", drv)
+}

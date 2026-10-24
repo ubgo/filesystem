@@ -1,0 +1,15 @@
+func tempCopy(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	path, err := disk.TempFile(ctx, greetingKey, filesystem.TempFileOptions{MaxSize: tempCap})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = os.Remove(path) }()
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "temp file: extension %s, %q\n", filepath.Ext(path), b)
+	_, err = disk.TempFile(ctx, greetingKey, filesystem.TempFileOptions{MaxSize: wordLength})
+	fmt.Fprintf(out, "temp file over its cap: %s\n", filesystem.CodeOf(err))
+	return nil
+}

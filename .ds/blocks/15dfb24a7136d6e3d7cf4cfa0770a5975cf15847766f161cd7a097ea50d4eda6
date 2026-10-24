@@ -1,0 +1,12 @@
+func (a *App) AddDocument(ctx context.Context, customer string, body []byte, filename string) (records.File, error) {
+	var f records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if f, err = a.Store.Upload(ctx, "", diskName, bytes.NewReader(body), filename, documentPolicy); err != nil {
+			return err
+		}
+		_, err = a.Store.Attach(ctx, "", f.ID, records.Owner{Type: ownerCustomer, ID: customer}, roleInvoices)
+		return err
+	})
+	return f, err
+}

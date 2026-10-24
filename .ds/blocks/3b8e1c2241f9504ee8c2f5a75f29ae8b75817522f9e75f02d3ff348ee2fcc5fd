@@ -1,0 +1,15 @@
+func webMP4(ctx context.Context, disk *filesystem.Disk, f records.File) (string, error) {
+	src, err := disk.Read(ctx, f.Key)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = src.Close() }()
+	out, err := tool.Transcode(ctx, src, video.Transcode{MaxWidth: webMaxSide, MaxHeight: webMaxSide * 9 / 16})
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = out.Close() }()
+	key := f.Key + ".web.mp4"
+	_, err = disk.Write(ctx, key, out, filesystem.WriteOptions{ContentType: video.MP4ContentType})
+	return key, err
+}

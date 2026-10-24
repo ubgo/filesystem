@@ -1,0 +1,33 @@
+func verify(ctx context.Context, src, dst *filesystem.Disk) (Report, error) {
+	var r Report
+	for e, err := range src.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return r, err
+		}
+		r.Checked++
+		want, wantSize, err := digest(ctx, src, e.Key)
+		if err != nil {
+			return r, err
+		}
+		got, gotSize, err := digest(ctx, dst, e.Key)
+		switch {
+		case filesystem.CodeOf(err) == filesystem.CodeNotFound:
+			r.Missing = append(r.Missing, e.Key)
+		case err != nil:
+			return r, err
+		case got != want || gotSize != wantSize:
+			r.Different = append(r.Different, e.Key)
+		}
+	}
+	for e, err := range dst.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return r, err
+		}
+		if ok, err := src.Exists(ctx, e.Key); err != nil {
+			return r, err
+		} else if !ok {
+			r.Extra = append(r.Extra, e.Key)
+		}
+	}
+	return r, nil
+}

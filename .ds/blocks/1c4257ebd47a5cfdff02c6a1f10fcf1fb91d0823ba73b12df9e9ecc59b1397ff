@@ -1,0 +1,3 @@
+func open(ctx context.Context, s *records.Store, p *share.Plugin, token string) (records.File, error) {
+	return p.Resolve(ctx, s, token)
+}

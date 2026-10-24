@@ -1,0 +1,12 @@
+func work(ctx context.Context, d *filesystem.Disk) error {
+	if _, err := d.WriteBytes(ctx, "reports/q3.txt", []byte("quarterly numbers\n"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	if _, err := d.ReadAll(ctx, "reports/q3.txt"); err != nil {
+		return err
+	}
+	if _, err := d.Stat(ctx, "reports/missing.txt"); filesystem.CodeOf(err) != filesystem.CodeNotFound {
+		return fmt.Errorf("want not_found, got %v", err)
+	}
+	return nil
+}

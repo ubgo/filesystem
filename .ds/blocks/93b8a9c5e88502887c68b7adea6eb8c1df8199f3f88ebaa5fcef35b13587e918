@@ -1,0 +1,3 @@
+func card(ctx context.Context, s *records.Store, p *variants.Plugin, fileID string) (variants.Variant, error) {
+	return p.Get(ctx, s, tenant, fileID, nameCard)
+}

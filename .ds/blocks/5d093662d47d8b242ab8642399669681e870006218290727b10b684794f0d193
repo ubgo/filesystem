@@ -1,0 +1,14 @@
+func (a *App) store(ctx context.Context, ws, folder string, body io.Reader, filename string) (records.File, error) {
+	var f records.File
+	err := a.Store.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		var err error
+		if f, err = a.Store.Upload(ctx, ws, diskName, body, filename, policy); err != nil {
+			return err
+		}
+		if folder == folders.RootID {
+			return nil
+		}
+		return a.Folders.Put(ctx, a.Store, ws, f.ID, folder)
+	})
+	return f, err
+}

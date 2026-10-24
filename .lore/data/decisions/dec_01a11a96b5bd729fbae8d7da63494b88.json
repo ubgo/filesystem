@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "upload.Sessions issues ID.secret tokens (store keeps only SHA-256 of the secret), redeems them as an upload.Resolver (header Upload-Session) so every handler (Handler, Chunked, Uppy, PresignHandlerWith, LimitsHandler) honours them; expiry is judged by the Sessions clock, not the store; session limits may only narrow the endpoint policy and are re-checked against the current policy at every redemption; sessions are not use-counted (redeemable until expiry). Stores: upload.MemorySessions (core, stdlib) and records/uploadsessions (fs_upload_sessions). tus has no Resolve option, so sessions there only gate via Authorize.",
+  "confidence": null,
+  "created_at": "2026-10-08T08:17:26.973171000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11a96b5bd729fbae8d7da63494b88",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "UP-15 upload sessions live in upload as a Resolver over a pluggable SessionStore",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:17:26.973171000Z"
+}

@@ -1,0 +1,20 @@
+func backfill(ctx context.Context, src, dst *filesystem.Disk) (copied, skipped int, err error) {
+	for e, err := range src.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return copied, skipped, err
+		}
+		have, err := dst.Stat(ctx, e.Key)
+		if err == nil && have.Size == e.Size {
+			skipped++
+			continue
+		}
+		if err != nil && filesystem.CodeOf(err) != filesystem.CodeNotFound {
+			return copied, skipped, err
+		}
+		if _, err := filesystem.CopyAcross(ctx, src, e.Key, dst, e.Key); err != nil {
+			return copied, skipped, err
+		}
+		copied++
+	}
+	return copied, skipped, nil
+}

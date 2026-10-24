@@ -1,0 +1,21 @@
+func galleryPages(ctx context.Context, s *records.Store, post records.Owner) ([][]string, error) {
+	var pages [][]string
+	cursor := ""
+	for {
+		page, err := s.AttachmentsPage(ctx, records.AttachmentQuery{
+			Scope: tenant, Owner: post, Role: roleGallery, Limit: pageSize, Cursor: cursor,
+		})
+		if err != nil {
+			return nil, err
+		}
+		var keys []string
+		for _, af := range page.Files {
+			keys = append(keys, af.File.Key)
+		}
+		pages = append(pages, keys)
+		if page.NextCursor == "" {
+			return pages, nil
+		}
+		cursor = page.NextCursor
+	}
+}

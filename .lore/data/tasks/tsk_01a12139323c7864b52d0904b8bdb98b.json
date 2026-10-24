@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "User asked (verbatim): \"just add to ask task we will check later\"\n\nContext: after the hard-wire audit (all 87 findings fixed, commit a57327b), three behaviours are documented as unverified at run time:\n- fshttp InlinePDF (PublicOptions/SignedOptions.InlinePDF, CSP default-src none; object-src self): check Chrome, Safari and Firefox show a PDF inline and that every other type keeps the sandbox.\n- adapters/cloudinary ResourceType image/video: a read sends format=<ext>; check what Cloudinary returns for a real upload (exact bytes or a conversion).\n- adapters/azure Config.AccountName (I32): user-delegation SAS links through a custom domain, Front Door or private-endpoint DNS; Azurite cannot show it.\n\nAcceptance: each checked against a real browser or account, findings written into the matching docs page (remove the \"unverified\" notes or fix the code).",
+  "commitment": "accepted",
+  "completed_at": null,
+  "created_at": "2026-10-09T15:12:38.972548000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a12139323c7864b52d0904b8bdb98b",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "low",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "todo",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "Verify live: inline PDF in browsers, Cloudinary image/video formats, Azure signing behind a front end",
+  "updated_at": "2026-10-09T15:12:38.972548000Z"
+}

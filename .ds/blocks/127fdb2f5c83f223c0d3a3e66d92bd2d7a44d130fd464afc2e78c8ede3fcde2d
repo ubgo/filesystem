@@ -1,0 +1,11 @@
+var rawKeys = []string{
+	"/avatars//u1.png",
+	`docs\2026\report.pdf`,
+	"./a/./b.txt",
+	"photos/",
+	"a/../b.txt",
+	"../../etc/passwd",
+	"",
+	"bad\x00name.txt",
+	overlongKey,
+}

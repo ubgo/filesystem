@@ -1,0 +1,3 @@
+func (d *Driver) Delete(ctx context.Context, key string) error {
+	return mapErr(d.backend.Delete(ctx, key))
+}

@@ -1,0 +1,12 @@
+func backupDisk(client *azblob.Client, blockSize int64, concurrency int) (*filesystem.Disk, error) {
+	drv, err := azure.New(azure.Config{
+		Client:      client,
+		Container:   "backups",
+		BlockSize:   blockSize,   // 0 is DefaultBlockSize (8 MiB)
+		Concurrency: concurrency, // 0 is DefaultConcurrency (5)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("backups", drv)
+}

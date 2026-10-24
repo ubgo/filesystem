@@ -1,0 +1,13 @@
+func (w *wiring) serve(ctx context.Context, lookup filesystem.LookupFunc) error {
+	base, _ := lookup(envFilesURL)
+	u, err := url.Parse(base)
+	if err != nil {
+		return fmt.Errorf("%s: %w", envFilesURL, err)
+	}
+	mux := http.NewServeMux()
+	mux.Handle(u.Path+"/", http.StripPrefix(u.Path, fshttp.Signed(w.disks, w.signer)))
+	mux.Handle("/healthz", health(w.disks, w.logger))
+	addr, _ := lookup(envAddr)
+	srv := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: readHeaderTimeout, BaseContext: func(net.Listener) context.Context { return ctx }}
+	return srv.ListenAndServe()
+}

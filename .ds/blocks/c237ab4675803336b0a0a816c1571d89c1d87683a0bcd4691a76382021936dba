@@ -1,0 +1,21 @@
+func sidebar(ctx context.Context, s *records.Store, fp *folders.Plugin) (string, error) {
+	fq := records.FileQuery{Scope: tenant}
+	var lines []string
+	for _, facet := range records.FacetValues {
+		counts, err := s.Facets(ctx, fq, facet)
+		if err != nil {
+			return "", err
+		}
+		lines = append(lines, string(facet)+": "+render(counts, nil))
+	}
+	byFolder, err := fp.FolderFacet(ctx, s, fq)
+	if err != nil {
+		return "", err
+	}
+	names, err := folderNames(ctx, s, fp)
+	if err != nil {
+		return "", err
+	}
+	lines = append(lines, "folder: "+render(byFolder, names))
+	return strings.Join(lines, "\n"), nil
+}

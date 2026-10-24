@@ -1,0 +1,3 @@
+func linkInto(ctx context.Context, s *records.Store, fp *folders.Plugin, fileID, folder string) error {
+	return fp.AddShortcut(ctx, s, tenant, fileID, folder)
+}

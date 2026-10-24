@@ -1,0 +1,9 @@
+func plugins() []records.Plugin {
+	reader := ocr.Tool{Languages: []string{"eng"}}
+	docs := pdf.NewPlugin(pdf.Tool{MaxOCRPages: 10},
+		pdf.WithPreview(),
+		pdf.WithOCR(reader),
+		pdf.WithConverter(office.Tool{}),
+	)
+	return []records.Plugin{docs, ocr.NewPlugin(reader)}
+}

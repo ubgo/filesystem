@@ -1,0 +1,18 @@
+func TestAvatarRefusalsOverHTTP(t *testing.T) {
+	disk := filesystemtest.NewFake(t, mediaDisk)
+	a := NewAvatars(disk.Disk)
+	tooBig := filesystemtest.PadTo(t, filesystemtest.FakeImage(t, filesystemtest.JPEG, 32, 32), maxAvatarSize+1)
+	for name, tc := range map[string]struct {
+		file filesystemtest.UploadFile
+		want int
+	}{
+		"one byte over the limit": {filesystemtest.UploadFile{Field: avatarField, Name: "big.jpg", Content: tooBig}, http.StatusRequestEntityTooLarge},
+		"not an image":            {filesystemtest.UploadFile{Field: avatarField, Name: "me.png", Content: filesystemtest.FakeBytes(1024)}, http.StatusUnsupportedMediaType},
+		"wrong field":             {filesystemtest.UploadFile{Field: "file", Name: "me.png", Content: filesystemtest.FakeImage(t, filesystemtest.GIF, 8, 8)}, http.StatusBadRequest},
+	} {
+		if rec := postAvatar(t, a, "u1", tc.file); rec.Code != tc.want {
+			t.Errorf("%s: status %d, want %d (%s)", name, rec.Code, tc.want, rec.Body)
+		}
+	}
+	disk.AssertEmpty()
+}

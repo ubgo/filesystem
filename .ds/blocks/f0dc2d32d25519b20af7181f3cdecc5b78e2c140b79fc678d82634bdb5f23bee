@@ -1,0 +1,46 @@
+func proxied(ctx context.Context, w io.Writer, dir string) error {
+	db, err := openSQLite(filepath.Join(dir, "proxied.db"))
+	if err != nil {
+		return err
+	}
+	defer func() { _ = db.Close() }()
+	disks, err := newDisks()
+	if err != nil {
+		return err
+	}
+	p, err := newPlugin(transforms, logEager)
+	if err != nil {
+		return err
+	}
+	s, err := newStore(ctx, db, disks, p)
+	if err != nil {
+		return err
+	}
+	f, err := uploadPhoto(ctx, s, photoW, photoH)
+	if err != nil {
+		return err
+	}
+	h := newProxyHandler(s, p)
+	path := "/variants/" + f.ID + "/" + nameThumb
+
+	full := get(h, path, nil)
+	fmt.Fprintf(w, "proxy GET thumb: %d %s, %d bytes, Location %q, nosniff %t, CSP set %t, Cache-Control %q\n",
+		full.Code, full.Header().Get("Content-Type"), full.Body.Len(), full.Header().Get("Location"),
+		full.Header().Get("X-Content-Type-Options") == "nosniff", full.Header().Get("Content-Security-Policy") != "",
+		full.Header().Get("Cache-Control"))
+
+	part := get(h, path, map[string]string{"Range": proxyRange})
+	fmt.Fprintf(w, "proxy GET thumb (Range %s): %d, %d bytes, Content-Range %s, same bytes as the full body %t\n",
+		proxyRange, part.Code, part.Body.Len(), part.Header().Get("Content-Range"),
+		full.Body.Len() >= part.Body.Len() && string(full.Body.Bytes()[:part.Body.Len()]) == part.Body.String())
+
+	etag := full.Header().Get("ETag")
+	again := get(h, path, map[string]string{"If-None-Match": etag})
+	fmt.Fprintf(w, "proxy GET thumb (If-None-Match its ETag): %d, %d bytes\n", again.Code, again.Body.Len())
+
+	bad := httptest.NewRecorder()
+	variants.Handler(s, p, scopeOf, variants.HandlerOptions{Mode: "stream"}).
+		ServeHTTP(bad, httptest.NewRequest(http.MethodGet, "/"+f.ID+"/"+nameThumb, nil))
+	fmt.Fprintf(w, "handler with mode \"stream\": %d\n", bad.Code)
+	return nil
+}

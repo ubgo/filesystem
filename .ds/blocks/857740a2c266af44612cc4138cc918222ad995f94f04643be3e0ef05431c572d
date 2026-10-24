@@ -1,0 +1,12 @@
+func conditional(ctx context.Context, out io.Writer, name string, disk *filesystem.Disk) error {
+	_, err := disk.WriteBytes(ctx, "notes/todo.txt", []byte("overwrite?"), filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "%s: IfNotExists on an existing key: %s\n", name, outcome(err))
+	e, err := disk.Stat(ctx, "notes/todo.txt")
+	if err != nil {
+		return err
+	}
+	_, current := disk.WriteBytes(ctx, "notes/todo.txt", []byte("buy milk and eggs\n"), filesystem.WriteOptions{IfMatch: e.ETag})
+	_, stale := disk.WriteBytes(ctx, "notes/todo.txt", []byte("lost update\n"), filesystem.WriteOptions{IfMatch: e.ETag})
+	fmt.Fprintf(out, "%s: IfMatch current etag: %s, same etag again: %s\n", name, outcome(current), outcome(stale))
+	return nil
+}

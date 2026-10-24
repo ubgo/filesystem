@@ -1,0 +1,7 @@
+func avatarPolicy(userID string) upload.Policy {
+	return upload.Policy{
+		MaxSize: maxAvatarSize,
+		Allowed: []string{"image/png", "image/jpeg", "image/gif"},
+		Key:     func(upload.Info) (string, error) { return avatarDir + "/" + userID, nil },
+	}
+}

@@ -1,0 +1,18 @@
+func receive(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	res, err := upload.Receive(ctx, disk, strings.NewReader(pngFile), `..\..\Holiday Photo.PNG`, policy)
+	if err != nil {
+		return err
+	}
+	shape := path.Dir(res.Key) + "/<random>" + path.Ext(res.Key)
+	fmt.Fprintf(out, "receive: key %s name %q type %s size %d\n", shape, res.Filename, res.ContentType, res.Size)
+	_, err = upload.Receive(ctx, disk, strings.NewReader(htmlFile), "photo.png", policy)
+	fmt.Fprintf(out, "receive html named photo.png: %s\n", filesystem.CodeOf(err))
+	big := strings.NewReader(pngFile + strings.Repeat("x", maxUpload))
+	_, err = upload.Receive(ctx, disk, big, "big.png", policy)
+	fmt.Fprintf(out, "receive over MaxSize: %s, objects stored: %d\n", filesystem.CodeOf(err), count(ctx, disk))
+	return nil
+}

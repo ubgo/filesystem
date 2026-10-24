@@ -1,0 +1,27 @@
+func routeByPrefix(ctx context.Context, out io.Writer) error {
+	disk, avatars, err := newRoute()
+	if err != nil {
+		return err
+	}
+	for _, k := range []string{"avatars/u1.png", "exports/2026-10.zip", "notes.txt"} {
+		if _, err := disk.WriteBytes(ctx, k, []byte(k), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	onAvatars, err := keys(ctx, avatars)
+	if err != nil {
+		return err
+	}
+	all, err := keys(ctx, disk)
+	if err != nil {
+		return err
+	}
+	link, err := avatars.PublicURL(ctx, "u1.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "route: avatars disk holds %q, routed listing %q, avatar url %s\n", onAvatars, all, link)
+	_, err = disk.Copy(ctx, "notes.txt", "exports/notes.txt")
+	fmt.Fprintf(out, "route: copy across mounts: %v\n", err)
+	return nil
+}

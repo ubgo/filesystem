@@ -1,0 +1,7 @@
+func newGraphQL(r *graph.Resolver) http.Handler {
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: r}))
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(fsgql.MultipartForm(r.Policy, r.MaxFiles))
+	srv.SetErrorPresenter(fsgql.ErrorPresenter(nil))
+	return srv
+}

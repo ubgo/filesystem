@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Deferred by the owner on 2026-10-03: decide later which project adopts the library first (recommendation so far: replace an internal file manager module).",
+  "commitment": "someday",
+  "completed_at": null,
+  "created_at": "2026-10-02T15:40:28.222256000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a0fd4626be73ef967dcff117eea70f",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "high",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-03T03:26:40.851283000Z",
+  "status": "cancelled",
+  "tasklist_id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "title": "Decide Q20: first proof target (replace an internal file manager first, recommended) and the first-version scope",
+  "updated_at": "2026-10-08T11:35:06.413755000Z"
+}

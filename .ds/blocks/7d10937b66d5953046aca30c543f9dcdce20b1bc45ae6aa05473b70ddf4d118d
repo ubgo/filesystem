@@ -1,0 +1,15 @@
+func sanitizeStored(ctx context.Context, disk *filesystem.Disk, key string) (upload.Result, error) {
+	rc, err := disk.Read(ctx, key)
+	if err != nil {
+		return upload.Result{}, err
+	}
+	res, err := upload.Receive(ctx, disk, rc, path.Base(key), photoPolicy)
+	_ = rc.Close()
+	if err != nil {
+		return upload.Result{}, err
+	}
+	if err := disk.Delete(ctx, key); err != nil {
+		return upload.Result{}, err
+	}
+	return res, nil
+}

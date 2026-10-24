@@ -1,0 +1,22 @@
+func (p *Plugin) Hold(ctx context.Context, s *records.Store, scope, fileID, reason string) error {
+	return s.Tx(ctx, func(ctx context.Context, _ *sql.Tx) error {
+		f, err := s.File(ctx, scope, fileID)
+		if err != nil {
+			return err
+		}
+		if f.DeletedAt != nil {
+			return filesystem.Errorf(filesystem.CodeInvalidArgument, "%s: restore file %s before holding it", PluginName, fileID)
+		}
+		h := Hold{Scope: scope, FileID: fileID, Reason: reason, HeldBy: s.Actor(ctx), HeldAt: time.Now().UTC().Truncate(time.Microsecond)}
+		ins := sqlb.NewInsert(s.Dialect()).Into(Table).Row(sqlb.Set(Scope, h.Scope), sqlb.Set(FileID, h.FileID),
+			sqlb.Set(Reason, h.Reason), sqlb.Set(HeldBy, h.HeldBy), sqlb.Set(HeldAt, h.HeldAt))
+		if _, err := s.Exec(ctx, ins); err != nil {
+			if records.IsUniqueViolation(err) {
+				return filesystem.Errorf(filesystem.CodeExists, "%s: file %s is already held", PluginName, fileID)
+			}
+			return err
+		}
+		s.AfterCommit(ctx, func(ctx context.Context) { p.notify(ctx, h) })
+		return nil
+	})
+}

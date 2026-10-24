@@ -1,0 +1,11 @@
+func newProxy(cache *remote.Cache, base string) (*remote.Proxy, error) {
+	secret := make([]byte, signedurl.MinKeyBytes)
+	if _, err := rand.Read(secret); err != nil {
+		return nil, err
+	}
+	signer, err := signedurl.New(base, []signedurl.Key{{ID: "proxy-1", Secret: secret}})
+	if err != nil {
+		return nil, err
+	}
+	return remote.NewProxy(cache, remote.ProxyOptions{Base: base, Signer: signer})
+}

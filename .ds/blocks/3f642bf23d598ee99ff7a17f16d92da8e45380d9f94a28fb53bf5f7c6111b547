@@ -1,0 +1,26 @@
+func versionHistory(ctx context.Context, out io.Writer) error {
+	disk, err := filesystem.NewDisk("history", memory.New(memory.WithVersions()))
+	if err != nil {
+		return err
+	}
+	for _, body := range []string{"draft", "final"} {
+		if _, err := disk.WriteBytes(ctx, "notes.txt", []byte(body), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	vs, err := disk.Versions(ctx, "notes.txt") // newest first
+	if err != nil {
+		return err
+	}
+	rc, err := disk.ReadVersion(ctx, "notes.txt", vs[len(vs)-1].ID)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rc.Close() }()
+	var first strings.Builder
+	if _, err := io.Copy(&first, rc); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "versions: %d, oldest holds %q\n", len(vs), first.String())
+	return nil
+}

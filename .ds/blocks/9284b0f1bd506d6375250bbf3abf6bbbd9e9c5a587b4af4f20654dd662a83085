@@ -1,0 +1,10 @@
+func newMux() (*filesystem.Mux, error) {
+	mux := filesystem.NewMux()
+	return mux, errors.Join(
+		mux.Register(local.Scheme, local.Opener),
+		mux.Register(memory.Scheme, memory.Opener),
+		mux.Register(s3.Scheme, s3.Opener),
+		mux.Register(gcs.Scheme, gcs.Opener),
+		mux.Register(azure.Scheme, azure.Opener),
+	)
+}

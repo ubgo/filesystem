@@ -1,0 +1,33 @@
+func bucketVersions(ctx context.Context, out io.Writer, f fixture) error {
+	_, disk, err := newBucketDisk(f, "history", true, gcs.Config{Versioned: true})
+	if err != nil {
+		return err
+	}
+	for _, body := range []string{"draft", "final"} {
+		if _, err := disk.WriteBytes(ctx, "contract.txt", []byte(body), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	vs, err := disk.Versions(ctx, "contract.txt") // newest first; an ID is a generation
+	if err != nil {
+		return err
+	}
+	rc, err := disk.ReadVersion(ctx, "contract.txt", vs[1].ID)
+	if err != nil {
+		return err
+	}
+	old, err := io.ReadAll(rc)
+	_ = rc.Close()
+	if err != nil {
+		return err
+	}
+	if err := disk.RestoreVersion(ctx, "contract.txt", vs[1].ID); err != nil {
+		return err
+	}
+	live, err := disk.ReadAll(ctx, "contract.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "versions: %d, older reads %q, after RestoreVersion the live object reads %q\n", len(vs), old, live)
+	return nil
+}

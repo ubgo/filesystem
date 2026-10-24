@@ -1,0 +1,15 @@
+func processAndInspect(ctx context.Context, out io.Writer) error {
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	p := upload.Policy{MaxSize: maxUpload, Allowed: []string{"text/plain"}, Process: trimText, Inspect: upload.Inspectors(refuseMarked)}
+	res, err := upload.Receive(ctx, disk, strings.NewReader("  notes  \n"), "notes.txt", p)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "processed: %d bytes\n", res.Size)
+	_, err = upload.Receive(ctx, disk, strings.NewReader("this is blocked"), "bad.txt", p)
+	fmt.Fprintf(out, "inspected: %s, objects stored: %d\n", filesystem.CodeOf(err), count(ctx, disk))
+	return nil
+}

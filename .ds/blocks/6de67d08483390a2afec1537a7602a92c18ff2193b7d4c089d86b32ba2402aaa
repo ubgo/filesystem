@@ -1,0 +1,10 @@
+func refusedWrites(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	body := func() io.Reader { return strings.NewReader("x") }
+	_, err := disk.Write(ctx, "x.txt", body(), filesystem.WriteOptions{Metadata: map[string]string{"k": "v"}})
+	fmt.Fprintf(out, "metadata: %s\n", filesystem.CodeOf(err))
+	_, err = disk.Write(ctx, "x.txt", body(), filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "if-not-exists: %s\n", filesystem.CodeOf(err))
+	_, err = disk.Write(ctx, webdav.StagingDir+"/mine.txt", body(), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "reserved key: %s\n", filesystem.CodeOf(err))
+	return nil
+}

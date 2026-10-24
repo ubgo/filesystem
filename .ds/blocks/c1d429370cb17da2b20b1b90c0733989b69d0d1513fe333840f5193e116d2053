@@ -1,0 +1,16 @@
+func backupSince(ctx context.Context, src, dst *filesystem.Disk, since time.Time) (int, error) {
+	n := 0
+	for e, err := range src.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return n, err
+		}
+		if !e.ModTime.After(since) {
+			continue
+		}
+		if _, err := filesystem.CopyAcross(ctx, src, e.Key, dst, e.Key); err != nil {
+			return n, err
+		}
+		n++
+	}
+	return n, nil
+}

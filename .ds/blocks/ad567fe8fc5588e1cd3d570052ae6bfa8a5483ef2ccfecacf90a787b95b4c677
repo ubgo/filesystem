@@ -1,0 +1,15 @@
+func (a *App) uppy(w http.ResponseWriter, r *http.Request) {
+	user, err := userOf(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	mine := path.Join(pendingDir, user)
+	opts := upload.UppyOptions{Authorize: func(_ *http.Request, key string) error {
+		if !filesystem.KeyInDir(key, mine) {
+			return fmt.Errorf("key %q is not this user's upload", key)
+		}
+		return nil
+	}}
+	upload.Uppy(a.Disk, policyFor(user), opts).ServeHTTP(w, r)
+}

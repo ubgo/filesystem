@@ -1,0 +1,19 @@
+func writeOnce(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	key := "receipts/" + strings.ToLower(rand.Text()) + ".txt"
+	opts := filesystem.WriteOptions{
+		IfNotExists: true,
+		Metadata:    map[string]string{"order": "1042"},
+		Headers:     filesystem.HTTPHeaders{CacheControl: "private, max-age=0"},
+	}
+	if _, err := disk.WriteBytes(ctx, key, []byte("paid"), opts); err != nil {
+		return err
+	}
+	_, err := disk.WriteBytes(ctx, key, []byte("paid twice"), opts)
+	fmt.Fprintf(out, "second conditional write: %s\n", filesystem.CodeOf(err))
+	e, err := disk.Stat(ctx, key)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "stat: %d bytes, order=%s, cache-control=%q\n", e.Size, e.Metadata["order"], e.Headers.CacheControl)
+	return nil
+}

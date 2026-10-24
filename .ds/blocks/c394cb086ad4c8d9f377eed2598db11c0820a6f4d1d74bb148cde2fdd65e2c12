@@ -1,0 +1,20 @@
+func signedUpload(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	req, err := disk.SignedURL(ctx, "inbox/note.txt", filesystem.PresignOptions{
+		Method:      filesystem.MethodPut,
+		Expires:     linkLifetime,
+		ContentType: "text/plain",
+	})
+	if err != nil {
+		return err
+	}
+	status, _, err := send(ctx, http.MethodPut, req.URL, strings.NewReader("sent by the browser"), req.Header)
+	if err != nil {
+		return err
+	}
+	e, err := disk.Stat(ctx, "inbox/note.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "signed PUT: %d, stored %d bytes as %s\n", status, e.Size, e.ContentType)
+	return nil
+}

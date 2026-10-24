@@ -1,0 +1,19 @@
+func newStore(ctx context.Context, db *sql.DB, now func() time.Time) (*records.Store, *locks.Plugin, error) {
+	disk, err := filesystem.NewDisk(diskName, memory.New())
+	if err != nil {
+		return nil, nil, err
+	}
+	disks, err := filesystem.NewManager(disk)
+	if err != nil {
+		return nil, nil, err
+	}
+	lp := locks.New(locks.WithMaxTTL(maxLock), locks.WithClock(now))
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(lp))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, lp, nil
+}

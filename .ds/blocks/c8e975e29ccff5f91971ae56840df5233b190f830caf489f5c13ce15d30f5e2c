@@ -1,0 +1,26 @@
+func signedDownload(ctx context.Context, a *app, out io.Writer) error {
+	if _, err := a.private.WriteBytes(ctx, "invoices/42.pdf", []byte("%PDF-1.7 invoice"), filesystem.WriteOptions{}); err != nil {
+		return err
+	}
+	link, err := a.private.SignedURL(ctx, "invoices/42.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "link: %s\n", shape(link.URL))
+	resp, body, err := fetch(http.MethodGet, link.URL, nil, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "GET %d %s %q\n", resp.StatusCode, resp.Header.Get("Content-Type"), body)
+	resp, body, err = fetch(http.MethodGet, link.URL, nil, http.Header{"Range": {"bytes=0-3"}})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "Range %d %q\n", resp.StatusCode, body)
+	resp, _, err = fetch(http.MethodGet, link.URL, nil, http.Header{"If-None-Match": {resp.Header.Get("ETag")}})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "If-None-Match %d\n", resp.StatusCode)
+	return nil
+}

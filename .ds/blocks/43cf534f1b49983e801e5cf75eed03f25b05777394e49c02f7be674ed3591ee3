@@ -1,0 +1,11 @@
+func newGorilla(h Handlers) *mux.Router {
+	r := mux.NewRouter()
+	r.Handle(pathUpload, h.Upload).Methods(http.MethodPost)
+	r.Handle(pathTicket, h.Ticket).Methods(http.MethodPost)
+	r.PathPrefix(pathUppy + "/").Handler(http.StripPrefix(pathUppy, h.Uppy))
+	r.PathPrefix(pathTus).Handler(http.StripPrefix(pathTus, h.Tus))
+	r.PathPrefix(pathFiles + "/").Handler(http.StripPrefix(pathFiles, h.Files))
+	r.PathPrefix(pathPublic + "/").Handler(http.StripPrefix(pathPublic, h.Public))
+	r.PathPrefix(pathRecords + "/").Handler(http.StripPrefix(pathRecords, h.Records))
+	return r
+}

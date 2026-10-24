@@ -1,0 +1,17 @@
+func Verify(ctx context.Context, src, dst *filesystem.Disk) ([]string, error) {
+	var bad []string
+	for e, err := range src.List(ctx, "", filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return bad, err
+		}
+		want, err := digest(ctx, src, e.Key)
+		if err != nil {
+			return bad, err
+		}
+		got, err := digest(ctx, dst, e.Key)
+		if err != nil || got != want {
+			bad = append(bad, e.Key)
+		}
+	}
+	return bad, nil
+}

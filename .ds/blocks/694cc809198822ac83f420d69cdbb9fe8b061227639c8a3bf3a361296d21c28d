@@ -1,0 +1,17 @@
+func newSessionStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, error) {
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks,
+		records.WithActorFunc(func(ctx context.Context) string {
+			if u, ok := ctx.Value(sessionKey{}).(session); ok {
+				return "user:" + u.UserID
+			}
+			return ""
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, err
+	}
+	return s, nil
+}

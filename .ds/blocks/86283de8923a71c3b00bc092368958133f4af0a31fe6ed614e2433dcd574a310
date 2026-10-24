@@ -1,0 +1,1 @@
+var photoLimits = imaging.Options{MaxBytes: maxPhotoBytes, MaxPixels: imaging.DefaultMaxPixels}

@@ -1,0 +1,3 @@
+func sweepSessions(ctx context.Context, dir string, cutoff time.Time) (int, error) {
+	return tus.Sweep(ctx, dir, cutoff)
+}

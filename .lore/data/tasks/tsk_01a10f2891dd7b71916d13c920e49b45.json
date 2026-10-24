@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": null,
+  "commitment": "accepted",
+  "completed_at": "2026-10-06T03:28:40.133083000Z",
+  "created_at": "2026-10-06T03:01:19.453748000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a10f2891dd7b71916d13c920e49b45",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": "2026-10-06T03:25:19.356959000Z",
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "P2 intake helpers: UP-13 base64/data URI, UP-14 promote from a cache prefix, TE-03 multipart request and fake image builders in filesystemtest",
+  "updated_at": "2026-10-06T03:28:40.133094000Z"
+}

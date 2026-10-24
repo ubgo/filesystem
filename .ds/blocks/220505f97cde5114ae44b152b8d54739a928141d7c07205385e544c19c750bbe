@@ -1,0 +1,35 @@
+func session(endpoint string) []step {
+	bucket := "s3://" + s3Bucket + "?region=us-east-1&path_style=true&endpoint=" + endpoint
+	aws := []string{"AWS_ACCESS_KEY_ID=example", "AWS_SECRET_ACCESS_KEY=example"}
+	signing := []string{"FS_SIGNING_SECRET=" + signingSecret, "FS_SIGNING_BASE=" + signingBase}
+	return []step{
+		{title: "local disk", args: []string{"put", "file:srv#reports/q3.txt", "report.txt"}},
+		{args: []string{"put", "file:srv#notes/hello.txt"}, stdin: files["hello.txt"]},
+		{args: []string{"ls", "file:srv"}},
+		{args: []string{"ls", "-r", "file:srv"}},
+		{args: []string{"cat", "file:srv#notes/hello.txt"}},
+		{args: []string{"cp", "file:srv#reports/q3.txt", "mem://scratch#q3.txt"}},
+		{args: []string{"mv", "file:srv#notes/hello.txt", "file:srv#notes/hi.txt"}},
+		{args: []string{"-json", "ls", "file:srv#notes"}},
+		{title: "directories", args: []string{"put", "file:srv#reports/2026/q4.txt", "q4.txt"}},
+		{args: []string{"put", "file:srv#reports/summary.txt", "summary.txt"}},
+		{args: []string{"cp", "-r", "-dry-run", "file:srv#reports", "file:bak#reports"}},
+		{args: []string{"cp", "-r", "file:srv#reports", "file:bak#reports"}},
+		{args: []string{"mv", "-r", "file:srv#reports/2026", "file:srv#archive/2026"}},
+		{args: []string{"put", "file:bak#moved", "summary.txt"}},
+		{args: []string{"mv", "-r", "file:srv#archive", "file:bak#moved"}},
+		{args: []string{"-json", "mv", "-r", "file:srv#archive", "file:bak#moved"}},
+		{title: "s3", args: []string{"cp", "file:srv#reports/q3.txt", bucket + "#reports/q3.txt"}, env: aws},
+		{args: []string{"ls", "-r", bucket + "#reports"}, env: aws},
+		{args: []string{"-json", "url", "-put", "-expires", "1m", bucket + "#uploads/new.pdf"}, env: aws},
+		{args: []string{"check", bucket}, env: aws},
+		{title: "signed URLs for local disks", args: []string{"url", "file:srv#notes/hi.txt"}},
+		{args: []string{"url", "-disk", "media", "file:srv#notes/hi.txt"}, env: signing},
+		{title: "errors", args: []string{"-json", "stat", "file:srv#reports/missing.txt"}},
+		{args: []string{"cat", "file:srv#../etc/passwd"}},
+		{args: []string{"put", "file:srv?readonly=true#x.txt", "report.txt"}},
+		{args: []string{"ls", "file:srv?bucket=x"}},
+		{args: []string{"cp", "file:srv#notes/hi.txt"}},
+		{args: []string{"rm", "-r", "file:srv#notes"}},
+	}
+}

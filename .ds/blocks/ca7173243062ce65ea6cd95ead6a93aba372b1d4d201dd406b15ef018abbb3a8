@@ -1,0 +1,6 @@
+func startScheduler(ctx context.Context, all []jobs.Schedule, now func() time.Time, report func(jobs.Report)) <-chan error {
+	s := jobs.NewScheduler(jobs.SchedulerOptions{OnRun: report, Now: now})
+	done := make(chan error, 1)
+	go func() { done <- s.Run(ctx, all...) }()
+	return done
+}

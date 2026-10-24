@@ -1,0 +1,7 @@
+func openTenant(ctx context.Context, mux *filesystem.Mux, t tenantConfig) (*filesystem.Disk, error) {
+	q := url.Values{filesystem.ParamPrefix: {filesystem.JoinKey(tenantsDir, t.Name)}}
+	dsn := bucketScheme + "://" + t.Bucket + "?" + q.Encode()
+	return mux.Open(ctx, t.Name, dsn,
+		filesystem.WithPublicURL(t.Domain),
+		filesystem.WithDefaultVisibility(filesystem.VisibilityPublic))
+}

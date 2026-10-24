@@ -1,0 +1,12 @@
+func openWithConfig(client *storage.Client, privateKey []byte) (*filesystem.Disk, error) {
+	drv, err := gcs.New(gcs.Config{
+		Client:     client,
+		Bucket:     bucketName,
+		Visibility: gcs.VisibilityACL,
+		Signing:    &storage.SignedURLOptions{GoogleAccessID: serviceAccount, PrivateKey: privateKey},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.NewDisk("media", drv)
+}

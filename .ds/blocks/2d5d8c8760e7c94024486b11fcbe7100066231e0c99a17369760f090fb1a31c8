@@ -1,0 +1,5 @@
+func headerInjection(ctx context.Context, disk *filesystem.Disk, out io.Writer) {
+	h := filesystem.HTTPHeaders{ContentDisposition: "attachment\r\nSet-Cookie: session=stolen"}
+	_, err := disk.WriteBytes(ctx, "report.pdf", []byte("%PDF-1.7"), filesystem.WriteOptions{Headers: h})
+	fmt.Fprintf(out, "header with CRLF: %s\n", filesystem.CodeOf(err))
+}

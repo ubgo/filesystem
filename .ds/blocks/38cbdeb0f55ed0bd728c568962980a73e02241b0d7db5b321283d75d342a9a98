@@ -1,0 +1,6 @@
+func newHandler(s *records.Store, p *variants.Plugin) http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("/variants/", http.StripPrefix("/variants/",
+		variants.Handler(s, p, scopeOf, variants.HandlerOptions{LinkLifetime: linkTTL})))
+	return mux
+}

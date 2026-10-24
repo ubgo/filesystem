@@ -1,0 +1,23 @@
+func plan(ctx context.Context, disk *filesystem.Disk, msg Message) ([]attachment, string, error) {
+	var attach []attachment
+	body := msg.Body
+	for _, f := range msg.Files {
+		e, err := disk.Stat(ctx, f.Key)
+		if err != nil {
+			return nil, "", err
+		}
+		if e.Size <= maxAttachBytes {
+			attach = append(attach, attachment{File: f, ContentType: e.ContentType})
+			continue
+		}
+		link, err := disk.SignedURL(ctx, f.Key, filesystem.PresignOptions{
+			Method: filesystem.MethodGet, Expires: linkLifetime,
+			ContentDisposition: mime.FormatMediaType("attachment", map[string]string{"filename": f.Filename}),
+		})
+		if err != nil {
+			return nil, "", err
+		}
+		body += fmt.Sprintf("\r\n\r\n%s is too large to attach. Download it within 7 days:\r\n%s", f.Filename, link.URL)
+	}
+	return attach, body, nil
+}

@@ -1,0 +1,10 @@
+func (p *Plugin) BeforePurge(ctx context.Context, s *records.Store, f records.File) error {
+	held, err := p.isHeld(ctx, s, f.Scope, f.ID)
+	if err != nil {
+		return err
+	}
+	if held {
+		return filesystem.NewError(filesystem.CodePermission, errHeld)
+	}
+	return nil
+}

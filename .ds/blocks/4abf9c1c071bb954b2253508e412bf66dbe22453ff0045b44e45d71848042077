@@ -1,0 +1,3 @@
+func (a *App) Sweep(ctx context.Context) (int, error) {
+	return upload.Sweep(ctx, a.Disk, exportDir, a.Now().Add(-retention))
+}

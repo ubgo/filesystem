@@ -1,0 +1,13 @@
+func deleteTenant(ctx context.Context, shared *filesystem.Disk, out io.Writer) error {
+	globex, err := tenantDisk(shared, "globex")
+	if err != nil {
+		return err
+	}
+	err = globex.DeletePrefix(ctx, "")
+	fmt.Fprintf(out, "scoped disk deletes its root: %s\n", filesystem.CodeOf(err))
+	if err := shared.DeletePrefix(ctx, filesystem.JoinKey(tenantsDir, "globex")); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "after deleting globex: %s\n", strings.Join(keys(ctx, shared, ""), " "))
+	return nil
+}

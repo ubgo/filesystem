@@ -1,0 +1,25 @@
+func demoDelete(ctx context.Context, w io.Writer, s *records.Store, fp *folders.Plugin, t tree, files []records.File) error {
+	if err := fp.Put(ctx, s, tenant, files[2].ID, t.projects.ID); err != nil {
+		return err
+	}
+	if err := fp.Put(ctx, s, tenant, files[1].ID, folders.RootID); err != nil {
+		return err
+	}
+	where, err := fp.FolderOf(ctx, s, tenant, files[2].ID)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "icons.txt is in Projects: %t\n", where == t.projects.ID)
+	refused, after, err := emptyAndDelete(ctx, s, fp, t.assets.ID, files[0])
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "delete with logo.txt inside: %s; after trashing it: deleted, logo.txt in the root: %t\n", refused, after == folders.RootID)
+	children, err := fp.Children(ctx, s, tenant, t.website.ID)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Website has %d subfolders\n", len(children))
+	fmt.Fprintln(w, "names:", checkNames("Reports 2026", "a/b", "..", " padded"))
+	return nil
+}

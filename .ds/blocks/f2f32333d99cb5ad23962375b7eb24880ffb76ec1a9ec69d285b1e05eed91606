@@ -1,0 +1,14 @@
+func buildFS(ctx context.Context, dir string) (string, error) {
+	src, err := cmdFSDir()
+	if err != nil {
+		return "", err
+	}
+	bin := filepath.Join(dir, "fs")
+	cmd := exec.CommandContext(ctx, "go", "build", "-o", bin, ".")
+	cmd.Dir = src
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("go build cmd/fs: %w\n%s", err, out)
+	}
+	return bin, nil
+}

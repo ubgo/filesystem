@@ -1,0 +1,11 @@
+func (a *App) maintain(ctx context.Context, now time.Time) error {
+	swept, err := a.Store.SweepTrash(ctx, now.Add(-trashRetention))
+	if err != nil {
+		return err
+	}
+	retried, err := a.retryOrphans(ctx)
+	if swept+retried > 0 {
+		fmt.Printf("maintenance: purged %d trashed files, deleted %d queued objects\n", swept, retried)
+	}
+	return err
+}

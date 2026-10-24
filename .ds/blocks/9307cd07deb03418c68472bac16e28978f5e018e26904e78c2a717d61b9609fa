@@ -1,0 +1,3 @@
+func script(s *records.Store) (string, error) {
+	return s.MigrationSQL()
+}

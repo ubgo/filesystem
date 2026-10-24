@@ -1,0 +1,4 @@
+type clock struct {
+	mu  sync.Mutex
+	now time.Time
+}

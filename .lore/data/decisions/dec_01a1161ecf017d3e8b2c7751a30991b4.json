@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "The owner asked to build every P3/P4 feature; ADR-0007 already set how vendor services are built (own module each, plain REST where the SDK is heavy, in-process fakes). The coordinator picked the vendors the spec names; Uploadcare and Instagram are skipped, and Supabase is documented as S3-compatible. Revisit when an app needs another provider.",
+  "confidence": null,
+  "created_at": "2026-10-07T11:28:00.257861000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a1161ecf017d3e8b2c7751a30991b4",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "HOSTED vendors: Google Drive, Dropbox, OneDrive, Vercel Blob, Cloudinary",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-07T11:28:00.257862000Z"
+}

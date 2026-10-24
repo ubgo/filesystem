@@ -1,0 +1,7 @@
+func failedFiles(ctx context.Context, s *records.Store) ([]records.File, error) {
+	page, err := s.Files(ctx, records.FileQuery{
+		Scope:   tenant,
+		Filters: []sqlb.Predicate{sqlb.Eq(records.FileStatus, records.StatusFailed)},
+	})
+	return page.Files, err
+}

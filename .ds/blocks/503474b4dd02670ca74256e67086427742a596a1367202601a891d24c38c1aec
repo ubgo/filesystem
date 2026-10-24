@@ -1,0 +1,16 @@
+func migrate(ctx context.Context, store *records.Store, out io.Writer) error {
+	applied, err := store.Migrate(ctx)
+	if err != nil {
+		return err
+	}
+	if len(applied) == 0 {
+		_, err = fmt.Fprintln(out, "schema is up to date")
+		return err
+	}
+	for _, m := range applied {
+		if _, err := fmt.Fprintln(out, "applied", m); err != nil {
+			return err
+		}
+	}
+	return nil
+}

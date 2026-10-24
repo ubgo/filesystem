@@ -1,0 +1,23 @@
+func newDisks(ctx context.Context, baseURL, s3URL string, signer *signedurl.Signer) (Disks, error) {
+	m := filesystem.NewMux()
+	if err := m.Register(memory.Scheme, memory.Opener); err != nil {
+		return Disks{}, err
+	}
+	media, err := m.Open(ctx, diskMedia, "mem://media", filesystem.WithURLSigner(signer))
+	if err != nil {
+		return Disks{}, err
+	}
+	public, err := m.Open(ctx, diskPublic, "mem://public?visibility=public&public_url="+url.QueryEscape(baseURL+pathPublic))
+	if err != nil {
+		return Disks{}, err
+	}
+	bucket, err := newBucket(ctx, s3URL)
+	if err != nil {
+		return Disks{}, err
+	}
+	manager, err := filesystem.NewManager(media, public, bucket)
+	if err != nil {
+		return Disks{}, err
+	}
+	return Disks{Manager: manager, Media: media, Public: public, Bucket: bucket}, nil
+}

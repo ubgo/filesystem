@@ -1,0 +1,3 @@
+func openWithClock() (*filesystem.Disk, error) {
+	return filesystem.NewDisk("cache", memory.New(memory.WithClock(func() time.Time { return frozenTime })))
+}

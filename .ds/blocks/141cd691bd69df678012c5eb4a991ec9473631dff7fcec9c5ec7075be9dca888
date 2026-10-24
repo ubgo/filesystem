@@ -1,0 +1,11 @@
+func linkUsage(ctx context.Context, s *records.Store, eg *egress.Plugin, link share.Share, from, to time.Time) (bytes, requests int64, err error) {
+	days, err := eg.SubjectDays(ctx, s, tenant, records.ServeShare, link.ID, from, to)
+	if err != nil {
+		return 0, 0, err
+	}
+	for _, d := range days {
+		bytes += d.Bytes
+		requests += d.Requests
+	}
+	return bytes, requests, nil
+}

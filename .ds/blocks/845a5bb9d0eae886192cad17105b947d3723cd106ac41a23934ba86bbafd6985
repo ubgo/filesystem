@@ -1,0 +1,7 @@
+func maintain(ctx context.Context, store *records.Store, auditLog *audit.Plugin, media *filesystem.Disk, now time.Time, out io.Writer) error {
+	purged, errTrash := store.SweepTrash(ctx, now.Add(-trashRetention))
+	swept, errUploads := upload.Sweep(ctx, media, incomingDir, now.Add(-abandonedUploadAge))
+	pruned, errAudit := auditLog.Prune(ctx, store, now.Add(-auditRetention))
+	_, errOut := fmt.Fprintf(out, "purged %d trashed files, swept %d abandoned uploads, pruned %d audit entries\n", purged, swept, pruned)
+	return errors.Join(errTrash, errUploads, errAudit, errOut)
+}

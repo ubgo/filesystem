@@ -1,0 +1,14 @@
+func rotateTenant(ctx context.Context, disk *filesystem.Disk, drv *crypt.Driver, keys *tenantKeys, tenant string) (int, error) {
+	keys.rotate(tenant)
+	n := 0
+	for e, err := range disk.List(ctx, tenant, filesystem.ListOptions{Recursive: true}) {
+		if err != nil {
+			return n, err
+		}
+		if err := drv.Rotate(ctx, e.Key); err != nil {
+			return n, err
+		}
+		n++
+	}
+	return n, nil
+}

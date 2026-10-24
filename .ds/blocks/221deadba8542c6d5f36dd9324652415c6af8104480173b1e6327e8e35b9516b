@@ -1,0 +1,6 @@
+func newChainedPlugin() *audit.Plugin {
+	return audit.New(
+		audit.WithHashChain(chainKey),
+		audit.WithAccessLog(audit.SampleRate(1)),
+	)
+}

@@ -1,0 +1,17 @@
+func (p *Plugin) Migrations(engine string) ([]records.Migration, error) {
+	t := records.TypesFor(engine)
+	st, err := records.NewDDL(engine).CreateTable(records.Table{
+		Table: Table,
+		Columns: []ddl.ColumnSpec{
+			records.Column(ID, t.Key), records.Column(Scope, t.Key), records.Column(FileID, t.Key), records.Column(TokenHash, t.Short),
+			records.Column(ExpiresAt, t.Timestamp), records.Column(MaxDownloads, t.Int), records.Column(Downloads, t.Int),
+			records.Column(RevokedAt, t.Timestamp), records.Column(CreatedAt, t.Timestamp),
+		},
+		PrimaryKey: []ddl.ColumnRef{ID},
+		Indexes: []records.Index{
+			{Name: "fs_shares_token", Unique: true, Columns: []records.IndexColumn{records.Key(TokenHash)}},
+			{Name: "fs_shares_file", Columns: []records.IndexColumn{records.Key(FileID)}},
+		},
+	}).Statements()
+	return []records.Migration{{Owner: PluginName, Name: "0001_shares", Statements: st}}, err
+}

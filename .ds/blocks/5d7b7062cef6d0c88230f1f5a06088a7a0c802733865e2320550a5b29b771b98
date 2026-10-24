@@ -1,0 +1,19 @@
+func New(ctx context.Context, baseURL, s3URL, tusDir string) (*App, error) {
+	signer, err := newSigner(baseURL + PathFiles)
+	if err != nil {
+		return nil, err
+	}
+	disks, err := newDisks(ctx, baseURL, s3URL, signer)
+	if err != nil {
+		return nil, err
+	}
+	store, err := newStore(ctx, disks.Manager)
+	if err != nil {
+		return nil, err
+	}
+	h, err := newHandlers(disks, store, signer, tusDir)
+	if err != nil {
+		return nil, err
+	}
+	return &App{Disks: disks, Store: store, Handlers: h}, nil
+}

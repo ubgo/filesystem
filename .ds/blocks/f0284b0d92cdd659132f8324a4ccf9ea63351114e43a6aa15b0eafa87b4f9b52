@@ -1,0 +1,27 @@
+func previewThenSweep(ctx context.Context, out io.Writer) error {
+	disk, err := mem("uploads")
+	if err != nil {
+		return err
+	}
+	for _, k := range []string{"incoming/a.png", "incoming/b.png", "files/kept.png"} {
+		if _, err := disk.WriteBytes(ctx, k, []byte(pngFile), filesystem.WriteOptions{}); err != nil {
+			return err
+		}
+	}
+	sweep := jobs.UploadSweep(disk, incomingDir, minAge)
+	preview, err := sweep.DryRun(ctx, later)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "dry run: would delete %d: %s\n", preview.Count, strings.Join(preview.Planned, " "))
+	done, err := sweep.Run(ctx, later)
+	if err != nil {
+		return err
+	}
+	left, err := disk.Exists(ctx, "files/kept.png")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "sweep: deleted %d, files/kept.png still there: %t\n", done.Count, left)
+	return nil
+}

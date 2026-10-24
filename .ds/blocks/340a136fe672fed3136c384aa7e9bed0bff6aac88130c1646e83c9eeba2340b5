@@ -1,0 +1,20 @@
+func authorizer() func(*http.Request, recordshttp.Action, recordshttp.Target) error {
+	return func(r *http.Request, action recordshttp.Action, t recordshttp.Target) error {
+		user := r.Header.Get(headerUser)
+		if user == "" {
+			return errNotYours
+		}
+		if t.Owner.Type != "" {
+			if t.Owner.Type != ownerUser || t.Owner.ID != user {
+				return errNotYours
+			}
+			return nil
+		}
+		// recordshttp loads the file in the request's scope before calling
+		// this, so another tenant's file never reaches here (it is a 404).
+		if t.File == nil || t.File.UploadedBy != actorPrefix+user {
+			return errNotYours
+		}
+		return nil
+	}
+}

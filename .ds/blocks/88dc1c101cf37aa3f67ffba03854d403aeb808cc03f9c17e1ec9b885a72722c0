@@ -1,0 +1,20 @@
+func cloudflareLink(ctx context.Context, out io.Writer) error {
+	// The rule's key; real code reads it from a secret store.
+	secret := bytes.Repeat([]byte("k"), cloudflare.MinSecretBytes)
+	signer, err := cloudflare.New(cloudflare.Config{BaseURL: cloudflareBase, Secret: secret, TTL: cloudflareRuleTTL})
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("downloads", memory.New(), filesystem.WithURLSigner(signer))
+	if err != nil {
+		return err
+	}
+	req, err := disk.SignedURL(ctx, "reports/q3.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "cloudflare URL: %s, valid %s\n", shape(req.URL), req.ExpiresAt.Sub(time.Now()).Round(time.Minute))
+	_, err = disk.SignedURL(ctx, "reports/q3.pdf", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: 4 * time.Hour})
+	fmt.Fprintf(out, "cloudflare link longer than the rule's TTL: %s\n", filesystem.CodeOf(err))
+	return nil
+}

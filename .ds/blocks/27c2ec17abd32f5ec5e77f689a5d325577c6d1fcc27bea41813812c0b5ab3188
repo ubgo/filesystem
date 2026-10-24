@@ -1,0 +1,20 @@
+func vercelVisibility(ctx context.Context, out io.Writer, public, private *filesystem.Disk) error {
+	fmt.Fprintf(out, "public store capabilities: %s\n", public.Capabilities())
+	fmt.Fprintf(out, "private store capabilities: %s\n", private.Capabilities())
+	_, err := private.PublicURL(ctx, "avatars/u1.png")
+	fmt.Fprintf(out, "private store PublicURL: %s\n", outcome(err))
+	_, err = public.WriteBytes(ctx, "secret.txt", []byte("x"), filesystem.WriteOptions{Visibility: filesystem.VisibilityPrivate})
+	fmt.Fprintf(out, "private write on the public store: %s\n", outcome(err))
+	_, err = private.WriteBytes(ctx, "avatars/u1.png", pngHeader, filesystem.WriteOptions{IfNotExists: true})
+	fmt.Fprintf(out, "IfNotExists: %s\n", outcome(err))
+	e, err := private.Stat(ctx, "avatars/u1.png")
+	if err != nil {
+		return err
+	}
+	if _, err := private.WriteBytes(ctx, "avatars/u1.png", pngHeader, filesystem.WriteOptions{IfMatch: e.ETag}); err != nil {
+		return err
+	}
+	_, err = private.WriteBytes(ctx, "avatars/u1.png", pngHeader, filesystem.WriteOptions{IfMatch: e.ETag})
+	fmt.Fprintf(out, "IfMatch with the current etag: ok; with the same etag again: %s\n", outcome(err))
+	return nil
+}

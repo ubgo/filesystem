@@ -1,0 +1,17 @@
+func listAll(ctx context.Context, s *records.Store) ([]records.File, int, error) {
+	var all []records.File
+	pages := 0
+	q := records.FileQuery{Scope: tenant, Limit: pageSize}
+	for {
+		page, err := s.Files(ctx, q)
+		if err != nil {
+			return nil, pages, err
+		}
+		pages++
+		all = append(all, page.Files...)
+		if page.NextCursor == "" {
+			return all, pages, nil
+		}
+		q.Cursor = page.NextCursor
+	}
+}

@@ -1,0 +1,20 @@
+{
+  "_table": "decisions",
+  "_v": 1,
+  "archived_at": null,
+  "body": "variants.WithDensities(base, factors...) declares one ordinary variant per factor named DensityName(base,k) (avatar-2x, avatar-1_5x; '-' and '_' because the name pattern has no '@' or '.'), so generation, keys, Prune, eager, quota and the handler need nothing new. Never upscale: at generation the source header is probed (Processor.Probe) and a version is made at min(factor, largest factor the source fills), never below 1x (ModeFill limited by the smaller source/box ratio, ModeFit and ModePad by the larger). The capped version still exists so an app requesting avatar-3x by name never gets 404; the row digest stays the declared transform's (as with focal points). DensitySrcSet advertises each version's REAL density (width over 1x width, 2 decimals) and drops versions adding no pixels, so a capped 3x says 2.5x and is displayed at the right CSS size. Handler dpr selection is opt-in (HandlerOptions.Density): ?dpr, then Sec-CH-DPR, then DPR, rounded up to the next declared factor, Vary: Sec-CH-DPR, DPR. Density versions inherit the base's WithHeaders unless given their own (resolved after all options so order does not matter); WithEager must come after WithDensities (fails loudly at New otherwise).",
+  "confidence": null,
+  "created_at": "2026-10-08T08:02:17.572358000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "id": "dec_01a11a88d564757eadab3a2ea1893092",
+  "last_validated_at": null,
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "source_kind": "manual",
+  "source_ref": null,
+  "status": "accepted",
+  "superseded_by_id": null,
+  "title": "Density variants (IM-27) are ordinary declared variants, capped at the source's pixels",
+  "trust_score": 0.5,
+  "updated_at": "2026-10-08T08:02:17.572358000Z"
+}

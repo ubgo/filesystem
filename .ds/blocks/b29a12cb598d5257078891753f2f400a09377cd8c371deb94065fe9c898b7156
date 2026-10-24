@@ -1,0 +1,15 @@
+func run(ctx context.Context, out io.Writer) error {
+	mux := filesystem.NewMux()
+	if err := mux.Register(fss3.Scheme, fss3.Opener); err != nil {
+		return err
+	}
+	for _, p := range providers {
+		disk, err := mux.Open(ctx, "media", p.DSN)
+		if err != nil {
+			return fmt.Errorf("%s: %w", p.Name, err)
+		}
+		c := disk.Capabilities()
+		fmt.Fprintf(out, "%-24s visibility=%-5t conditional=%t\n", p.Name, c.SetVisibility, c.ConditionalWrite)
+	}
+	return nil
+}

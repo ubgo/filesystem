@@ -1,0 +1,21 @@
+func copyExisting(ctx context.Context, w io.Writer, d Disks) error {
+	copied, skipped, err := backfill(ctx, d.Old, d.New)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "backfill: copied %d, skipped %d already there\n", copied, skipped)
+	copied, skipped, err = backfill(ctx, d.Old, d.New)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "backfill again: copied %d, skipped %d\n", copied, skipped)
+	r, err := verify(ctx, d.Old, d.New)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "verify: %d checked, %d different, %d missing, %d extra, ok=%v\n", r.Checked, len(r.Different), len(r.Missing), len(r.Extra), r.OK())
+	if !r.OK() {
+		return filesystem.Errorf(filesystem.CodeUnavailable, "the copy does not match: %+v", r)
+	}
+	return nil
+}

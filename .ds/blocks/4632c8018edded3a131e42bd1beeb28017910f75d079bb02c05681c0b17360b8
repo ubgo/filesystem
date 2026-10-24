@@ -1,0 +1,59 @@
+func sharedInstances(ctx context.Context, out io.Writer, dataDir string) error {
+	st, disk, err := openStore(ctx, dataDir)
+	if err != nil {
+		return err
+	}
+	app := &App{Store: st}
+	sessions := filestore.New(filepath.Join(dataDir, "shared-sessions"))
+	locker := memorylocker.New()
+	bases := map[string]string{}
+	for _, name := range []string{"a", "b"} {
+		h, err := app.newSharedTus(disk, sessions, locker)
+		if err != nil {
+			return err
+		}
+		mux := http.NewServeMux()
+		mux.Handle(tusPath, http.StripPrefix(tusPath, h))
+		srv := httptest.NewServer(withUser(mux))
+		defer srv.Close()
+		bases[name] = srv.URL
+	}
+	body := jpegSample
+	half := len(body) / 2
+	created, err := tusRequest(ctx, http.MethodPost, bases["a"]+tusPath, "", map[string]string{
+		"Upload-Length": strconv.Itoa(len(body)), "Upload-Metadata": "filename " + base64.StdEncoding.EncodeToString([]byte("clip.jpg")),
+	})
+	if err != nil {
+		return err
+	}
+	loc, err := url.Parse(created.Header.Get("Location"))
+	if err != nil {
+		return err
+	}
+	first, err := tusPatch(ctx, bases["a"]+loc.Path, 0, body[:half])
+	if err != nil {
+		return err
+	}
+	head, err := tusRequest(ctx, http.MethodHead, bases["b"]+loc.Path, "", nil)
+	if err != nil {
+		return err
+	}
+	last, err := tusPatch(ctx, bases["b"]+loc.Path, half, body[half:])
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "instance a: create %d, first %d bytes %d\n", created.StatusCode, half, first.StatusCode)
+	fmt.Fprintf(out, "instance b: HEAD sees offset %s, last %d bytes %d\n", head.Header.Get("Upload-Offset"), len(body)-half, last.StatusCode)
+	attached, err := st.Attachments(ctx, "", records.Owner{Type: ownerUser, ID: demoUser}, roleUploads)
+	if err != nil {
+		return err
+	}
+	if len(attached) != 1 {
+		return fmt.Errorf("recorded %d files, want 1", len(attached))
+	}
+	f := attached[0].File
+	fmt.Fprintf(out, "recorded for %s: %s, %d bytes\n", demoUser, f.ContentType, f.Size)
+	_, err = tus.New(tus.Config{Disk: disk, Policy: policy, Store: sessions, BasePath: tusPath})
+	fmt.Fprintf(out, "shared store without a locker: %s\n", filesystem.CodeOf(err))
+	return nil
+}

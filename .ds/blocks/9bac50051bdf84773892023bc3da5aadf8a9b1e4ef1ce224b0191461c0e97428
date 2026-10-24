@@ -1,0 +1,15 @@
+func (a *app) uploadPhoto(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxPhotoSize+formOverhead)
+	part, err := formFile(r)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	defer func() { _ = part.Close() }()
+	f, err := a.addPhoto(r.Context(), currentUser(r), part, part.FileName())
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, photoOf(f))
+}

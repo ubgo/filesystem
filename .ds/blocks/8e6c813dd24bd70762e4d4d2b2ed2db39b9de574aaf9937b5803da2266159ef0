@@ -1,0 +1,9 @@
+func refusedKeysAndOptions(ctx context.Context, out io.Writer, disk *filesystem.Disk) error {
+	_, err := disk.WriteBytes(ctx, local.StagingDir+"/tmp/x", []byte("x"), filesystem.WriteOptions{})
+	fmt.Fprintf(out, "staging key: %s\n", filesystem.CodeOf(err))
+	_, err = disk.WriteBytes(ctx, "a.txt", []byte("x"), filesystem.WriteOptions{Metadata: map[string]string{"k": "v"}})
+	fmt.Fprintf(out, "metadata: %s\n", filesystem.CodeOf(err))
+	_, err = disk.WriteBytes(ctx, "a.txt", []byte("x"), filesystem.WriteOptions{Headers: filesystem.HTTPHeaders{CacheControl: "no-store"}})
+	fmt.Fprintf(out, "headers: %s\n", filesystem.CodeOf(err))
+	return nil
+}

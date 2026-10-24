@@ -1,0 +1,11 @@
+func watermarked() (*imaging.Pipeline, imaging.Transform, error) {
+	p := imaging.NewPipeline(imaging.WithWatermark(logoName, logo()))
+	if err := p.Err(); err != nil {
+		return nil, imaging.Transform{}, err
+	}
+	t := imaging.Transform{
+		Mode: imaging.ModeFit, Width: 200, Height: 200, Format: imaging.FormatPNG,
+		Watermark: &imaging.Watermark{Name: logoName, Anchor: imaging.AnchorBottomRight, Opacity: 0.5, Scale: 0.2, Margin: 0.02},
+	}
+	return p, t, nil
+}

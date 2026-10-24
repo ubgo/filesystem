@@ -1,0 +1,15 @@
+func newStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager) (*records.Store, *variants.Plugin, error) {
+	v, err := variants.New(widths, imaging.Options{})
+	if err != nil {
+		return nil, nil, err
+	}
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(
+		dimensions.New(dimensions.WithThumbHash(imaging.Options{})), v))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, v, nil
+}

@@ -1,0 +1,8 @@
+func withActor(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if user := r.Header.Get(headerUser); user != "" {
+			r = r.WithContext(audit.WithActor(r.Context(), "user:"+user))
+		}
+		next.ServeHTTP(w, r)
+	})
+}

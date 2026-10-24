@@ -1,0 +1,21 @@
+func checkAndEscape(ctx context.Context, dir string, out io.Writer) error {
+	drv, err := local.New(dir)
+	if err != nil {
+		return err
+	}
+	disk, err := filesystem.NewDisk("uploads", drv)
+	if err != nil {
+		_ = drv.Close()
+		return err
+	}
+	defer func() { _ = disk.Close() }()
+	if err := disk.Check(ctx); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "check: ok")
+	root, ok := filesystem.As[*os.Root](disk)
+	fmt.Fprintf(out, "as *os.Root: %t, rooted at the disk's directory: %t\n", ok, ok && root.Name() == dir)
+	_, ok = filesystem.As[*strings.Builder](disk)
+	fmt.Fprintf(out, "as *strings.Builder: %t\n", ok)
+	return nil
+}

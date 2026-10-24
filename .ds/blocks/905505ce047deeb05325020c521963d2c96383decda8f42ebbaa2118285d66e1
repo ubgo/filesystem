@@ -1,0 +1,5 @@
+func ssrf(out io.Writer) {
+	for _, a := range []string{"127.0.0.1", "10.0.0.8", "169.254.169.254", "100.64.0.1", "::ffff:127.0.0.1", "64:ff9b::a00:1", "fd00::1", "93.184.215.14"} {
+		fmt.Fprintf(out, "PublicAddr(%s): %t\n", a, upload.PublicAddr(netip.MustParseAddr(a)))
+	}
+}

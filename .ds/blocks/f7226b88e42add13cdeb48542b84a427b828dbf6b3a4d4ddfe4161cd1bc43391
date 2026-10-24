@@ -1,0 +1,9 @@
+func migrate(ctx context.Context, out io.Writer, d deployment, now time.Time) error {
+	job := jobs.MigrateDisk(d.store, "hot", "cold", jobs.MigrateOptions{
+		Cursor:   jobs.ObjectCursor(d.cold, "_jobs/migrate-hot"),
+		OnFailed: func(f records.File, err error) { fmt.Fprintf(out, "migrate: %s stays on hot: %v\n", f.Filename, err) },
+	})
+	res, err := job.Run(ctx, now)
+	fmt.Fprintf(out, "migrate: moved %d file(s) to cold\n", res.Count)
+	return err
+}

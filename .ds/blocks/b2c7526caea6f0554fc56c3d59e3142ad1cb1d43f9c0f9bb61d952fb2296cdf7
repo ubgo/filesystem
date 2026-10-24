@@ -1,0 +1,24 @@
+func fromURL(ctx context.Context, out io.Writer) error {
+	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html") // ignored: the bytes decide
+		w.Header().Set("Content-Disposition", `attachment; filename="scan.pdf"`)
+		_, _ = io.WriteString(w, pdfFile)
+	}))
+	defer remote.Close()
+	disk, err := newDisk()
+	if err != nil {
+		return err
+	}
+	_, err = upload.FromURL(ctx, disk, remote.URL+"/files/7", policy, upload.FetchOptions{})
+	fmt.Fprintf(out, "from loopback: %v\n", err)
+	loopback := func(a netip.Addr) bool { return a.IsLoopback() }
+	res, err := upload.FromURL(ctx, disk, remote.URL+"/files/7", policy, upload.FetchOptions{AllowAddr: loopback})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "from allowed server: %q %s %d bytes\n", res.Filename, res.ContentType, res.Size)
+	fmt.Fprintf(out, "PublicAddr(%s): %t\n", metadataService, upload.PublicAddr(metadataService))
+	_, err = upload.FromURL(ctx, disk, "file:///etc/passwd", policy, upload.FetchOptions{})
+	fmt.Fprintf(out, "file URL: %s\n", filesystem.CodeOf(err))
+	return nil
+}

@@ -1,0 +1,11 @@
+{
+  "_table": "comments",
+  "_v": 1,
+  "body": "Done 2026-10-03: adapters/s3/interceptors_test.go wraps the S3 driver in Observe, Log, Retry, Timeout and Limit; capabilities, As, presign, multipart and presigned parts all still work.",
+  "created_at": "2026-10-03T04:21:15.425764000Z",
+  "created_by_actor_id": null,
+  "entity_id": "tsk_01a0fd4626f17af0ae230b7e6bbf514f",
+  "entity_table": "tasks",
+  "id": "cmt_01a0fffeac217be692250fb09f7915a1",
+  "updated_at": "2026-10-03T04:21:15.425765000Z"
+}

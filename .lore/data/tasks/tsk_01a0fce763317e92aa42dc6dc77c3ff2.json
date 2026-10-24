@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": "Needs owner review of the feature catalogue and the brainstorm.",
+  "commitment": "proposed",
+  "completed_at": null,
+  "created_at": "2026-10-02T13:56:57.777954000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a0fce763317e92aa42dc6dc77c3ff2",
+  "mission_id": "msn_01a0fce742bd7eb58260281ed0fdacc6",
+  "plan_id": null,
+  "priority": "medium",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "cancelled",
+  "tasklist_id": "tlt_01a0fce742e17c389193138c854b17fc",
+  "title": "Decide the v0 scope (P0 set) and the first adapters",
+  "updated_at": "2026-10-02T15:40:44.772756000Z"
+}

@@ -1,0 +1,7 @@
+var avatarPolicy = upload.Policy{
+	MaxSize:    maxAvatarBytes,
+	Allowed:    []string{"image/jpeg", "image/png", "image/webp"},
+	Key:        upload.RandomKey("avatars"),
+	Visibility: filesystem.VisibilityPublic,
+	Process:    imaging.Sanitize(inputLimits),
+}

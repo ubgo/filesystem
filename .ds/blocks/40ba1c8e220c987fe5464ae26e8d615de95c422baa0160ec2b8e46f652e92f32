@@ -1,0 +1,18 @@
+func publishAsset(ctx context.Context, disk *filesystem.Disk, ext string, body []byte) (string, error) {
+	sum := sha256.Sum256(body)
+	key := filesystem.JoinKey(assetDir, hex.EncodeToString(sum[:16])+ext)
+	exists, err := disk.Exists(ctx, key)
+	if err != nil {
+		return "", err
+	}
+	if !exists {
+		opts := filesystem.WriteOptions{ContentType: assetTypes[ext], MaxSize: maxAsset}
+		if disk.Capabilities().Headers {
+			opts.Headers = filesystem.HTTPHeaders{CacheControl: immutable}
+		}
+		if _, err := disk.WriteBytes(ctx, key, body, opts); err != nil {
+			return "", err
+		}
+	}
+	return disk.PublicURL(ctx, key)
+}

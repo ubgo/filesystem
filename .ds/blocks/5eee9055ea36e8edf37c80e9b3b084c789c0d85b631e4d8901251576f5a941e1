@@ -1,0 +1,9 @@
+func interceptors(logger *slog.Logger, metrics func(context.Context, layer.Event)) []filesystem.Interceptor {
+	return []filesystem.Interceptor{
+		layer.Observe(metrics),
+		layer.Log(logger),
+		layer.Retry(layer.RetryOptions{}),
+		layer.Timeout(opTimeout),
+		layer.Limit(maxConcurrentOps),
+	}
+}

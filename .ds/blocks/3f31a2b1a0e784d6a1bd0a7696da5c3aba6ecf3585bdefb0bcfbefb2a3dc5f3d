@@ -1,0 +1,11 @@
+func mirrored(disks *filesystem.Manager, name, primary, backup string) (*filesystem.Disk, error) {
+	p, err := disks.Disk(primary)
+	if err != nil {
+		return nil, err
+	}
+	b, err := disks.Disk(backup)
+	if err != nil {
+		return nil, err
+	}
+	return filesystem.Mirror(name, p, b)
+}

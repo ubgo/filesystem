@@ -1,0 +1,8 @@
+func TestAvatarRefused(t *testing.T) {
+	disk := filesystemtest.NewFake(t, "media")
+	_, err := NewAvatars(disk.Disk).Save(t.Context(), "u1", strings.NewReader("<svg onload=alert(1)>"))
+	if !errors.Is(err, filesystem.ErrRejected) {
+		t.Fatalf("err = %v, want CodeRejected", err)
+	}
+	disk.AssertEmpty()
+}

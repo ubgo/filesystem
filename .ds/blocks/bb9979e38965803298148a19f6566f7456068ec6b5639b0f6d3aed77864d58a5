@@ -1,0 +1,16 @@
+func ready(s scan.Scanner) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		p, ok := s.(pinger)
+		if !ok {
+			_, _ = io.WriteString(w, "ok (stand-in scanner)\n")
+			return
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), readyTimeout)
+		defer cancel()
+		if err := p.Ping(ctx); err != nil {
+			http.Error(w, "scanner unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		_, _ = io.WriteString(w, "ok\n")
+	}
+}

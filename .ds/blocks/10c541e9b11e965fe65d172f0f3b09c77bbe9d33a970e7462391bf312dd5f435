@@ -1,0 +1,3 @@
+func sendViewOnce(ctx context.Context, s *records.Store) (records.File, error) {
+	return s.Upload(ctx, tenant, diskName, strings.NewReader("secret"), "once.txt", textPolicy, records.ViewOnce())
+}

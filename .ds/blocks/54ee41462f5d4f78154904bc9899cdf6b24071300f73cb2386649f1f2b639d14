@@ -1,0 +1,11 @@
+func newStore(ctx context.Context, db *sql.DB, disks *filesystem.Manager, opts ...share.Option) (*records.Store, *share.Plugin, error) {
+	p := share.New(opts...)
+	s, err := records.New(db, sqlb.SQLiteDialect{}, disks, records.WithPlugins(p))
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, err := s.Migrate(ctx); err != nil {
+		return nil, nil, err
+	}
+	return s, p, nil
+}

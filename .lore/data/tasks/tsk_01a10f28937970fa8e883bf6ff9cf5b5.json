@@ -1,0 +1,23 @@
+{
+  "_table": "tasks",
+  "_v": 1,
+  "assigned_to_actor_id": null,
+  "body": null,
+  "commitment": "accepted",
+  "completed_at": "2026-10-06T05:56:17.078371000Z",
+  "created_at": "2026-10-06T03:01:19.865062000Z",
+  "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
+  "deferred_until": null,
+  "due_at": null,
+  "id": "tsk_01a10f28937970fa8e883bf6ff9cf5b5",
+  "mission_id": null,
+  "plan_id": null,
+  "priority": "low",
+  "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
+  "repo_id": null,
+  "started_at": null,
+  "status": "done",
+  "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
+  "title": "P2 direct uploads (owner decision: POST policy API): UP-04 presigned POST on S3/GCS, UP-11 S3 SweepAbandoned opt-in, HT-09 CORS setter",
+  "updated_at": "2026-10-06T05:56:17.078373000Z"
+}

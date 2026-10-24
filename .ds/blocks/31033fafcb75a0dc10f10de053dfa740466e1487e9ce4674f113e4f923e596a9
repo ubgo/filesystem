@@ -1,0 +1,17 @@
+func trashDemo(ctx context.Context, w io.Writer, s *records.Store, _ *Clock) error {
+	f, err := store(ctx, s, diskName, "trash/a.txt")
+	if err != nil {
+		return err
+	}
+	if err := s.Trash(ctx, tenant, f.ID); err != nil {
+		return err
+	}
+	live, trashed, err := trashCounts(ctx, s)
+	fmt.Fprintf(w, "after Trash: live=%d trashed=%d %v\n", live, trashed, err)
+	if err := s.Restore(ctx, tenant, f.ID); err != nil {
+		return err
+	}
+	live, trashed, err = trashCounts(ctx, s)
+	fmt.Fprintf(w, "after Restore: live=%d trashed=%d %v\n", live, trashed, err)
+	return s.Purge(ctx, tenant, f.ID)
+}

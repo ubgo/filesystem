@@ -1,0 +1,16 @@
+func unsupported(ctx context.Context, disk *filesystem.Disk, out io.Writer) error {
+	_, err := disk.WriteBytes(ctx, "m.txt", []byte("x"), filesystem.WriteOptions{Metadata: map[string]string{"owner": "u1"}})
+	fmt.Fprintf(out, "metadata: %s\n", filesystem.CodeOf(err))
+	_, err = disk.WriteBytes(ctx, "h.txt", []byte("x"), filesystem.WriteOptions{Headers: filesystem.HTTPHeaders{CacheControl: "no-store"}})
+	fmt.Fprintf(out, "headers: %s\n", filesystem.CodeOf(err))
+	_, err = disk.SignedURL(ctx, "m.txt", filesystem.PresignOptions{Method: filesystem.MethodGet, Expires: linkLifetime})
+	fmt.Fprintf(out, "signed URL without a signer: %s\n", filesystem.CodeOf(err))
+	_, err = disk.PublicURL(ctx, "m.txt")
+	fmt.Fprintf(out, "public URL without a base: %s\n", filesystem.CodeOf(err))
+	ok, err := disk.Exists(ctx, "m.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "m.txt stored anyway: %t\n", ok)
+	return nil
+}

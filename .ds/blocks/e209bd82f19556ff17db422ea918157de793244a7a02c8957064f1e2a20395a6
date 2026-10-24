@@ -1,0 +1,13 @@
+func policies() (map[string]upload.Policy, error) {
+	out := make(map[string]upload.Policy, len(slots))
+	for name, s := range slots {
+		check, err := imaging.CheckDimensions(s.limits)
+		if err != nil {
+			return nil, fmt.Errorf("slot %s: %w", name, err)
+		}
+		p := basePolicy
+		p.Inspect = check
+		out[name] = p
+	}
+	return out, nil
+}

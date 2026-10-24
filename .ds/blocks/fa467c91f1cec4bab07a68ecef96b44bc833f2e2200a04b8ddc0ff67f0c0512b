@@ -1,0 +1,7 @@
+func (r *mutationResolver) UploadFile(ctx context.Context, file graphql.Upload) (*upload.Result, error) {
+	res, err := fsgql.Receive(ctx, r.Media, file, r.Policy)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
