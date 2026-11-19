@@ -1,4 +1,12 @@
 {
-  "_v": 1,
+  "_v": 2,
+  "features": [
+    "hlc"
+  ],
+  "format": 2,
+  "migrated_at": "2026-11-19T09:56:26Z",
+  "migrated_by": "khanakia <khanakia@gmail.com>",
+  "migrated_via": "claude_code (agent:auto/claude_code/afbe7e)",
+  "min_lore_version": "0.1.18",
   "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb"
 }

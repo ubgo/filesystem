@@ -1,9 +1,11 @@
 {
+  "_hlc": "2026-10-08T14:25:23.230Z/0000/",
   "_table": "commit_links",
-  "_v": 1,
+  "_v": 2,
   "author": "khanakia <khanakia@gmail.com>",
   "committed_at": "2026-10-08T19:55:13+05:30",
   "created_at": "2026-10-08T14:25:23.230369000Z",
+  "created_by": "act_01a0fce71a627b94b0058edc881057c0",
   "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
   "entity_id": "tsk_01a11b8529767f3280e9360e4858409b",
   "entity_table": "tasks",
@@ -12,5 +14,6 @@
   "project_id": "prj_01a0fce71a637e11a34cc611de7d86bb",
   "repo_path": null,
   "sha": "1cebd18cabd149e5a2234bd70a7ee296e78c2fd9",
-  "updated_at": "2026-10-08T14:25:23.230370000Z"
+  "updated_at": "2026-10-08T14:25:23.230370000Z",
+  "updated_by": "act_00000000000070008000000000000000"
 }

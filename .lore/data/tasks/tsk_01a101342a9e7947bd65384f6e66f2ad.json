@@ -1,11 +1,13 @@
 {
+  "_hlc": "2026-10-03T10:44:37.754Z/0000/",
   "_table": "tasks",
-  "_v": 1,
+  "_v": 2,
   "assigned_to_actor_id": null,
   "body": "Split into one task per item on 2026-10-03.",
   "commitment": "accepted",
   "completed_at": null,
   "created_at": "2026-10-03T09:59:18.430603000Z",
+  "created_by": "act_01a0fce71a627b94b0058edc881057c0",
   "created_by_actor_id": "act_01a0fce71a627b94b0058edc881057c0",
   "deferred_until": null,
   "due_at": null,
@@ -19,5 +21,6 @@
   "status": "cancelled",
   "tasklist_id": "tlt_01a0ffccb51671248e2b5defd35bbb73",
   "title": "Gaps from guides: PurgeOwner unattached files, PurgeScope, records disk rename, quota of variants, events from folders/tags/share, recordshttp restore/purge/SetAttachment/SetVisibility routes, upload Policy Headers, Sanitize quality, lookup by sha256, recursive fs cp, SFTP reconnect, GCS/Azure keyless signing, conformance case for IfNotExists refusal",
-  "updated_at": "2026-10-03T10:44:37.754569000Z"
+  "updated_at": "2026-10-03T10:44:37.754569000Z",
+  "updated_by": "act_00000000000070008000000000000000"
 }
