@@ -26,3 +26,13 @@ examples/storage/
 /examples/imaging-codecs/imaging-codecs
 /examples/pickers-import/pickers-import
 /examples/remote-media/remote-media
+
+# lore
+.lore/lore.db.broken.*
+.lore/lore-cache.db
+.lore/lore-cache.db-shm
+.lore/lore-cache.db-wal
+.lore/lock
+
+# lore
+.lore/data/**/.tmp-*
